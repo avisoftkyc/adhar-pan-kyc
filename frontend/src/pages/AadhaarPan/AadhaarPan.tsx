@@ -9,7 +9,11 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
-  LinkIcon
+  LinkIcon,
+  TrashIcon,
+  MagnifyingGlassIcon,
+  ArrowDownTrayIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
 
 interface Batch {
@@ -37,6 +41,17 @@ interface BatchDetail {
   };
 }
 
+interface Record {
+  _id: string;
+  aadhaarNumber: string;
+  panNumber: string;
+  name: string;
+  status: string;
+  verificationDetails?: any;
+  processedAt?: string;
+  processingTime?: number;
+}
+
 const AadhaarPan: React.FC = () => {
   const { user } = useAuth();
   const [batches, setBatches] = useState<Batch[]>([]);
@@ -51,6 +66,25 @@ const AadhaarPan: React.FC = () => {
   const documentsPerPage = 5;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
+  
+  // Enhanced features from PAN KYC
+  const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
+  const [verifying, setVerifying] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentTablePage, setCurrentTablePage] = useState(1);
+  const recordsPerPage = 10;
+  
+  // Tab UI state
+  const [activeTab, setActiveTab] = useState<'upload' | 'single'>('upload');
+  
+  // Single verification form state
+  const [singleVerificationForm, setSingleVerificationForm] = useState({
+    aadhaarNumber: '',
+    panNumber: '',
+    name: ''
+  });
+  const [singleVerificationVerifying, setSingleVerificationVerifying] = useState(false);
+  const [singleVerificationResult, setSingleVerificationResult] = useState<any>(null);
 
   useEffect(() => {
     fetchBatches();
@@ -106,19 +140,6 @@ const AadhaarPan: React.FC = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const allowedTypes = ['.xlsx', '.xls'];
-      const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-      
-      if (!allowedTypes.includes(fileExtension)) {
-        setError('Please select an Excel file (.xlsx or .xls)');
-        return;
-      }
-      
-      if (file.size > 10 * 1024 * 1024) { // 10MB
-        setError('File size must be less than 10MB');
-        return;
-      }
-      
       setSelectedFile(file);
       setError(null);
     }
@@ -126,17 +147,17 @@ const AadhaarPan: React.FC = () => {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Please select a file to upload');
+      setError('Please select a file');
       return;
     }
 
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
     try {
       setUploading(true);
+      setUploadProgress(0);
       setError(null);
-      setSuccess(null);
-
-      const formData = new FormData();
-      formData.append('file', selectedFile);
 
       const response = await api.post('/aadhaar-pan/upload', formData, {
         headers: {
@@ -150,38 +171,21 @@ const AadhaarPan: React.FC = () => {
         },
       });
 
-      setSuccess(`Successfully uploaded ${response.data.data.recordCount} records`);
+      setSuccess('File uploaded successfully!');
       setSelectedFile(null);
       setUploadProgress(0);
       
-      // Fetch updated batches list
+      // Store the newly uploaded batch ID
+      if (response.data.data && response.data.data.batchId) {
+        setNewlyUploadedBatchId(response.data.data.batchId);
+      }
+      
+      // Refresh batches list
       await fetchBatches();
       
-      // Automatically fetch and display the newly uploaded batch
-      if (response.data.data.batchId) {
-        setNewlyUploadedBatchId(response.data.data.batchId);
+      // Auto-select the newly uploaded batch
+      if (response.data.data && response.data.data.batchId) {
         await fetchBatchDetails(response.data.data.batchId);
-        
-        // Scroll to the top of the batch details section
-        setTimeout(() => {
-          if (batchDetailsRef.current) {
-            batchDetailsRef.current.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
-            });
-          }
-          
-          // Also scroll the table to the top if it exists
-          const tableElement = document.querySelector('.overflow-x-auto');
-          if (tableElement) {
-            tableElement.scrollTop = 0;
-          }
-        }, 100);
-        
-        // Clear the "new upload" indicator after 5 seconds
-        setTimeout(() => {
-          setNewlyUploadedBatchId(null);
-        }, 5000);
       }
     } catch (error: any) {
       console.error('Error uploading file:', error);
@@ -191,32 +195,206 @@ const AadhaarPan: React.FC = () => {
     }
   };
 
+  const handleDeleteBatch = async (batchId: string) => {
+    if (!window.confirm('Are you sure you want to delete this batch? This action cannot be undone.')) {
+      return;
+    }
 
-
-  const handleDownloadReport = async (batchId: string) => {
     try {
-      const response = await api.get(`/aadhaar-pan/batch/${batchId}/download`, {
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-              link.setAttribute('download', `${batchId}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading report:', error);
-      setError('Failed to download report');
+      await api.delete(`/aadhaar-pan/batch/${batchId}`);
+      setSuccess('Batch deleted successfully');
+      
+      // Refresh batches list
+      await fetchBatches();
+      
+      // Clear selected batch if it was the deleted one
+      if (selectedBatch && selectedBatch.batchId === batchId) {
+        setSelectedBatch(null);
+      }
+    } catch (error: any) {
+      console.error('Error deleting batch:', error);
+      setError(error.response?.data?.message || 'Failed to delete batch');
     }
   };
 
+  const downloadBatchData = (batchId: string, records: any[]) => {
+    const csvContent = [
+      ['Aadhaar Number', 'PAN Number', 'Name', 'Status', 'Processed At'],
+      ...records.map(record => [
+        record.aadhaarNumber || '',
+        record.panNumber || '',
+        record.name || '',
+        record.status || '',
+        record.processedAt ? new Date(record.processedAt).toLocaleString() : ''
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `aadhaar-pan-batch-${batchId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  // Enhanced features from PAN KYC
+  const handleRecordSelection = (recordId: string) => {
+    const newSelected = new Set(selectedRecords);
+    if (newSelected.has(recordId)) {
+      newSelected.delete(recordId);
+    } else {
+      newSelected.add(recordId);
+    }
+    setSelectedRecords(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedBatch && selectedBatch.records) {
+      if (selectedRecords.size === selectedBatch.records.length) {
+        setSelectedRecords(new Set());
+      } else {
+        setSelectedRecords(new Set(selectedBatch.records.map(record => record._id)));
+      }
+    }
+  };
+
+  const handleVerifySelected = async () => {
+    if (selectedRecords.size === 0) {
+      setError('Please select at least one record to verify');
+      return;
+    }
+
+    try {
+      setVerifying(true);
+      const response = await api.post('/aadhaar-pan/verify', {
+        recordIds: Array.from(selectedRecords)
+      });
+
+      setSuccess(`Successfully verified ${response.data.data.length} records`);
+      setSelectedRecords(new Set());
+      
+      // Refresh batch details
+      if (selectedBatch) {
+        await fetchBatchDetails(selectedBatch.batchId);
+      }
+    } catch (error: any) {
+      console.error('Error verifying records:', error);
+      setError(error.response?.data?.message || 'Failed to verify records');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleVerifySingle = async (recordId: string) => {
+    try {
+      setVerifying(true);
+      const response = await api.post('/aadhaar-pan/verify', {
+        recordIds: [recordId]
+      });
+
+      setSuccess('Record verified successfully');
+      
+      // Refresh batch details
+      if (selectedBatch) {
+        await fetchBatchDetails(selectedBatch.batchId);
+      }
+    } catch (error: any) {
+      console.error('Error verifying record:', error);
+      setError(error.response?.data?.message || 'Failed to verify record');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  // Single verification form functions
+  const handleSingleVerificationFormChange = (field: string, value: string) => {
+    setSingleVerificationForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateSingleVerificationForm = () => {
+    const { aadhaarNumber, panNumber, name } = singleVerificationForm;
+    
+    if (!aadhaarNumber.trim()) {
+      setError('Aadhaar Number is required');
+      return false;
+    }
+    
+    if (!panNumber.trim()) {
+      setError('PAN Number is required');
+      return false;
+    }
+    
+    if (!name.trim()) {
+      setError('Name is required');
+      return false;
+    }
+    
+    // Validate Aadhaar format (12 digits)
+    const aadhaarRegex = /^\d{12}$/;
+    if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
+      setError('Aadhaar Number must be 12 digits');
+      return false;
+    }
+    
+    // Validate PAN format
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(panNumber.toUpperCase())) {
+      setError('Invalid PAN number format');
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleSingleVerificationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateSingleVerificationForm()) {
+      return;
+    }
+    
+    try {
+      setSingleVerificationVerifying(true);
+      setError(null);
+      
+      const response = await api.post('/aadhaar-pan/verify-single', {
+        aadhaarNumber: singleVerificationForm.aadhaarNumber.replace(/\s/g, ''),
+        panNumber: singleVerificationForm.panNumber.toUpperCase(),
+        name: singleVerificationForm.name.trim()
+      });
+      
+      setSingleVerificationResult(response.data.data);
+      setSuccess('Aadhaar-PAN linking verification completed');
+      
+    } catch (error: any) {
+      console.error('Error in single verification:', error);
+      setError(error.response?.data?.message || 'Failed to verify Aadhaar-PAN linking');
+    } finally {
+      setSingleVerificationVerifying(false);
+    }
+  };
+
+  const resetSingleVerificationForm = () => {
+    setSingleVerificationForm({
+      aadhaarNumber: '',
+      panNumber: '',
+      name: ''
+    });
+    setSingleVerificationResult(null);
+    setError(null);
+  };
+
+  // Utility functions
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'linked':
-        return <LinkIcon className="h-5 w-5 text-green-500" />;
+        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
       case 'not-linked':
         return <XCircleIcon className="h-5 w-5 text-red-500" />;
       case 'invalid':
@@ -243,13 +421,58 @@ const AadhaarPan: React.FC = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Filter and paginate records
+  const filteredRecords = selectedBatch?.records.filter(record =>
+    record.aadhaarNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.panNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    record.status?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const paginatedRecords = filteredRecords.slice(
+    (currentTablePage - 1) * recordsPerPage,
+    currentTablePage * recordsPerPage
+  );
+
+  const totalTablePages = Math.ceil(filteredRecords.length / recordsPerPage);
+
+  // Pagination for batches
+  const indexOfLastDocument = currentPage * documentsPerPage;
+  const indexOfFirstDocument = indexOfLastDocument - documentsPerPage;
+  const currentBatches = batches.slice(indexOfFirstDocument, indexOfLastDocument);
+  const totalPages = Math.ceil(batches.length / documentsPerPage);
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold">Aadhaar-PAN Linking</h1>
-        <p className="text-green-100 mt-1">
-          Upload Excel files and check Aadhaar-PAN linking status in bulk
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Aadhaar-PAN Linking</h1>
+            <p className="text-green-100 mt-1">
+              Upload Excel files and verify Aadhaar-PAN linking in bulk
+            </p>
+          </div>
+          <button
+            onClick={() => window.location.href = '/verification-records'}
+            className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600"
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            View All Records
+          </button>
+        </div>
       </div>
 
       {/* Error and Success Messages */}
@@ -275,271 +498,528 @@ const AadhaarPan: React.FC = () => {
         </div>
       )}
 
-      {/* File Upload Section */}
-      <div className="card">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Upload Aadhaar-PAN Data</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Excel File (.xlsx, .xls)
-            </label>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-            />
-            <p className="mt-1 text-sm text-gray-500">
-              File should contain columns: panNumber, aadhaarNumber, name (dateOfBirth, gender are optional)
-            </p>
-          </div>
-
-          {selectedFile && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <DocumentTextIcon className="h-5 w-5 text-green-500" />
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-green-900">{selectedFile.name}</p>
-                  <p className="text-sm text-green-700">
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {uploadProgress > 0 && (
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
-          )}
-
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
           <button
-            onClick={handleUpload}
-            disabled={!selectedFile || uploading}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => setActiveTab('upload')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'upload'
+                ? 'border-green-500 text-green-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
           >
-            {uploading ? (
-              <>
-                <CloudArrowUpIcon className="h-4 w-4 mr-2 animate-pulse" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <CloudArrowUpIcon className="h-4 w-4 mr-2" />
-                Upload File
-              </>
-            )}
+            <div className="flex items-center space-x-2">
+              <CloudArrowUpIcon className="h-5 w-5" />
+              <span>Upload File</span>
+            </div>
           </button>
-        </div>
+          <button
+            onClick={() => setActiveTab('single')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'single'
+                ? 'border-green-500 text-green-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <LinkIcon className="h-5 w-5" />
+              <span>Single Linking</span>
+            </div>
+          </button>
+        </nav>
       </div>
 
-      {/* Batches List */}
-      <div className="card">
-                      <h2 className="text-lg font-medium text-gray-900 mb-4">Uploaded Documents</h2>
-        
-        {loading ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-          </div>
-        ) : batches.length === 0 ? (
-          <div className="text-center py-8">
-            <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto" />
-                          <p className="mt-2 text-sm text-gray-500">No documents uploaded yet</p>
-          </div>
-        ) : (
-          <>
+      {/* Upload Tab Content */}
+      {activeTab === 'upload' && (
+        <>
+          {/* File Upload Section */}
+          <div className="card">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Upload Aadhaar-PAN Linking File</h2>
+            
             <div className="space-y-4">
-              {batches
-                .slice((currentPage - 1) * documentsPerPage, currentPage * documentsPerPage)
-                .map((batch) => (
-              <div
-                key={batch._id}
-                className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedBatch && selectedBatch.batchId === batch._id
-                    ? 'border-blue-500 bg-blue-50 shadow-md'
-                    : 'border-gray-200 hover:bg-gray-50'
-                }`}
-                onClick={() => fetchBatchDetails(batch._id)}
+              <div>
+                <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Excel File
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileSelect}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  File should contain columns: aadhaarNumber, panNumber, name
+                </p>
+              </div>
+
+              {selectedFile && (
+                <div className="flex items-center space-x-2">
+                  <DocumentTextIcon className="h-5 w-5 text-green-500" />
+                  <span className="text-sm text-gray-700">{selectedFile.name}</span>
+                </div>
+              )}
+
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div 
+                    className="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              )}
+
+              <button
+                onClick={handleUpload}
+                disabled={!selectedFile || uploading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    {selectedBatch && selectedBatch.batchId === batch._id && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    )}
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900">{batch._id}</h3>
-                                          <p className="text-sm text-gray-500">
-                        {new Date(batch.createdAt).toLocaleDateString()} - {batch.totalRecords} records
-                      </p>
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <CloudArrowUpIcon className="h-4 w-4 mr-2" />
+                    Upload File
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Batches List */}
+          <div className="card">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Uploaded Documents</h2>
+            
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              </div>
+            ) : batches.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <p>No documents uploaded yet</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {currentBatches.map((batch) => (
+                  <div
+                    key={batch._id}
+                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                      selectedBatch?.batchId === batch._id
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => fetchBatchDetails(batch._id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          selectedBatch?.batchId === batch._id ? 'bg-green-500' : 'bg-gray-300'
+                        }`}></div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">Batch {batch._id}</h3>
+                          <p className="text-sm text-gray-500">
+                            {batch.totalRecords} records • {formatDate(batch.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadBatchData(batch._id, selectedBatch?.records || []);
+                          }}
+                          className="p-2 text-gray-400 hover:text-gray-600"
+                          title="Download"
+                        >
+                          <ArrowDownTrayIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteBatch(batch._id);
+                          }}
+                          className="p-2 text-gray-400 hover:text-red-600"
+                          title="Delete"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {batch.pendingRecords} Pending
-                      </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {batch.linkedRecords} Linked
-                      </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        {batch.notLinkedRecords} Not Linked
-                      </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        {batch.invalidRecords} Invalid
-                      </span>
-                      {batch.errorRecords > 0 && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                          {batch.errorRecords} Error
-                        </span>
-                      )}
+                ))}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="text-sm text-gray-700">
+                      Showing {indexOfFirstDocument + 1} to {Math.min(indexOfLastDocument, batches.length)} of {batches.length} documents
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
+                    <div className="flex space-x-2">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownloadReport(batch._id);
-                        }}
-                        className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
                       >
-                        <DocumentArrowDownIcon className="h-3 w-3 mr-1" />
-                        Download
+                        Previous
+                      </button>
+                      <span className="px-3 py-1 text-sm text-gray-700">
+                        {currentPage} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
+                      >
+                        Next
                       </button>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            ))}
-            </div>
-            
-            {/* Pagination */}
-            {batches.length > documentsPerPage && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-700">
-                  Showing {((currentPage - 1) * documentsPerPage) + 1} to {Math.min(currentPage * documentsPerPage, batches.length)} of {batches.length} documents
-                </div>
+            )}
+          </div>
+
+          {/* Batch Details */}
+          {selectedBatch && (
+            <div className="card" ref={batchDetailsRef}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">
+                  Batch Details: {selectedBatch.batchId}
+                </h2>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => downloadBatchData(selectedBatch.batchId, selectedBatch.records)}
+                    className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                   >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1 text-sm text-gray-700">
-                    Page {currentPage} of {Math.ceil(batches.length / documentsPerPage)}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(batches.length / documentsPerPage)))}
-                    disabled={currentPage === Math.ceil(batches.length / documentsPerPage)}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
+                    <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
+                    Download
                   </button>
                 </div>
               </div>
-            )}
-          </>
-        )}
-      </div>
 
-      {/* Batch Details */}
-      {selectedBatch && (
-        <div className="card" ref={batchDetailsRef}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">
-              Document Details: {selectedBatch.batchId}
-            </h2>
-            {newlyUploadedBatchId === selectedBatch.batchId && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 animate-pulse">
-                ✨ New Upload
-              </span>
-            )}
-          </div>
-          
-          <div className="mb-4">
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-gray-900">{selectedBatch.stats.total}</div>
-                <div className="text-sm text-gray-500">Total</div>
+              {/* Statistics */}
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{selectedBatch.stats.total}</div>
+                  <div className="text-sm text-gray-500">Total</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{selectedBatch.stats.linked}</div>
+                  <div className="text-sm text-gray-500">Linked</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">{selectedBatch.stats['not-linked']}</div>
+                  <div className="text-sm text-gray-500">Not Linked</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600">{selectedBatch.stats.invalid}</div>
+                  <div className="text-sm text-gray-500">Invalid</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{selectedBatch.stats.error}</div>
+                  <div className="text-sm text-gray-500">Error</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-600">{selectedBatch.stats.pending}</div>
+                  <div className="text-sm text-gray-500">Pending</div>
+                </div>
               </div>
-              <div className="bg-blue-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-blue-900">{selectedBatch.stats.pending}</div>
-                <div className="text-sm text-blue-500">Pending</div>
+
+              {/* Table Controls */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedRecords.size === selectedBatch.records.length && selectedBatch.records.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">
+                      {selectedRecords.size} of {selectedBatch.records.length} selected
+                    </span>
+                  </div>
+                  {selectedRecords.size > 0 && (
+                    <button
+                      onClick={handleVerifySelected}
+                      disabled={verifying}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {verifying ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <CheckIcon className="h-3 w-3 mr-1" />
+                          Verify Selected ({selectedRecords.size})
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="relative">
+                    <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search records..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-1 border border-gray-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="bg-green-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-green-900">{selectedBatch.stats.linked}</div>
-                <div className="text-sm text-green-500">Linked</div>
+
+              {/* Records Table */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input
+                          type="checkbox"
+                          checked={selectedRecords.size === selectedBatch.records.length && selectedBatch.records.length > 0}
+                          onChange={handleSelectAll}
+                          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Aadhaar Number
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        PAN Number
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedRecords.map((record) => (
+                      <tr key={record._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedRecords.has(record._id)}
+                            onChange={() => handleRecordSelection(record._id)}
+                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {record.aadhaarNumber}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {record.panNumber}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {record.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {getStatusIcon(record.status)}
+                            <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
+                              {record.status}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <button
+                            onClick={() => handleVerifySingle(record._id)}
+                            disabled={verifying || record.status !== 'pending'}
+                            className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Verify
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="bg-red-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-red-900">{selectedBatch.stats['not-linked']}</div>
-                <div className="text-sm text-red-500">Not Linked</div>
-              </div>
-              <div className="bg-yellow-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-yellow-900">{selectedBatch.stats.invalid}</div>
-                <div className="text-sm text-yellow-500">Invalid</div>
-              </div>
-              <div className="bg-orange-50 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-orange-900">{selectedBatch.stats.error}</div>
-                <div className="text-sm text-orange-500">Error</div>
-              </div>
+
+              {/* Table Pagination */}
+              {totalTablePages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-gray-700">
+                    Showing {((currentTablePage - 1) * recordsPerPage) + 1} to {Math.min(currentTablePage * recordsPerPage, filteredRecords.length)} of {filteredRecords.length} records
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setCurrentTablePage(currentTablePage - 1)}
+                      disabled={currentTablePage === 1}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-3 py-1 text-sm text-gray-700">
+                      {currentTablePage} of {totalTablePages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentTablePage(currentTablePage + 1)}
+                      disabled={currentTablePage === totalTablePages}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+        </>
+      )}
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    PAN Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Aadhaar Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Processed At
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {selectedBatch.records.map((record, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {record.panNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {record.aadhaarNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {record.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {getStatusIcon(record.status)}
-                        <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                          {record.status}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.processedAt ? new Date(record.processedAt).toLocaleString() : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Single Linking Tab Content */}
+      {activeTab === 'single' && (
+        <div className="card">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Single Aadhaar-PAN Linking Verification</h2>
+
+          <div className="max-w-2xl">
+            <form onSubmit={handleSingleVerificationSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                  Aadhaar Number *
+                </label>
+                <input
+                  type="text"
+                  id="aadhaarNumber"
+                  value={singleVerificationForm.aadhaarNumber}
+                  onChange={(e) => handleSingleVerificationFormChange('aadhaarNumber', e.target.value)}
+                  placeholder="e.g., 123456789012"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  maxLength={12}
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter 12-digit Aadhaar number
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                  PAN Number *
+                </label>
+                <input
+                  type="text"
+                  id="panNumber"
+                  value={singleVerificationForm.panNumber}
+                  onChange={(e) => handleSingleVerificationFormChange('panNumber', e.target.value)}
+                  placeholder="e.g., ABCDE1234F"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  maxLength={10}
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter PAN number in format: ABCDE1234F
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={singleVerificationForm.name}
+                  onChange={(e) => handleSingleVerificationFormChange('name', e.target.value)}
+                  placeholder="Enter full name as per Aadhaar"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <button
+                  type="submit"
+                  disabled={singleVerificationVerifying}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {singleVerificationVerifying ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="h-4 w-4 mr-2" />
+                      Verify Linking
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetSingleVerificationForm}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  Reset Form
+                </button>
+              </div>
+            </form>
+
+            {/* Single Verification Result */}
+            {singleVerificationResult && (
+              <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Verification Result</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Aadhaar Number</p>
+                    <p className="text-sm text-gray-900">{singleVerificationResult.aadhaarNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">PAN Number</p>
+                    <p className="text-sm text-gray-900">{singleVerificationResult.panNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Name</p>
+                    <p className="text-sm text-gray-900">{singleVerificationResult.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <div className="flex items-center">
+                      {getStatusIcon(singleVerificationResult.status)}
+                      <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(singleVerificationResult.status)}`}>
+                        {singleVerificationResult.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Processing Time</p>
+                    <p className="text-sm text-gray-900">{singleVerificationResult.processingTime}ms</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Processed At</p>
+                    <p className="text-sm text-gray-900">
+                      {singleVerificationResult.processedAt ? new Date(singleVerificationResult.processedAt).toLocaleString() : '-'}
+                    </p>
+                  </div>
+                </div>
+
+                {singleVerificationResult.verificationDetails && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-500 mb-2">Verification Details</p>
+                    <div className="bg-white p-4 rounded border">
+                      <pre className="text-sm text-gray-900 whitespace-pre-wrap">
+                        {JSON.stringify(singleVerificationResult.verificationDetails, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

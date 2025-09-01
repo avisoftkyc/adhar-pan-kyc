@@ -3,11 +3,74 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 const XLSX = require('xlsx');
 const { protect } = require('../middleware/auth');
 const AadhaarPan = require('../models/AadhaarPan');
 const { logAadhaarPanEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
+
+// Simulate Aadhaar-PAN linking verification function
+const simulateAadhaarPanLinking = async (record) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  
+  // Simulate verification logic
+  const aadhaarNumber = record.aadhaarNumber;
+  const panNumber = record.panNumber;
+  const name = record.name;
+  
+  // Simple validation simulation
+  const isValidAadhaar = /^\d{12}$/.test(aadhaarNumber.replace(/\s/g, ''));
+  const isValidPAN = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber);
+  const isValidName = name && name.length >= 2;
+  
+  let status = 'linked';
+  let details = {
+    message: 'Aadhaar-PAN linking verified successfully',
+    confidence: 95,
+    dataMatch: true
+  };
+  
+  if (!isValidAadhaar) {
+    status = 'invalid';
+    details = {
+      message: 'Invalid Aadhaar number format',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else if (!isValidPAN) {
+    status = 'invalid';
+    details = {
+      message: 'Invalid PAN number format',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else if (!isValidName) {
+    status = 'invalid';
+    details = {
+      message: 'Invalid name format',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else {
+    // Simulate random verification failures (15% chance)
+    if (Math.random() < 0.15) {
+      status = 'not-linked';
+      details = {
+        message: 'Aadhaar and PAN are not linked in government records',
+        confidence: 30,
+        dataMatch: false
+      };
+    }
+  }
+  
+  return {
+    status,
+    details,
+    processingTime: Math.floor(Math.random() * 2000) + 500
+  };
+};
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -492,6 +555,248 @@ router.get('/batch/:batchId/download', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to download report'
+    });
+  }
+});
+
+// Single Aadhaar-PAN linking verification
+router.post('/verify-single', protect, async (req, res) => {
+  try {
+    const { aadhaarNumber, panNumber, name } = req.body;
+
+    // Validate required fields
+    if (!aadhaarNumber || !panNumber || !name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aadhaar Number, PAN Number, and Name are required'
+      });
+    }
+
+    // Validate Aadhaar format
+    const aadhaarRegex = /^\d{12}$/;
+    if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Aadhaar number format'
+      });
+    }
+
+    // Validate PAN format
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(panNumber.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid PAN number format'
+      });
+    }
+
+    // Create a temporary record for verification
+    const tempRecord = new AadhaarPan({
+      userId: req.user.id,
+      batchId: 'SINGLE_LINKING_' + Date.now(),
+      aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+      panNumber: panNumber.toUpperCase(),
+      name: name.trim(),
+      status: 'pending'
+    });
+
+    // Simulate verification process (replace with actual API call)
+    const verificationResult = await simulateAadhaarPanLinking(tempRecord);
+
+    // Update record with verification result
+    tempRecord.status = verificationResult.status;
+    tempRecord.verificationDetails = verificationResult.details;
+    tempRecord.processedAt = new Date();
+    tempRecord.processingTime = verificationResult.processingTime;
+
+    await tempRecord.save();
+
+    // Log verification event
+    await logAadhaarPanEvent('single_linking_verified', req.user.id, {
+      aadhaarNumber: tempRecord.aadhaarNumber,
+      panNumber: tempRecord.panNumber,
+      name: tempRecord.name,
+      status: tempRecord.status
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Aadhaar-PAN linking verification completed',
+      data: {
+        aadhaarNumber: tempRecord.aadhaarNumber,
+        panNumber: tempRecord.panNumber,
+        name: tempRecord.name,
+        status: tempRecord.status,
+        verificationDetails: tempRecord.verificationDetails,
+        processedAt: tempRecord.processedAt,
+        processingTime: tempRecord.processingTime
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error in single Aadhaar-PAN linking verification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify Aadhaar-PAN linking'
+    });
+  }
+});
+
+// Get verification statistics
+router.get('/stats', protect, async (req, res) => {
+  try {
+    const { timeframe = 'all' } = req.query;
+    
+    // Build date filter based on timeframe
+    let dateFilter = {};
+    const now = new Date();
+    
+    if (timeframe === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter = { createdAt: { $gte: startOfMonth } };
+    } else if (timeframe === 'week') {
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { $gte: startOfWeek } };
+    }
+
+    // Aggregate statistics
+    const stats = await AadhaarPan.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id), ...dateFilter } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          linked: { $sum: { $cond: [{ $eq: ['$status', 'linked'] }, 1, 0] } },
+          'not-linked': { $sum: { $cond: [{ $eq: ['$status', 'not-linked'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          invalid: { $sum: { $cond: [{ $eq: ['$status', 'invalid'] }, 1, 0] } },
+          error: { $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    const result = stats[0] || { total: 0, linked: 0, 'not-linked': 0, pending: 0, invalid: 0, error: 0 };
+    const successRate = result.total > 0 ? (result.linked / result.total) * 100 : 0;
+
+    res.json({
+      success: true,
+      data: {
+        ...result,
+        successRate
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error fetching Aadhaar-PAN linking stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch verification statistics'
+    });
+  }
+});
+
+// Get monthly verification statistics
+router.get('/monthly-stats', protect, async (req, res) => {
+  try {
+    const { timeframe = 'all' } = req.query;
+    
+    // Build date filter based on timeframe
+    let dateFilter = {};
+    const now = new Date();
+    
+    if (timeframe === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter = { createdAt: { $gte: startOfMonth } };
+    } else if (timeframe === 'week') {
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { $gte: startOfWeek } };
+    }
+
+    // Aggregate monthly statistics
+    const monthlyStats = await AadhaarPan.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id), ...dateFilter } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          total: { $sum: 1 },
+          linked: { $sum: { $cond: [{ $eq: ['$status', 'linked'] }, 1, 0] } },
+          'not-linked': { $sum: { $cond: [{ $eq: ['$status', 'not-linked'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          invalid: { $sum: { $cond: [{ $eq: ['$status', 'invalid'] }, 1, 0] } },
+          error: { $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] } }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+
+    // Format the results
+    const formattedStats = monthlyStats.map(stat => ({
+      month: new Date(stat._id.year, stat._id.month - 1).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long' 
+      }),
+      total: stat.total,
+      linked: stat.linked,
+      'not-linked': stat['not-linked'],
+      pending: stat.pending,
+      invalid: stat.invalid,
+      error: stat.error
+    }));
+
+    res.json({
+      success: true,
+      data: formattedStats
+    });
+
+  } catch (error) {
+    logger.error('Error fetching monthly Aadhaar-PAN linking stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch monthly statistics'
+    });
+  }
+});
+
+// Get recent verifications
+router.get('/recent-verifications', protect, async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    const recentVerifications = await AadhaarPan.find({
+      userId: new mongoose.Types.ObjectId(req.user.id)
+    })
+    .select('aadhaarNumber panNumber name status processedAt batchId')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .lean();
+
+    // Decrypt the records before sending to frontend
+    const decryptedVerifications = recentVerifications.map(record => {
+      try {
+        // Create a temporary document instance to use decryptData method
+        const tempDoc = new AadhaarPan(record);
+        return tempDoc.decryptData();
+      } catch (error) {
+        logger.error('Error decrypting record:', error);
+        return record;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: decryptedVerifications
+    });
+
+  } catch (error) {
+    logger.error('Error fetching recent Aadhaar-PAN linking verifications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recent verifications'
     });
   }
 });

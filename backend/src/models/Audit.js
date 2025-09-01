@@ -25,9 +25,9 @@ const AuditSchema = new mongoose.Schema({
       'pan_kyc_upload', 'pan_kyc_verification', 'pan_kyc_batch_complete',
       'pan_kyc_api_call', 'pan_kyc_api_error', 'record_verified', 'batch_deleted', 'single_kyc_verified',
       
-      // Aadhaar-PAN events
-      'aadhaar_pan_upload', 'aadhaar_pan_verification', 'aadhaar_pan_batch_complete',
-      'aadhaar_pan_api_call', 'aadhaar_pan_api_error',
+                        // Aadhaar-PAN events
+                  'aadhaar_pan_upload', 'aadhaar_pan_verification', 'aadhaar_pan_batch_complete',
+                  'aadhaar_pan_api_call', 'aadhaar_pan_api_error', 'single_linking_verified',
       
       // Report events
       'report_generated', 'report_downloaded', 'report_deleted',
