@@ -294,12 +294,23 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
+      // Extract values with proper handling
+      const panNumberValue = row[columnMap.panNumber]?.toString().trim();
+      const aadhaarNumberValue = row[columnMap.aadhaarNumber]?.toString().trim();
+      const nameValue = row[columnMap.name]?.toString().trim();
+      
+      // Skip rows with missing required data
+      if (!panNumberValue || !aadhaarNumberValue || !nameValue) {
+        logger.info(`Skipping row ${i + 1}: Missing required data - PAN: ${panNumberValue}, Aadhaar: ${aadhaarNumberValue}, Name: ${nameValue}`);
+        continue;
+      }
+      
       const record = new AadhaarPan({
         userId: req.user.id,
         batchId: batchId,
-        panNumber: row[columnMap.panNumber]?.toString().trim(),
-        aadhaarNumber: row[columnMap.aadhaarNumber]?.toString().trim(),
-        name: row[columnMap.name]?.toString().trim(),
+        panNumber: panNumberValue,
+        aadhaarNumber: aadhaarNumberValue,
+        name: nameValue,
         dateOfBirth: row.dateOfBirth || row.DOB || row['Date of Birth']?.toString().trim(),
         gender: row.gender || row.Gender?.toString().trim(),
         fileUpload: {
@@ -313,22 +324,31 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       records.push(record);
     }
 
-    // Save all records
-    await AadhaarPan.insertMany(records);
+    // Save records individually to ensure middleware runs properly
+    const savedRecords = [];
+    for (const record of records) {
+      try {
+        await record.save();
+        savedRecords.push(record);
+      } catch (error) {
+        logger.error(`Error saving record:`, error);
+        // Continue with other records even if one fails
+      }
+    }
 
     // Log the upload event
     await logAadhaarPanEvent('aadhaar_pan_upload', req.user.id, {
       batchId,
-      recordCount: records.length,
+      recordCount: savedRecords.length,
       fileName: req.file.originalname
     }, req);
 
     res.json({
       success: true,
-      message: `Successfully uploaded ${records.length} records`,
+      message: `Successfully uploaded ${savedRecords.length} records`,
       data: {
         batchId,
-        recordCount: records.length,
+        recordCount: savedRecords.length,
         fileName: req.file.originalname
       }
     });
