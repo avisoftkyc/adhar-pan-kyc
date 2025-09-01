@@ -211,7 +211,7 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
     }
 
     // Validate required columns with flexible column name matching
-    const requiredColumns = ['panNumber', 'name'];
+    const requiredColumns = ['panNumber', 'name', 'dateOfBirth'];
     const firstRow = data[0];
     
     // Debug logging
@@ -221,7 +221,8 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
     // Column name mapping for flexibility
     const columnMapping = {
       'panNumber': ['panNumber', 'PAN No', 'PAN', 'pan', 'PANNumber', 'pan_number', 'PAN No.'],
-      'name': ['name', 'Name', 'NAME', 'fullName', 'Full Name', 'full_name', 'FULL NAME']
+      'name': ['name', 'Name', 'NAME', 'fullName', 'Full Name', 'full_name', 'FULL NAME'],
+      'dateOfBirth': ['dateOfBirth', 'DOB', 'dob', 'Date of Birth', 'dateOfBirth', 'birthDate', 'Birth Date', 'BIRTH DATE']
     };
     
     const missingColumns = [];
