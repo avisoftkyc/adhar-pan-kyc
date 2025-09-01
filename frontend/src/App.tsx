@@ -25,7 +25,10 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
 }) => {
   const { user, loading, isAuthenticated } = useAuth();
 
+  console.log('🔒 ProtectedRoute state:', { user: !!user, loading, isAuthenticated });
+
   if (loading) {
+    console.log('🔒 ProtectedRoute: Loading...');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
@@ -34,13 +37,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
   }
 
   if (!isAuthenticated || !user) {
+    console.log('🔒 ProtectedRoute: Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && user.role !== requiredRole) {
+    console.log('🔒 ProtectedRoute: Role mismatch, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log('🔒 ProtectedRoute: Access granted');
   return <>{children}</>;
 };
 

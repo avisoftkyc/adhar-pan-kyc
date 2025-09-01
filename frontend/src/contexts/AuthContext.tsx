@@ -127,21 +127,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
+      console.log('🔍 Initializing auth with token:', token ? 'exists' : 'none');
       
       if (token) {
         try {
+          console.log('🔍 Attempting to validate token...');
           dispatch({ type: 'AUTH_START' });
           const response = await api.get('/auth/me');
+          console.log('✅ Token validation successful:', response.data);
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: { user: response.data.data, token },
           });
         } catch (error) {
-          console.error('Token validation failed:', error);
+          console.error('❌ Token validation failed:', error);
           localStorage.removeItem('token');
           dispatch({ type: 'AUTH_FAILURE' });
         }
       } else {
+        console.log('🔍 No token found, setting loading to false');
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
