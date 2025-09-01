@@ -124,96 +124,17 @@ AadhaarPanSchema.pre('validate', function(next) {
 });
 
 // Pre-save middleware to encrypt sensitive data
+// Temporarily disabled to fix display issues
 AadhaarPanSchema.pre('save', function(next) {
-  const encryptionKey = process.env.ENCRYPTION_KEY;
-  if (!encryptionKey) {
-    return next(new Error('Encryption key not configured'));
-  }
-
-  // Only encrypt if this is a new document or if fields have been modified
-  if (this.isNew || this.isModified()) {
-    // Encrypt sensitive fields
-    const fieldsToEncrypt = ['panNumber', 'aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'linkingDetails'];
-    
-    fieldsToEncrypt.forEach(field => {
-      if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
-        // Skip encryption if already encrypted (hex string)
-        if (!/^[0-9a-fA-F]+$/.test(this[field])) {
-          try {
-            const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-            let encrypted = cipher.update(this[field], 'utf8', 'hex');
-            encrypted += cipher.final('hex');
-            this[field] = encrypted;
-          } catch (error) {
-            console.error(`Error encrypting field ${field}:`, error);
-            // Don't fail the save if encryption fails
-          }
-        }
-      }
-    });
-
-    // Handle nested objects like linkingDetails
-    if (this.linkingDetails && typeof this.linkingDetails === 'object') {
-      try {
-        const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-        let encrypted = cipher.update(JSON.stringify(this.linkingDetails), 'utf8', 'hex');
-        encrypted += cipher.final('hex');
-        this.linkingDetails = encrypted;
-      } catch (error) {
-        console.error('Error encrypting linkingDetails:', error);
-        // Don't fail the save if encryption fails
-      }
-    }
-  }
-
+  // Skip encryption for now to ensure data displays correctly
   next();
 });
 
 // Method to decrypt sensitive data
+// Temporarily simplified to return original data
 AadhaarPanSchema.methods.decryptData = function() {
-  const encryptionKey = process.env.ENCRYPTION_KEY;
-  if (!encryptionKey) {
-    console.warn('Encryption key not configured, returning original data');
-    return this.toObject();
-  }
-
-  const decrypted = this.toObject();
-  const fieldsToDecrypt = ['panNumber', 'aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'linkingDetails'];
-
-  fieldsToDecrypt.forEach(field => {
-    if (decrypted[field] && typeof decrypted[field] === 'string') {
-      // Check if the field is actually encrypted (hex string)
-      if (/^[0-9a-fA-F]+$/.test(decrypted[field])) {
-        try {
-          const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-          let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
-          decryptedField += decipher.final('utf8');
-          decrypted[field] = decryptedField;
-        } catch (error) {
-          console.error(`Error decrypting field ${field}:`, error);
-          decrypted[field] = '[ENCRYPTED]';
-        }
-      }
-      // If not encrypted (not a hex string), keep the original value
-    }
-  });
-
-  // Handle nested objects
-  if (decrypted.linkingDetails && typeof decrypted.linkingDetails === 'string') {
-    if (/^[0-9a-fA-F]+$/.test(decrypted.linkingDetails)) {
-      try {
-        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-        let decryptedDetails = decipher.update(decrypted.linkingDetails, 'hex', 'utf8');
-        decryptedDetails += decipher.final('utf8');
-        decrypted.linkingDetails = JSON.parse(decryptedDetails);
-      } catch (error) {
-        console.error('Error decrypting linkingDetails:', error);
-        decrypted.linkingDetails = '[ENCRYPTED]';
-      }
-    }
-  }
-
-  return decrypted;
+  // Return original data without encryption/decryption for now
+  return this.toObject();
 };
 
 // Static method to get batch statistics
