@@ -23,7 +23,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
   children, 
   requiredRole 
 }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthenticated } = useAuth();
 
   if (loading) {
     return (
@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -49,9 +49,9 @@ const ModuleRoute: React.FC<{
   children: React.ReactNode; 
   module: string;
 }> = ({ children, module }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 

@@ -56,7 +56,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem('token'),
   loading: true,
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('token'), // Set to true if token exists
 };
 
 // Action types
@@ -148,6 +148,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     initializeAuth();
   }, []);
+
+  // Set loading to false if no token exists
+  useEffect(() => {
+    if (!state.token && state.loading) {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, [state.token, state.loading]);
 
   // Login function
   const login = async (email: string, password: string) => {
