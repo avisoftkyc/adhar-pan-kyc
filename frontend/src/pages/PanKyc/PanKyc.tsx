@@ -630,6 +630,8 @@ const PanKyc: React.FC = () => {
             </div>
           </div>
 
+
+
           {/* Selection Controls */}
           {selectedBatch.records.some(record => record.status === 'pending') && (
             <div className="mb-4 flex items-center justify-between">
