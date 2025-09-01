@@ -322,6 +322,20 @@ const PanKyc: React.FC = () => {
   };
 
   const handleVerifySingle = async (recordId: string) => {
+    // Find the record to show confirmation details
+    const record = selectedBatch?.records.find(r => r._id === recordId);
+    if (!record) return;
+
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to verify this record?\n\n` +
+      `PAN: ${record.panNumber}\n` +
+      `Name: ${record.name}\n` +
+      `DOB: ${record.dateOfBirth || 'N/A'}`
+    );
+
+    if (!confirmed) return;
+
     try {
       setVerifying(true);
       const response = await api.post('/pan-kyc/verify', {
@@ -861,19 +875,38 @@ const PanKyc: React.FC = () => {
                         <button
                           onClick={() => handleVerifySingle(record._id)}
                           disabled={verifying}
-                          className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors"
+                          title={`Verify ${record.name} (${record.panNumber})`}
                         >
-                          {verifying ? 'Verifying...' : 'Verify'}
+                          {verifying ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Verifying...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircleIcon className="h-4 w-4 mr-1" />
+                              Verify
+                            </>
+                          )}
                         </button>
                       )}
                       {record.status === 'verified' && (
-                        <div className="text-green-600 text-xs">
+                        <div className="inline-flex items-center text-green-600 text-sm">
+                          <CheckCircleIcon className="h-4 w-4 mr-1" />
                           ✓ Verified
                         </div>
                       )}
                       {record.status === 'rejected' && (
-                        <div className="text-red-600 text-xs">
+                        <div className="inline-flex items-center text-red-600 text-sm">
+                          <XCircleIcon className="h-4 w-4 mr-1" />
                           ✗ Rejected
+                        </div>
+                      )}
+                      {record.status === 'error' && (
+                        <div className="inline-flex items-center text-orange-600 text-sm">
+                          <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                          ⚠ Error
                         </div>
                       )}
                     </td>
