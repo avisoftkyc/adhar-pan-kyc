@@ -288,12 +288,12 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
         logger.info('Extracted values:', {
           panNumber: row[columnMap.panNumber],
           name: row[columnMap.name],
-          dateOfBirth: row.dateOfBirth || row.DOB || row['Date of Birth']
+          dateOfBirth: row[columnMap.dateOfBirth]
         });
         logger.info('Raw extracted values:', {
           panNumberRaw: row[columnMap.panNumber],
           nameRaw: row[columnMap.name],
-          dateOfBirthRaw: row.dateOfBirth || row.DOB || row['Date of Birth']
+          dateOfBirthRaw: row[columnMap.dateOfBirth]
         });
       }
       
@@ -302,24 +302,26 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       
       // Handle DOB - convert Excel date number to string
       let dateOfBirthValue = '';
-      if (row.DOB !== undefined) {
-        if (typeof row.DOB === 'number') {
+      const dateOfBirthColumn = columnMap.dateOfBirth;
+      if (row[dateOfBirthColumn] !== undefined) {
+        if (typeof row[dateOfBirthColumn] === 'number') {
           // Convert Excel date number to date string
-          const excelDate = row.DOB;
+          const excelDate = row[dateOfBirthColumn];
           const date = new Date((excelDate - 25569) * 86400 * 1000);
           dateOfBirthValue = date.toLocaleDateString('en-GB'); // DD/MM/YYYY format
         } else {
-          dateOfBirthValue = row.DOB?.toString().trim();
+          dateOfBirthValue = row[dateOfBirthColumn]?.toString().trim();
         }
       }
       
       const fatherNameValue = row.fatherName || row['Father Name'] || row.father_name || '';
       
       // Skip rows with missing required fields
-      if (!panNumberValue || !nameValue) {
+      if (!panNumberValue || !nameValue || !dateOfBirthValue) {
         logger.warn(`Skipping row ${i + 1} - missing required fields:`, {
           panNumber: panNumberValue,
           name: nameValue,
+          dateOfBirth: dateOfBirthValue,
           row: row
         });
         continue;
