@@ -112,13 +112,23 @@ router.get('/batch/:batchId', protect, async (req, res) => {
       batchId: batchId
     }).select('-__v');
 
+    // Decrypt the records before sending to frontend
+    const decryptedRecords = records.map(record => {
+      try {
+        return record.decryptData();
+      } catch (error) {
+        logger.error('Error decrypting record:', error);
+        return record.toObject();
+      }
+    });
+
     const stats = await AadhaarPan.getBatchStats(batchId);
 
     res.json({
       success: true,
       data: {
         batchId,
-        records,
+        records: decryptedRecords,
         stats
       }
     });
