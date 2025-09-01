@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
 import { 
   DocumentTextIcon, 
@@ -54,14 +55,13 @@ interface Record {
 
 const AadhaarPan: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<BatchDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const documentsPerPage = 5;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
@@ -103,7 +103,10 @@ const AadhaarPan: React.FC = () => {
       setBatches(response.data.data || []);
     } catch (error) {
       console.error('Error fetching batches:', error);
-      setError('Failed to fetch batches');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch batches'
+      });
     } finally {
       setLoading(false);
     }
@@ -132,7 +135,10 @@ const AadhaarPan: React.FC = () => {
       }, 100);
     } catch (error) {
       console.error('Error fetching batch details:', error);
-      setError('Failed to fetch batch details');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch batch details'
+      });
     } finally {
       setLoading(false);
     }
@@ -142,13 +148,15 @@ const AadhaarPan: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      setError(null);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Please select a file');
+      showToast({
+        type: 'error',
+        message: 'Please select a file'
+      });
       return;
     }
 
@@ -158,7 +166,6 @@ const AadhaarPan: React.FC = () => {
     try {
       setUploading(true);
       setUploadProgress(0);
-      setError(null);
 
       const response = await api.post('/aadhaar-pan/upload', formData, {
         headers: {
@@ -172,7 +179,10 @@ const AadhaarPan: React.FC = () => {
         },
       });
 
-      setSuccess('File uploaded successfully!');
+      showToast({
+        type: 'success',
+        message: 'File uploaded successfully!'
+      });
       setSelectedFile(null);
       setUploadProgress(0);
       
@@ -190,7 +200,10 @@ const AadhaarPan: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      setError(error.response?.data?.message || 'Failed to upload file');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to upload file'
+      });
     } finally {
       setUploading(false);
     }
@@ -203,7 +216,10 @@ const AadhaarPan: React.FC = () => {
 
     try {
       await api.delete(`/aadhaar-pan/batch/${batchId}`);
-      setSuccess('Batch deleted successfully');
+      showToast({
+        type: 'success',
+        message: 'Batch deleted successfully'
+      });
       
       // Refresh batches list
       await fetchBatches();
@@ -214,7 +230,10 @@ const AadhaarPan: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error deleting batch:', error);
-      setError(error.response?.data?.message || 'Failed to delete batch');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete batch'
+      });
     }
   };
 
@@ -264,7 +283,10 @@ const AadhaarPan: React.FC = () => {
 
   const handleVerifySelected = async () => {
     if (selectedRecords.size === 0) {
-      setError('Please select at least one record to verify');
+      showToast({
+        type: 'error',
+        message: 'Please select at least one record to verify'
+      });
       return;
     }
 
@@ -274,7 +296,10 @@ const AadhaarPan: React.FC = () => {
         recordIds: Array.from(selectedRecords)
       });
 
-      setSuccess(`Successfully verified ${response.data.data.length} records`);
+      showToast({
+        type: 'success',
+        message: `Successfully verified ${response.data.data.length} records`
+      });
       setSelectedRecords(new Set());
       
       // Refresh batch details
@@ -283,7 +308,10 @@ const AadhaarPan: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error verifying records:', error);
-      setError(error.response?.data?.message || 'Failed to verify records');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to verify records'
+      });
     } finally {
       setVerifying(false);
     }
@@ -296,7 +324,10 @@ const AadhaarPan: React.FC = () => {
         recordIds: [recordId]
       });
 
-      setSuccess('Record verified successfully');
+      showToast({
+        type: 'success',
+        message: 'Record verified successfully'
+      });
       
       // Refresh batch details
       if (selectedBatch) {
@@ -304,7 +335,10 @@ const AadhaarPan: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error verifying record:', error);
-      setError(error.response?.data?.message || 'Failed to verify record');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to verify record'
+      });
     } finally {
       setVerifying(false);
     }
@@ -322,31 +356,46 @@ const AadhaarPan: React.FC = () => {
     const { aadhaarNumber, panNumber, name } = singleVerificationForm;
     
     if (!aadhaarNumber.trim()) {
-      setError('Aadhaar Number is required');
+      showToast({
+        type: 'error',
+        message: 'Aadhaar Number is required'
+      });
       return false;
     }
     
     if (!panNumber.trim()) {
-      setError('PAN Number is required');
+      showToast({
+        type: 'error',
+        message: 'PAN Number is required'
+      });
       return false;
     }
     
     if (!name.trim()) {
-      setError('Name is required');
+      showToast({
+        type: 'error',
+        message: 'Name is required'
+      });
       return false;
     }
     
     // Validate Aadhaar format (12 digits)
     const aadhaarRegex = /^\d{12}$/;
     if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
-      setError('Aadhaar Number must be 12 digits');
+      showToast({
+        type: 'error',
+        message: 'Aadhaar Number must be 12 digits'
+      });
       return false;
     }
     
     // Validate PAN format
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     if (!panRegex.test(panNumber.toUpperCase())) {
-      setError('Invalid PAN number format');
+      showToast({
+        type: 'error',
+        message: 'Invalid PAN number format'
+      });
       return false;
     }
     
@@ -362,7 +411,6 @@ const AadhaarPan: React.FC = () => {
     
     try {
       setSingleVerificationVerifying(true);
-      setError(null);
       
       const response = await api.post('/aadhaar-pan/verify-single', {
         aadhaarNumber: singleVerificationForm.aadhaarNumber.replace(/\s/g, ''),
@@ -371,11 +419,17 @@ const AadhaarPan: React.FC = () => {
       });
       
       setSingleVerificationResult(response.data.data);
-      setSuccess('Aadhaar-PAN linking verification completed');
+      showToast({
+        type: 'success',
+        message: 'Aadhaar-PAN linking verification completed'
+      });
       
     } catch (error: any) {
       console.error('Error in single verification:', error);
-      setError(error.response?.data?.message || 'Failed to verify Aadhaar-PAN linking');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to verify Aadhaar-PAN linking'
+      });
     } finally {
       setSingleVerificationVerifying(false);
     }
@@ -388,7 +442,6 @@ const AadhaarPan: React.FC = () => {
       name: ''
     });
     setSingleVerificationResult(null);
-    setError(null);
   };
 
   // Utility functions
@@ -476,28 +529,7 @@ const AadhaarPan: React.FC = () => {
         </div>
       </div>
 
-      {/* Error and Success Messages */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <XCircleIcon className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex">
-            <CheckCircleIcon className="h-5 w-5 text-green-400" />
-            <div className="ml-3">
-              <p className="text-sm text-green-800">{success}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
