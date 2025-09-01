@@ -173,7 +173,8 @@ AadhaarPanSchema.pre('save', function(next) {
 AadhaarPanSchema.methods.decryptData = function() {
   const encryptionKey = process.env.ENCRYPTION_KEY;
   if (!encryptionKey) {
-    throw new Error('Encryption key not configured');
+    console.warn('Encryption key not configured, returning original data');
+    return this.toObject();
   }
 
   const decrypted = this.toObject();
@@ -181,26 +182,34 @@ AadhaarPanSchema.methods.decryptData = function() {
 
   fieldsToDecrypt.forEach(field => {
     if (decrypted[field] && typeof decrypted[field] === 'string') {
-      try {
-        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-        let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
-        decryptedField += decipher.final('utf8');
-        decrypted[field] = decryptedField;
-      } catch (error) {
-        decrypted[field] = '[ENCRYPTED]';
+      // Check if the field is actually encrypted (hex string)
+      if (/^[0-9a-fA-F]+$/.test(decrypted[field])) {
+        try {
+          const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+          let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
+          decryptedField += decipher.final('utf8');
+          decrypted[field] = decryptedField;
+        } catch (error) {
+          console.error(`Error decrypting field ${field}:`, error);
+          decrypted[field] = '[ENCRYPTED]';
+        }
       }
+      // If not encrypted (not a hex string), keep the original value
     }
   });
 
   // Handle nested objects
   if (decrypted.linkingDetails && typeof decrypted.linkingDetails === 'string') {
-    try {
-      const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-      let decryptedDetails = decipher.update(decrypted.linkingDetails, 'hex', 'utf8');
-      decryptedDetails += decipher.final('utf8');
-      decrypted.linkingDetails = JSON.parse(decryptedDetails);
-    } catch (error) {
-      decrypted.linkingDetails = '[ENCRYPTED]';
+    if (/^[0-9a-fA-F]+$/.test(decrypted.linkingDetails)) {
+      try {
+        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+        let decryptedDetails = decipher.update(decrypted.linkingDetails, 'hex', 'utf8');
+        decryptedDetails += decipher.final('utf8');
+        decrypted.linkingDetails = JSON.parse(decryptedDetails);
+      } catch (error) {
+        console.error('Error decrypting linkingDetails:', error);
+        decrypted.linkingDetails = '[ENCRYPTED]';
+      }
     }
   }
 
