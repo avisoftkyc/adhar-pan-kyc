@@ -125,8 +125,16 @@ const upload = multer({
 // Get all Aadhaar-PAN batches for the user
 router.get('/batches', protect, async (req, res) => {
   try {
+    // Debug: Check total records for this user
+    const totalRecords = await AadhaarPan.countDocuments({ userId: req.user.id });
+    logger.info(`Total Aadhaar-PAN records for user ${req.user.id}: ${totalRecords}`);
+    
+    // Debug: Check unique batchIds for this user
+    const uniqueBatchIds = await AadhaarPan.distinct('batchId', { userId: req.user.id });
+    logger.info(`Unique batch IDs for user ${req.user.id}:`, uniqueBatchIds);
+
     const batches = await AadhaarPan.aggregate([
-      { $match: { userId: req.user.id } },
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
       {
         $group: {
           _id: '$batchId',
@@ -153,6 +161,7 @@ router.get('/batches', protect, async (req, res) => {
       { $sort: { createdAt: -1 } }
     ]);
 
+    logger.info(`Found ${batches.length} batches for user ${req.user.id}`);
     res.json({
       success: true,
       data: batches
