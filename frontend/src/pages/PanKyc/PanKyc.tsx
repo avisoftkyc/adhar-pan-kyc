@@ -61,6 +61,12 @@ const PanKyc: React.FC = () => {
   const documentsPerPage = 5;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
+  
+  // Table pagination and search
+  const [tableCurrentPage, setTableCurrentPage] = useState(1);
+  const [tableRecordsPerPage, setTableRecordsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredRecords, setFilteredRecords] = useState<any[]>([]);
 
   useEffect(() => {
     fetchBatches();
@@ -81,6 +87,23 @@ const PanKyc: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [success, error]);
+
+  // Filter and paginate records when selectedBatch or search changes
+  useEffect(() => {
+    if (selectedBatch) {
+      const filtered = selectedBatch.records.filter(record => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          record.panNumber?.toLowerCase().includes(searchLower) ||
+          record.name?.toLowerCase().includes(searchLower) ||
+          record.dateOfBirth?.toLowerCase().includes(searchLower) ||
+          record.status?.toLowerCase().includes(searchLower)
+        );
+      });
+      setFilteredRecords(filtered);
+      setTableCurrentPage(1); // Reset to first page when search changes
+    }
+  }, [selectedBatch, searchTerm]);
 
   const fetchBatches = async () => {
     try {
@@ -258,7 +281,7 @@ const PanKyc: React.FC = () => {
 
   const handleSelectAll = () => {
     if (selectedBatch) {
-      const pendingRecordIds = selectedBatch.records
+      const pendingRecordIds = filteredRecords
         .filter(record => record.status === 'pending')
         .map(record => record._id);
       
@@ -346,6 +369,44 @@ const PanKyc: React.FC = () => {
       setError('Failed to delete batch');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadTableData = () => {
+    if (!selectedBatch || filteredRecords.length === 0) {
+      setError('No data to download');
+      return;
+    }
+
+    try {
+      // Create CSV content
+      const headers = ['PAN Number', 'Name', 'Date of Birth', 'Status', 'Processed At'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredRecords.map(record => [
+          record.panNumber || '',
+          record.name || '',
+          record.dateOfBirth || '',
+          record.status || '',
+          record.processedAt ? new Date(record.processedAt).toLocaleString() : ''
+        ].join(','))
+      ].join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${selectedBatch.batchId}_table_data.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setSuccess('Table data downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading table data:', error);
+      setError('Failed to download table data');
     }
   };
 
@@ -632,47 +693,107 @@ const PanKyc: React.FC = () => {
 
 
 
-          {/* Selection Controls */}
-          {selectedBatch.records.some(record => record.status === 'pending') && (
-            <div className="mb-4 flex items-center justify-between">
+          {/* Table Controls - Search, Pagination, Download */}
+          <div className="mb-4 space-y-4">
+            {/* Search and Actions Row */}
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <label className="flex items-center">
+                {/* Search Input */}
+                <div className="relative">
                   <input
-                    type="checkbox"
-                    checked={selectedBatch.records.filter(r => r.status === 'pending').length === selectedRecords.length && selectedRecords.length > 0}
-                    onChange={handleSelectAll}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    type="text"
+                    placeholder="Search by PAN, Name, DOB, or Status..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 w-80"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Select All Pending</span>
-                </label>
-                {selectedRecords.length > 0 && (
-                  <span className="text-sm text-gray-500">
-                    {selectedRecords.length} record(s) selected
-                  </span>
-                )}
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* Records Per Page */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm text-gray-700">Show:</label>
+                  <select
+                    value={tableRecordsPerPage}
+                    onChange={(e) => {
+                      setTableRecordsPerPage(Number(e.target.value));
+                      setTableCurrentPage(1);
+                    }}
+                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                  <span className="text-sm text-gray-700">records</span>
+                </div>
               </div>
               
-              {selectedRecords.length > 0 && (
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-3">
                 <button
-                  onClick={handleVerifySelected}
-                  disabled={verifying}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  onClick={handleDownloadTableData}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  {verifying ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircleIcon className="h-4 w-4 mr-2" />
-                      Verify Selected ({selectedRecords.length})
-                    </>
-                  )}
+                  <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                  Download CSV
                 </button>
-              )}
+                
+                {selectedBatch.records.some(record => record.status === 'pending') && (
+                  <button
+                    onClick={handleVerifySelected}
+                    disabled={verifying || selectedRecords.length === 0}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                  >
+                    {verifying ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircleIcon className="h-4 w-4 mr-2" />
+                        Verify Selected ({selectedRecords.length})
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
-          )}
+            
+            {/* Selection Controls */}
+            {selectedBatch.records.some(record => record.status === 'pending') && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={filteredRecords.filter(r => r.status === 'pending').length === selectedRecords.length && selectedRecords.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Select All Pending</span>
+                  </label>
+                  {selectedRecords.length > 0 && (
+                    <span className="text-sm text-gray-500">
+                      {selectedRecords.length} record(s) selected
+                    </span>
+                  )}
+                </div>
+                
+                {/* Results Info */}
+                <div className="text-sm text-gray-500">
+                  Showing {((tableCurrentPage - 1) * tableRecordsPerPage) + 1} to {Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)} of {filteredRecords.length} results
+                  {searchTerm && ` (filtered from ${selectedBatch.records.length} total)`}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -704,7 +825,9 @@ const PanKyc: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {selectedBatch.records.map((record, index) => (
+                {filteredRecords
+                  .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
+                  .map((record, index) => (
                   <tr key={record._id || index} className={selectedRecords.includes(record._id) ? 'bg-blue-50' : ''}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {record.status === 'pending' && (
@@ -759,6 +882,35 @@ const PanKyc: React.FC = () => {
               </tbody>
             </table>
           </div>
+          
+          {/* Table Pagination */}
+          {filteredRecords.length > tableRecordsPerPage && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-700">
+                Showing {((tableCurrentPage - 1) * tableRecordsPerPage) + 1} to {Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)} of {filteredRecords.length} results
+                {searchTerm && ` (filtered from ${selectedBatch.records.length} total)`}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setTableCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={tableCurrentPage === 1}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1 text-sm text-gray-700">
+                  Page {tableCurrentPage} of {Math.ceil(filteredRecords.length / tableRecordsPerPage)}
+                </span>
+                <button
+                  onClick={() => setTableCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRecords.length / tableRecordsPerPage)))}
+                  disabled={tableCurrentPage === Math.ceil(filteredRecords.length / tableRecordsPerPage)}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
