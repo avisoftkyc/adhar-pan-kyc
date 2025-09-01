@@ -99,7 +99,8 @@ const AadhaarPan: React.FC = () => {
     try {
       setLoading(true);
       const response = await api.get('/aadhaar-pan/batches');
-      setBatches(response.data.data);
+      console.log('Aadhaar-PAN batches response:', response.data);
+      setBatches(response.data.data || []);
     } catch (error) {
       console.error('Error fetching batches:', error);
       setError('Failed to fetch batches');
@@ -621,7 +622,7 @@ const AadhaarPan: React.FC = () => {
                           selectedBatch?.batchId === batch._id ? 'bg-green-500' : 'bg-gray-300'
                         }`}></div>
                         <div>
-                          <h3 className="font-medium text-gray-900">Batch {batch._id}</h3>
+                          <h3 className="font-medium text-gray-900">{batch._id}</h3>
                           <p className="text-sm text-gray-500">
                             {batch.totalRecords} records • {formatDate(batch.createdAt)}
                           </p>
