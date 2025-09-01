@@ -44,6 +44,68 @@ const verifyPAN = async (panNumber, name) => {
   }
 };
 
+// Simulate PAN verification function for single KYC
+const simulatePANVerification = async (record) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+  
+  // Simulate verification logic
+  const panNumber = record.panNumber;
+  const name = record.name;
+  const dateOfBirth = record.dateOfBirth;
+  
+  // Simple validation simulation
+  const isValidPAN = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber);
+  const isValidName = name && name.length >= 2;
+  const isValidDOB = dateOfBirth && dateOfBirth.length > 0;
+  
+  let status = 'verified';
+  let details = {
+    message: 'Verification successful',
+    confidence: 95,
+    dataMatch: true
+  };
+  
+  if (!isValidPAN) {
+    status = 'rejected';
+    details = {
+      message: 'Invalid PAN number format',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else if (!isValidName) {
+    status = 'rejected';
+    details = {
+      message: 'Invalid name format',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else if (!isValidDOB) {
+    status = 'rejected';
+    details = {
+      message: 'Invalid date of birth',
+      confidence: 0,
+      dataMatch: false
+    };
+  } else {
+    // Simulate random verification failures (10% chance)
+    if (Math.random() < 0.1) {
+      status = 'rejected';
+      details = {
+        message: 'Data mismatch with government records',
+        confidence: 30,
+        dataMatch: false
+      };
+    }
+  }
+  
+  return {
+    status,
+    details,
+    processingTime: Math.floor(Math.random() * 2000) + 500
+  };
+};
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -553,24 +615,7 @@ router.post('/batch/:batchId/process', protect, async (req, res) => {
   }
 });
 
-// Get user statistics
-router.get('/stats', protect, async (req, res) => {
-  try {
-    const { days = 30 } = req.query;
-    const stats = await PanKyc.getUserStats(req.user.id, parseInt(days));
-    
-    res.json({
-      success: true,
-      data: stats
-    });
-  } catch (error) {
-    logger.error('Error fetching PAN KYC stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch statistics'
-    });
-  }
-});
+
 
 // Verify selected records
 router.post('/verify', protect, async (req, res) => {
@@ -775,6 +820,235 @@ router.get('/batch/:batchId/download', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to download report'
+    });
+  }
+});
+
+// Single KYC verification endpoint
+router.post('/verify-single', protect, async (req, res) => {
+  try {
+    const { panNumber, name, dateOfBirth } = req.body;
+
+    // Validate required fields
+    if (!panNumber || !name || !dateOfBirth) {
+      return res.status(400).json({
+        success: false,
+        message: 'PAN Number, Name, and Date of Birth are required'
+      });
+    }
+
+    // Validate PAN format
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    if (!panRegex.test(panNumber.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid PAN number format'
+      });
+    }
+
+    // Create a temporary record for verification
+    const tempRecord = new PanKyc({
+      userId: req.user.id,
+      batchId: 'SINGLE_KYC_' + Date.now(),
+      panNumber: panNumber.toUpperCase(),
+      name: name.trim(),
+      dateOfBirth: dateOfBirth.trim(),
+      status: 'pending'
+    });
+
+    // Simulate verification process (replace with actual API call)
+    const verificationResult = await simulatePANVerification(tempRecord);
+    
+    // Update record with verification result
+    tempRecord.status = verificationResult.status;
+    tempRecord.verificationDetails = verificationResult.details;
+    tempRecord.processedAt = new Date();
+    tempRecord.processingTime = verificationResult.processingTime;
+    
+    await tempRecord.save();
+
+    // Log verification event
+    await logPanKycEvent('single_kyc_verified', req.user.id, {
+      panNumber: tempRecord.panNumber,
+      name: tempRecord.name,
+      status: tempRecord.status
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'KYC verification completed',
+      data: {
+        panNumber: tempRecord.panNumber,
+        name: tempRecord.name,
+        dateOfBirth: tempRecord.dateOfBirth,
+        status: tempRecord.status,
+        verificationDetails: tempRecord.verificationDetails,
+        processedAt: tempRecord.processedAt,
+        processingTime: tempRecord.processingTime
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error in single KYC verification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to verify KYC'
+    });
+  }
+});
+
+// Get verification statistics
+router.get('/stats', protect, async (req, res) => {
+  try {
+    const { timeframe = 'all' } = req.query;
+    
+    // Build date filter based on timeframe
+    let dateFilter = {};
+    const now = new Date();
+    
+    if (timeframe === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter = { createdAt: { $gte: startOfMonth } };
+    } else if (timeframe === 'week') {
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { $gte: startOfWeek } };
+    }
+
+    // Aggregate statistics
+    const stats = await PanKyc.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id), ...dateFilter } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          verified: { $sum: { $cond: [{ $eq: ['$status', 'verified'] }, 1, 0] } },
+          rejected: { $sum: { $cond: [{ $eq: ['$status', 'rejected'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          error: { $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    const result = stats[0] || { total: 0, verified: 0, rejected: 0, pending: 0, error: 0 };
+    const successRate = result.total > 0 ? (result.verified / result.total) * 100 : 0;
+
+    res.json({
+      success: true,
+      data: {
+        ...result,
+        successRate
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error fetching verification stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch verification statistics'
+    });
+  }
+});
+
+// Get monthly verification statistics
+router.get('/monthly-stats', protect, async (req, res) => {
+  try {
+    const { timeframe = 'all' } = req.query;
+    
+    // Build date filter based on timeframe
+    let dateFilter = {};
+    const now = new Date();
+    
+    if (timeframe === 'month') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter = { createdAt: { $gte: startOfMonth } };
+    } else if (timeframe === 'week') {
+      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      startOfWeek.setHours(0, 0, 0, 0);
+      dateFilter = { createdAt: { $gte: startOfWeek } };
+    }
+
+    // Aggregate monthly statistics
+    const monthlyStats = await PanKyc.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id), ...dateFilter } },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' }
+          },
+          total: { $sum: 1 },
+          verified: { $sum: { $cond: [{ $eq: ['$status', 'verified'] }, 1, 0] } },
+          rejected: { $sum: { $cond: [{ $eq: ['$status', 'rejected'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+          error: { $sum: { $cond: [{ $eq: ['$status', 'error'] }, 1, 0] } }
+        }
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } }
+    ]);
+
+    // Format the results
+    const formattedStats = monthlyStats.map(stat => ({
+      month: new Date(stat._id.year, stat._id.month - 1).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long' 
+      }),
+      total: stat.total,
+      verified: stat.verified,
+      rejected: stat.rejected,
+      pending: stat.pending,
+      error: stat.error
+    }));
+
+    res.json({
+      success: true,
+      data: formattedStats
+    });
+
+  } catch (error) {
+    logger.error('Error fetching monthly stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch monthly statistics'
+    });
+  }
+});
+
+// Get recent verifications
+router.get('/recent-verifications', protect, async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+    
+    const recentVerifications = await PanKyc.find({
+      userId: new mongoose.Types.ObjectId(req.user.id)
+    })
+    .select('panNumber name dateOfBirth status processedAt batchId')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .lean();
+
+    // Decrypt the records before sending to frontend
+    const decryptedVerifications = recentVerifications.map(record => {
+      try {
+        // Create a temporary document instance to use decryptData method
+        const tempDoc = new PanKyc(record);
+        return tempDoc.decryptData();
+      } catch (error) {
+        logger.error('Error decrypting record:', error);
+        return record;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: decryptedVerifications
+    });
+
+  } catch (error) {
+    logger.error('Error fetching recent verifications:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch recent verifications'
     });
   }
 });

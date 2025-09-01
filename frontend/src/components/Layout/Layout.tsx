@@ -13,6 +13,7 @@ import {
   SunIcon,
   MoonIcon,
   BellIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -45,6 +46,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: IdentificationIcon,
       current: location.pathname === '/aadhaar-pan',
       module: 'aadhaar-pan',
+    },
+    {
+      name: 'Verification Records',
+      href: '/verification-records',
+      icon: ChartBarIcon,
+      current: location.pathname === '/verification-records',
     },
     {
       name: 'Profile',

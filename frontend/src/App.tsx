@@ -16,6 +16,7 @@ import PanKyc from './pages/PanKyc/PanKyc';
 import AadhaarPan from './pages/AadhaarPan/AadhaarPan';
 import Profile from './pages/Profile/Profile';
 import Admin from './pages/Admin/Admin';
+import VerificationRecords from './pages/VerificationRecords/VerificationRecords';
 import NotFound from './pages/NotFound/NotFound';
 
 // Protected Route Component
@@ -117,6 +118,14 @@ const AppContent: React.FC = () => {
                 <AadhaarPan />
               </Layout>
             </ModuleRoute>
+          } />
+
+          <Route path="/verification-records" element={
+            <ProtectedRoute>
+              <Layout>
+                <VerificationRecords />
+              </Layout>
+            </ProtectedRoute>
           } />
 
           <Route path="/profile" element={
