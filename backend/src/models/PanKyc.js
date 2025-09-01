@@ -26,6 +26,10 @@ const PanKycSchema = new mongoose.Schema({
     type: String,
     encrypted: true,
   },
+  fatherName: {
+    type: String,
+    encrypted: true,
+  },
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected', 'error'],
