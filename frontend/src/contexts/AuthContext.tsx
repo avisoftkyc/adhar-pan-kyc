@@ -127,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
+      
       if (token) {
         try {
           dispatch({ type: 'AUTH_START' });

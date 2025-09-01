@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3002/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -31,9 +31,9 @@ api.interceptors.response.use(
   (error) => {
     // Handle specific error cases
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Token expired or invalid - let AuthContext handle this
+      // Don't automatically redirect here, let the calling code decide
+      console.log('401 Unauthorized - letting AuthContext handle');
     }
     
     if (error.response?.status === 403) {

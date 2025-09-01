@@ -1,11 +1,508 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/auth');
+const User = require('../models/User');
+const Audit = require('../models/Audit');
+const PanKyc = require('../models/PanKyc');
+const AadhaarPan = require('../models/AadhaarPan');
+const { logEvent } = require('../services/auditService');
+const logger = require('../utils/logger');
 
-// Placeholder for admin routes
-// This will be implemented with user management, system settings, and audit access
+// Admin middleware - check if user is admin
+const adminAuth = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Admin privileges required.'
+    });
+  }
+  next();
+};
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Admin routes - to be implemented' });
+// Get all users (admin only)
+router.get('/users', protect, adminAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', status = '' } = req.query;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (status) {
+      query.status = status;
+    }
+
+    const users = await User.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        users,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching users:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users'
+    });
+  }
+});
+
+// Get user by ID (admin only)
+router.get('/users/:id', protect, adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    logger.error('Error fetching user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user'
+    });
+  }
+});
+
+// Create new user (admin only)
+router.post('/users', protect, adminAuth, async (req, res) => {
+  try {
+    const { name, email, password, role, moduleAccess, status } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User with this email already exists'
+      });
+    }
+
+    const user = new User({
+      name,
+      email,
+      password,
+      role: role || 'user',
+      moduleAccess: moduleAccess || [],
+      status: status || 'active'
+    });
+
+    await user.save();
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'user_created',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        createdUserEmail: user.email,
+        role: user.role,
+        moduleAccess: user.moduleAccess
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully',
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        moduleAccess: user.moduleAccess,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    logger.error('Error creating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create user'
+    });
+  }
+});
+
+// Update user (admin only)
+router.put('/users/:id', protect, adminAuth, async (req, res) => {
+  try {
+    const { name, email, role, moduleAccess, status } = req.body;
+    
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email already in use'
+        });
+      }
+    }
+
+    const oldData = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      moduleAccess: user.moduleAccess,
+      status: user.status
+    };
+
+    // Update user
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.role = role || user.role;
+    user.moduleAccess = moduleAccess || user.moduleAccess;
+    user.status = status || user.status;
+
+    await user.save();
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'user_updated',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        oldData,
+        newData: {
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          moduleAccess: user.moduleAccess,
+          status: user.status
+        }
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        moduleAccess: user.moduleAccess,
+        status: user.status
+      }
+    });
+  } catch (error) {
+    logger.error('Error updating user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user'
+    });
+  }
+});
+
+// Delete user (admin only)
+router.delete('/users/:id', protect, adminAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Prevent admin from deleting themselves
+    if (user._id.toString() === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'user_deleted',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        deletedUserEmail: user.email,
+        deletedUserName: user.name
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    logger.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user'
+    });
+  }
+});
+
+// Get audit logs (admin only)
+router.get('/audit-logs', protect, adminAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 50, module = '', action = '', userId = '', startDate = '', endDate = '' } = req.query;
+    const skip = (page - 1) * limit;
+
+    let query = {};
+    
+    if (module) query.module = module;
+    if (action) query.action = action;
+    if (userId) query.userId = userId;
+    
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    const logs = await Audit.find(query)
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Audit.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        logs,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching audit logs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch audit logs'
+    });
+  }
+});
+
+// Get system statistics (admin only)
+router.get('/stats', protect, adminAuth, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    // User statistics
+    const totalUsers = await User.countDocuments();
+    const activeUsers = await User.countDocuments({ status: 'active' });
+    const newUsers = await User.countDocuments({ createdAt: { $gte: startDate } });
+
+    // PAN KYC statistics
+    const panKycStats = await PanKyc.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Aadhaar-PAN statistics
+    const aadhaarPanStats = await AadhaarPan.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Activity statistics
+    const activityStats = await Audit.aggregate([
+      { $match: { createdAt: { $gte: startDate } } },
+      {
+        $group: {
+          _id: '$action',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Daily activity for the last 7 days
+    const dailyActivity = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        users: {
+          total: totalUsers,
+          active: activeUsers,
+          new: newUsers
+        },
+        panKyc: panKycStats,
+        aadhaarPan: aadhaarPanStats,
+        activity: activityStats,
+        dailyActivity
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching system stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch system statistics'
+    });
+  }
+});
+
+// Get system health (admin only)
+router.get('/health', protect, adminAuth, async (req, res) => {
+  try {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date(),
+      services: {
+        database: 'connected',
+        fileSystem: 'accessible',
+        memory: process.memoryUsage(),
+        uptime: process.uptime()
+      }
+    };
+
+    // Check database connection
+    try {
+      await User.findOne().limit(1);
+      health.services.database = 'connected';
+    } catch (error) {
+      health.services.database = 'disconnected';
+      health.status = 'degraded';
+    }
+
+    // Check file system
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const uploadDir = path.join(__dirname, '../../uploads');
+      fs.accessSync(uploadDir, fs.constants.W_OK);
+      health.services.fileSystem = 'accessible';
+    } catch (error) {
+      health.services.fileSystem = 'inaccessible';
+      health.status = 'degraded';
+    }
+
+    res.json({
+      success: true,
+      data: health
+    });
+  } catch (error) {
+    logger.error('Error checking system health:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check system health'
+    });
+  }
+});
+
+// Get system settings (admin only)
+router.get('/settings', protect, adminAuth, async (req, res) => {
+  try {
+    const settings = {
+      environment: process.env.NODE_ENV,
+      apiVersion: '1.0.0',
+      features: {
+        panKyc: true,
+        aadhaarPan: true,
+        auditLogging: true,
+        fileUpload: true,
+        emailNotifications: !!process.env.EMAIL_SERVICE,
+        twoFactorAuth: true
+      },
+      limits: {
+        maxFileSize: '10MB',
+        maxRecordsPerBatch: 1000,
+        apiRateLimit: '100 requests per minute'
+      }
+    };
+
+    res.json({
+      success: true,
+      data: settings
+    });
+  } catch (error) {
+    logger.error('Error fetching system settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch system settings'
+    });
+  }
 });
 
 module.exports = router;

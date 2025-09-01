@@ -71,9 +71,8 @@ const ModuleRoute: React.FC<{
 // Main App Component
 const AppContent: React.FC = () => {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -160,18 +159,19 @@ const AppContent: React.FC = () => {
           }}
         />
       </div>
-    </Router>
   );
 };
 
 // Root App Component with Providers
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
+    </Router>
   );
 };
 

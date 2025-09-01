@@ -108,6 +108,21 @@ AadhaarPanSchema.virtual('processingDuration').get(function() {
   return null;
 });
 
+// Pre-validate middleware to ensure required fields are present
+AadhaarPanSchema.pre('validate', function(next) {
+  // Ensure required fields are present before validation
+  if (!this.name || this.name.trim() === '') {
+    return next(new Error('name: Path `name` is required.'));
+  }
+  if (!this.panNumber || this.panNumber.trim() === '') {
+    return next(new Error('panNumber: Path `panNumber` is required.'));
+  }
+  if (!this.aadhaarNumber || this.aadhaarNumber.trim() === '') {
+    return next(new Error('aadhaarNumber: Path `aadhaarNumber` is required.'));
+  }
+  next();
+});
+
 // Pre-save middleware to encrypt sensitive data
 AadhaarPanSchema.pre('save', function(next) {
   const encryptionKey = process.env.ENCRYPTION_KEY;
@@ -115,24 +130,40 @@ AadhaarPanSchema.pre('save', function(next) {
     return next(new Error('Encryption key not configured'));
   }
 
-  // Encrypt sensitive fields
-  const fieldsToEncrypt = ['panNumber', 'aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'linkingDetails'];
-  
-  fieldsToEncrypt.forEach(field => {
-    if (this[field] && typeof this[field] === 'string') {
-      const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-      let encrypted = cipher.update(this[field], 'utf8', 'hex');
-      encrypted += cipher.final('hex');
-      this[field] = encrypted;
-    }
-  });
+  // Only encrypt if this is a new document or if fields have been modified
+  if (this.isNew || this.isModified()) {
+    // Encrypt sensitive fields
+    const fieldsToEncrypt = ['panNumber', 'aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'linkingDetails'];
+    
+    fieldsToEncrypt.forEach(field => {
+      if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
+        // Skip encryption if already encrypted (hex string)
+        if (!/^[0-9a-fA-F]+$/.test(this[field])) {
+          try {
+            const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+            let encrypted = cipher.update(this[field], 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            this[field] = encrypted;
+          } catch (error) {
+            console.error(`Error encrypting field ${field}:`, error);
+            // Don't fail the save if encryption fails
+          }
+        }
+      }
+    });
 
-  // Handle nested objects like linkingDetails
-  if (this.linkingDetails && typeof this.linkingDetails === 'object') {
-    const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-    let encrypted = cipher.update(JSON.stringify(this.linkingDetails), 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    this.linkingDetails = encrypted;
+    // Handle nested objects like linkingDetails
+    if (this.linkingDetails && typeof this.linkingDetails === 'object') {
+      try {
+        const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+        let encrypted = cipher.update(JSON.stringify(this.linkingDetails), 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        this.linkingDetails = encrypted;
+      } catch (error) {
+        console.error('Error encrypting linkingDetails:', error);
+        // Don't fail the save if encryption fails
+      }
+    }
   }
 
   next();

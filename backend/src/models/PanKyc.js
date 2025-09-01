@@ -26,10 +26,6 @@ const PanKycSchema = new mongoose.Schema({
     type: String,
     encrypted: true,
   },
-  fatherName: {
-    type: String,
-    encrypted: true,
-  },
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected', 'error'],
@@ -109,6 +105,18 @@ PanKycSchema.virtual('processingDuration').get(function() {
   return null;
 });
 
+// Pre-validate middleware to ensure required fields are present
+PanKycSchema.pre('validate', function(next) {
+  // Ensure required fields are present before validation
+  if (!this.name || this.name.trim() === '') {
+    return next(new Error('name: Path `name` is required.'));
+  }
+  if (!this.panNumber || this.panNumber.trim() === '') {
+    return next(new Error('panNumber: Path `panNumber` is required.'));
+  }
+  next();
+});
+
 // Pre-save middleware to encrypt sensitive data
 PanKycSchema.pre('save', function(next) {
   const encryptionKey = process.env.ENCRYPTION_KEY;
@@ -116,24 +124,40 @@ PanKycSchema.pre('save', function(next) {
     return next(new Error('Encryption key not configured'));
   }
 
-  // Encrypt sensitive fields
-  const fieldsToEncrypt = ['panNumber', 'name', 'dateOfBirth', 'fatherName', 'verificationDetails'];
-  
-  fieldsToEncrypt.forEach(field => {
-    if (this[field] && typeof this[field] === 'string') {
-      const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-      let encrypted = cipher.update(this[field], 'utf8', 'hex');
-      encrypted += cipher.final('hex');
-      this[field] = encrypted;
-    }
-  });
+  // Only encrypt if this is a new document or if fields have been modified
+  if (this.isNew || this.isModified()) {
+    // Encrypt sensitive fields
+    const fieldsToEncrypt = ['panNumber', 'name', 'dateOfBirth', 'fatherName', 'verificationDetails'];
+    
+    fieldsToEncrypt.forEach(field => {
+      if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
+        // Skip encryption if already encrypted (hex string)
+        if (!/^[0-9a-fA-F]+$/.test(this[field])) {
+          try {
+            const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+            let encrypted = cipher.update(this[field], 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            this[field] = encrypted;
+          } catch (error) {
+            console.error(`Error encrypting field ${field}:`, error);
+            // Don't fail the save if encryption fails
+          }
+        }
+      }
+    });
 
-  // Handle nested objects like verificationDetails
-  if (this.verificationDetails && typeof this.verificationDetails === 'object') {
-    const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
-    let encrypted = cipher.update(JSON.stringify(this.verificationDetails), 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    this.verificationDetails = encrypted;
+    // Handle nested objects like verificationDetails
+    if (this.verificationDetails && typeof this.verificationDetails === 'object') {
+      try {
+        const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+        let encrypted = cipher.update(JSON.stringify(this.verificationDetails), 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+        this.verificationDetails = encrypted;
+      } catch (error) {
+        console.error('Error encrypting verificationDetails:', error);
+        // Don't fail the save if encryption fails
+      }
+    }
   }
 
   next();
