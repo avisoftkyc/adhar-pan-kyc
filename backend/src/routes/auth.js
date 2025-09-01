@@ -158,9 +158,18 @@ router.post('/logout', protect, async (req, res) => {
 router.get('/me', protect, async (req, res) => {
   try {
     const user = await authController.getCurrentUser(req.user._id);
+    
+    // Add cache control headers to prevent caching
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    
     res.json({
       success: true,
       data: user,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
     res.status(400).json({

@@ -133,12 +133,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           console.log('🔍 Attempting to validate token...');
           dispatch({ type: 'AUTH_START' });
-          const response = await api.get('/auth/me');
-          console.log('✅ Token validation successful:', response.data);
-          dispatch({
-            type: 'AUTH_SUCCESS',
-            payload: { user: response.data.data, token },
+          const response = await api.get('/auth/me', {
+            headers: {
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            }
           });
+          console.log('✅ Token validation successful:', response.data);
+          
+          // Check if response has data
+          if (response.data && response.data.success && response.data.data) {
+            dispatch({
+              type: 'AUTH_SUCCESS',
+              payload: { user: response.data.data, token },
+            });
+          } else {
+            console.error('❌ Invalid response format:', response.data);
+            throw new Error('Invalid response format');
+          }
         } catch (error) {
           console.error('❌ Token validation failed:', error);
           localStorage.removeItem('token');
