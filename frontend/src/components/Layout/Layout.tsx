@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const filteredNavigation = navigation.filter(item => {
     if (item.module) {
-      return user?.role === 'admin' || user?.moduleAccess?.includes(item.module);
+      return user?.moduleAccess?.includes(item.module);
     }
     return true;
   });
