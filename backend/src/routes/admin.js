@@ -505,4 +505,107 @@ router.get('/settings', protect, adminAuth, async (req, res) => {
   }
 });
 
+// Update user module access (admin only)
+router.patch('/users/:id/module-access', protect, adminAuth, async (req, res) => {
+  try {
+    const { moduleAccess } = req.body;
+    
+    if (!moduleAccess || !Array.isArray(moduleAccess)) {
+      return res.status(400).json({
+        success: false,
+        message: 'moduleAccess must be an array'
+      });
+    }
+
+    // Validate module names
+    const validModules = ['pan-kyc', 'aadhaar-pan'];
+    const invalidModules = moduleAccess.filter(module => !validModules.includes(module));
+    
+    if (invalidModules.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid modules: ${invalidModules.join(', ')}. Valid modules are: ${validModules.join(', ')}`
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Store old module access for audit
+    const oldModuleAccess = user.moduleAccess;
+
+    // Update module access
+    user.moduleAccess = moduleAccess;
+    await user.save();
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'module_access_updated',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        targetUserEmail: user.email,
+        oldModuleAccess,
+        newModuleAccess: moduleAccess
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({
+      success: true,
+      message: 'User module access updated successfully',
+      data: {
+        id: user._id,
+        email: user.email,
+        moduleAccess: user.moduleAccess
+      }
+    });
+  } catch (error) {
+    logger.error('Error updating user module access:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user module access'
+    });
+  }
+});
+
+// Get available modules (admin only)
+router.get('/modules', protect, adminAuth, async (req, res) => {
+  try {
+    const modules = [
+      {
+        id: 'pan-kyc',
+        name: 'PAN KYC',
+        description: 'PAN verification and KYC processing',
+        features: ['File upload', 'Batch processing', 'Verification', 'Reports']
+      },
+      {
+        id: 'aadhaar-pan',
+        name: 'Aadhaar-PAN Linking',
+        description: 'Aadhaar and PAN number linking verification',
+        features: ['File upload', 'Single verification', 'Batch processing', 'Reports']
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: modules
+    });
+  } catch (error) {
+    logger.error('Error fetching modules:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch modules'
+    });
+  }
+});
+
 module.exports = router;

@@ -67,6 +67,8 @@ const Admin: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [showModuleAccess, setShowModuleAccess] = useState(false);
+  const [selectedUserForModules, setSelectedUserForModules] = useState<User | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -186,6 +188,24 @@ const Admin: React.FC = () => {
       setError(error.response?.data?.message || 'Failed to delete user');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleManageModuleAccess = (user: User) => {
+    setSelectedUserForModules(user);
+    setShowModuleAccess(true);
+  };
+
+  const handleUpdateModuleAccess = async (userId: string, moduleAccess: string[]) => {
+    try {
+      await api.patch(`/admin/users/${userId}/module-access`, { moduleAccess });
+      setSuccess('User module access updated successfully');
+      setShowModuleAccess(false);
+      setSelectedUserForModules(null);
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Error updating module access:', error);
+      setError(error.response?.data?.message || 'Failed to update module access');
     }
   };
 
@@ -409,18 +429,42 @@ const Admin: React.FC = () => {
                               </span>
                             </div>
                           </div>
+                          <div className="flex items-center mt-2">
+                            <span className="text-xs text-gray-500 mr-2">Modules:</span>
+                            {user.moduleAccess.length > 0 ? (
+                              user.moduleAccess.map((module) => (
+                                <span
+                                  key={module}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
+                                >
+                                  {module === 'pan-kyc' ? 'PAN KYC' : 'Aadhaar-PAN'}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs text-gray-400">No modules assigned</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
+                          onClick={() => handleManageModuleAccess(user)}
+                          className="text-gray-400 hover:text-blue-600"
+                          title="Manage Module Access"
+                        >
+                          <CogIcon className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleEditUser(user)}
                           className="text-gray-400 hover:text-gray-600"
+                          title="Edit User"
                         >
                           <PencilIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user._id)}
                           className="text-gray-400 hover:text-red-600"
+                          title="Delete User"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>
@@ -628,6 +672,81 @@ const Admin: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Module Access Management Modal */}
+      {showModuleAccess && selectedUserForModules && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Manage Module Access for {selectedUserForModules.name}
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Module Access</label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserForModules.moduleAccess.includes('pan-kyc')}
+                        onChange={(e) => {
+                          const newModuleAccess = e.target.checked
+                            ? [...selectedUserForModules.moduleAccess, 'pan-kyc']
+                            : selectedUserForModules.moduleAccess.filter(m => m !== 'pan-kyc');
+                          setSelectedUserForModules({
+                            ...selectedUserForModules,
+                            moduleAccess: newModuleAccess
+                          });
+                        }}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">PAN KYC</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserForModules.moduleAccess.includes('aadhaar-pan')}
+                        onChange={(e) => {
+                          const newModuleAccess = e.target.checked
+                            ? [...selectedUserForModules.moduleAccess, 'aadhaar-pan']
+                            : selectedUserForModules.moduleAccess.filter(m => m !== 'aadhaar-pan');
+                          setSelectedUserForModules({
+                            ...selectedUserForModules,
+                            moduleAccess: newModuleAccess
+                          });
+                        }}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Aadhaar-PAN Linking</span>
+                    </label>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowModuleAccess(false);
+                      setSelectedUserForModules(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleUpdateModuleAccess(selectedUserForModules._id, selectedUserForModules.moduleAccess)}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
+                  >
+                    Update Access
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
