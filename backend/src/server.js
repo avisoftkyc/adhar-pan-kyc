@@ -31,10 +31,12 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "http://localhost:3002"],
       scriptSrc: ["'self'"],
     },
   } : false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
 }));
 
 // CORS configuration
@@ -73,6 +75,42 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Logo serving endpoint (bypasses helmet restrictions)
+app.get('/api/logos/:userId', (req, res) => {
+  const userId = req.params.userId;
+  const logoPath = path.join(__dirname, '../uploads/logos');
+  
+  // Set CORS headers for image serving
+  res.set({
+    'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
+      ? 'https://yourdomain.com' 
+      : 'http://localhost:3000',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Cross-Origin-Embedder-Policy': 'unsafe-none'
+  });
+  
+  // Find the logo file for this user
+  const fs = require('fs');
+  fs.readdir(logoPath, (err, files) => {
+    if (err) {
+      return res.status(404).json({ error: 'Logo not found' });
+    }
+    
+    // Find the most recent logo file for this user
+    const logoFiles = files.filter(file => file.startsWith('logo-'));
+    if (logoFiles.length === 0) {
+      return res.status(404).json({ error: 'Logo not found' });
+    }
+    
+    // Get the most recent logo file
+    const latestLogo = logoFiles.sort().pop();
+    res.sendFile(path.join(logoPath, latestLogo));
+  });
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {

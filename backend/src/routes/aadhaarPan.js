@@ -82,27 +82,13 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: async (req, file, cb) => {
-    // Add index to prevent overwrites and ensure uniqueness
+    // Use timestamp to ensure each upload creates a unique file
     const originalName = path.parse(file.originalname).name;
     const extension = path.extname(file.originalname);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
     
-    // Get count of existing files with same base name for this user
-    const baseFileName = originalName.replace(/[^a-zA-Z0-9]/g, '_');
-    const uploadDir = path.join(__dirname, '../../uploads/aadhaar-pan');
-    const fs = require('fs');
-    
-    try {
-      const files = fs.readdirSync(uploadDir);
-      const existingFiles = files.filter(f => 
-        f.startsWith(baseFileName) && f.endsWith(extension)
-      );
-      
-      const nextIndex = existingFiles.length + 1;
-      cb(null, `${originalName}_${nextIndex}${extension}`);
-    } catch (error) {
-      // If directory doesn't exist or error, start with index 1
-      cb(null, `${originalName}_1${extension}`);
-    }
+    cb(null, `${originalName}_${timestamp}_${randomSuffix}${extension}`);
   }
 });
 
@@ -285,18 +271,46 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       });
     }
 
-    // Generate unique batch ID from original filename with index
+    // Check if this is a PAN KYC file (contains fatherName or dateOfBirth columns)
+    // Only reject if it's clearly a PAN KYC file (has fatherName AND dateOfBirth but missing aadhaarNumber)
+    const panKycIndicators = ['fatherName', 'dateOfBirth', 'DOB', 'dob', 'Father Name', 'father_name'];
+    const foundPanKycColumns = Object.keys(firstRow).filter(col => 
+      panKycIndicators.some(indicator => 
+        col.toLowerCase().includes(indicator.toLowerCase())
+      )
+    );
+    
+    // Only reject if it's clearly a PAN KYC file (has fatherName AND dateOfBirth but missing aadhaarNumber)
+    const hasFatherName = foundPanKycColumns.some(col => 
+      col.toLowerCase().includes('father')
+    );
+    const hasDateOfBirth = foundPanKycColumns.some(col => 
+      col.toLowerCase().includes('dob') || col.toLowerCase().includes('dateofbirth')
+    );
+    const hasAadhaarNumber = Object.keys(firstRow).some(col => 
+      columnMapping.aadhaarNumber.some(indicator => 
+        col.toLowerCase().includes(indicator.toLowerCase())
+      )
+    );
+    
+    // Only reject if it has both fatherName and dateOfBirth but no aadhaarNumber
+    if (hasFatherName && hasDateOfBirth && !hasAadhaarNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'This appears to be a PAN KYC file. Please upload it to the PAN KYC module instead. Aadhaar-PAN linking requires: aadhaarNumber, panNumber, and name columns.',
+        debug: {
+          foundPanKycColumns: foundPanKycColumns,
+          foundColumns: Object.keys(firstRow),
+          hasAadhaarNumber: hasAadhaarNumber
+        }
+      });
+    }
+
+    // Generate unique batch ID with timestamp to ensure each upload is a new entry
     const originalName = path.parse(req.file.originalname).name;
-    
-    // Get count of existing batches with same base name for this user
-    const baseBatchName = originalName.replace(/[^a-zA-Z0-9]/g, '_');
-    const existingBatches = await AadhaarPan.distinct('batchId', {
-      userId: req.user.id,
-      batchId: new RegExp(`^${baseBatchName}_\\d+$`)
-    });
-    
-    const nextIndex = existingBatches.length + 1;
-    const batchId = `${baseBatchName}_${nextIndex}`; // Add index for uniqueness
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const batchId = `${originalName}_${timestamp}_${randomSuffix}`;
     const records = [];
 
     // Process each row
@@ -322,6 +336,7 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
         name: nameValue,
         dateOfBirth: row.dateOfBirth || row.DOB || row['Date of Birth']?.toString().trim(),
         gender: row.gender || row.Gender?.toString().trim(),
+        fatherName: row.fatherName || row['Father Name'] || row.father_name || '',
         fileUpload: {
           originalName: req.file.originalname,
           fileName: req.file.filename,
@@ -519,6 +534,54 @@ router.get('/stats', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch statistics'
+    });
+  }
+});
+
+// Delete batch and all its records
+router.delete('/batch/:batchId', protect, async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    
+    // Find all records for this batch that belong to the user
+    const records = await AadhaarPan.find({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      batchId: batchId
+    });
+
+    if (records.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Batch not found or access denied'
+      });
+    }
+
+    // Delete all records for this batch
+    const deleteResult = await AadhaarPan.deleteMany({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      batchId: batchId
+    });
+
+    // Log deletion event
+    await logAadhaarPanEvent('batch_deleted', req.user.id, {
+      batchId,
+      recordCount: records.length
+    }, req);
+
+    res.json({
+      success: true,
+      message: `Successfully deleted batch with ${deleteResult.deletedCount} records`,
+      data: {
+        batchId,
+        deletedRecords: deleteResult.deletedCount
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error deleting batch:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete batch'
     });
   }
 });

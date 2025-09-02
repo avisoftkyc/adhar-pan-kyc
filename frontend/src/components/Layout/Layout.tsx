@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -21,9 +21,30 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUserData } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+
+  // Function to refresh user data and force re-render
+  const handleRefreshUserData = async () => {
+    if (refreshUserData) {
+      await refreshUserData();
+    }
+  };
+
+  // Memoize the logo URL to avoid unnecessary re-renders
+  const logoUrl = useMemo(() => {
+    if (user?.branding?.logo && user?._id) {
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3002/api';
+      const url = `${baseUrl.replace('/api', '')}/api/admin/users/${user._id}/logo`;
+      // Add cache busting parameter based on logo filename to ensure fresh image loads
+      const cacheBuster = user.branding.logo.filename ? `?v=${user.branding.logo.filename}` : '';
+      return `${url}${cacheBuster}`;
+    }
+    return null;
+  }, [user?.branding?.logo, user?._id]);
+
+
 
   const navigation = [
     {
@@ -76,11 +97,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center">
-              {user?.branding?.logo ? (
+              {logoUrl ? (
                 <img
-                  src={`/api/admin/users/${user._id}/logo`}
+                  src={logoUrl}
                   alt="Company Logo"
                   className="h-8 w-8 object-contain rounded-lg"
+                  onError={(e) => {
+                    console.error('Failed to load logo:', logoUrl);
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -126,11 +152,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white shadow-xl">
           <div className="flex h-16 items-center px-4">
-            {user?.branding?.logo ? (
+            {logoUrl ? (
               <img
-                src={`/api/admin/users/${user._id}/logo`}
+                src={logoUrl}
                 alt="Company Logo"
                 className="h-8 w-8 object-contain rounded-lg"
+                onError={(e) => {
+                  console.error('Failed to load logo:', logoUrl);
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
               />
             ) : (
               <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
@@ -214,6 +245,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                 </div>
               </div>
+
+              {/* Refresh button (temporary for debugging) */}
+              <button
+                onClick={handleRefreshUserData}
+                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Refresh
+              </button>
 
               {/* Logout button */}
               <button

@@ -66,16 +66,29 @@ const AadhaarPan: React.FC = () => {
   const documentsPerPage = 5;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Enhanced features from PAN KYC
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
   const [verifying, setVerifying] = useState(false);
+  const [verifyingRecords, setVerifyingRecords] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [currentTablePage, setCurrentTablePage] = useState(1);
   const recordsPerPage = 10;
   
   // Tab UI state
   const [activeTab, setActiveTab] = useState<'upload' | 'single'>('upload');
+  
+  // Reset file input when switching tabs
+  const handleTabChange = (tab: 'upload' | 'single') => {
+    setActiveTab(tab);
+    if (tab === 'upload') {
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
   
   // Single verification form state
   const [singleVerificationForm, setSingleVerificationForm] = useState({
@@ -186,6 +199,11 @@ const AadhaarPan: React.FC = () => {
       setSelectedFile(null);
       setUploadProgress(0);
       
+      // Reset the file input element
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
       // Store the newly uploaded batch ID
       if (response.data.data && response.data.data.batchId) {
         setNewlyUploadedBatchId(response.data.data.batchId);
@@ -239,12 +257,11 @@ const AadhaarPan: React.FC = () => {
 
   const downloadBatchData = (batchId: string, records: any[]) => {
     const csvContent = [
-      ['Aadhaar Number', 'PAN Number', 'Name', 'Status', 'Processed At'],
+      ['Aadhaar Number', 'PAN Number', 'Name', 'Processed At'],
       ...records.map(record => [
         record.aadhaarNumber || '',
         record.panNumber || '',
         record.name || '',
-        record.status || '',
         record.processedAt ? new Date(record.processedAt).toLocaleString() : ''
       ])
     ].map(row => row.join(',')).join('\n');
@@ -292,6 +309,7 @@ const AadhaarPan: React.FC = () => {
 
     try {
       setVerifying(true);
+      setVerifyingRecords(new Set(Array.from(selectedRecords)));
       const response = await api.post('/aadhaar-pan/verify', {
         recordIds: Array.from(selectedRecords)
       });
@@ -314,12 +332,13 @@ const AadhaarPan: React.FC = () => {
       });
     } finally {
       setVerifying(false);
+      setVerifyingRecords(new Set());
     }
   };
 
   const handleVerifySingle = async (recordId: string) => {
     try {
-      setVerifying(true);
+      setVerifyingRecords(new Set([recordId]));
       const response = await api.post('/aadhaar-pan/verify', {
         recordIds: [recordId]
       });
@@ -340,7 +359,7 @@ const AadhaarPan: React.FC = () => {
         message: error.response?.data?.message || 'Failed to verify record'
       });
     } finally {
-      setVerifying(false);
+      setVerifyingRecords(new Set());
     }
   };
 
@@ -535,7 +554,7 @@ const AadhaarPan: React.FC = () => {
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
-            onClick={() => setActiveTab('upload')}
+            onClick={() => handleTabChange('upload')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'upload'
                 ? 'border-green-500 text-green-600'
@@ -548,7 +567,7 @@ const AadhaarPan: React.FC = () => {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('single')}
+            onClick={() => handleTabChange('single')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'single'
                 ? 'border-green-500 text-green-600'
@@ -576,6 +595,7 @@ const AadhaarPan: React.FC = () => {
                   Select Excel File
                 </label>
                 <input
+                  ref={fileInputRef}
                   id="file-upload"
                   type="file"
                   accept=".xlsx,.xls"
@@ -588,9 +608,22 @@ const AadhaarPan: React.FC = () => {
               </div>
 
               {selectedFile && (
-                <div className="flex items-center space-x-2">
-                  <DocumentTextIcon className="h-5 w-5 text-green-500" />
-                  <span className="text-sm text-gray-700">{selectedFile.name}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <DocumentTextIcon className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-gray-700">{selectedFile.name}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Clear
+                  </button>
                 </div>
               )}
 
@@ -834,23 +867,22 @@ const AadhaarPan: React.FC = () => {
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {paginatedRecords.map((record) => (
-                      <tr key={record._id} className="hover:bg-gray-50">
+                                              <tr key={record._id} className={`hover:bg-gray-50 ${record.status === 'linked' ? 'opacity-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <input
-                            type="checkbox"
-                            checked={selectedRecords.has(record._id)}
-                            onChange={() => handleRecordSelection(record._id)}
-                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                          />
+                          {(record.status === 'pending' || record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error') && (
+                            <input
+                              type="checkbox"
+                              checked={selectedRecords.has(record._id)}
+                              onChange={() => handleRecordSelection(record._id)}
+                              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                            />
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {record.aadhaarNumber}
@@ -861,22 +893,40 @@ const AadhaarPan: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {record.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {getStatusIcon(record.status)}
-                            <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                              {record.status}
-                            </span>
-                          </div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <button
-                            onClick={() => handleVerifySingle(record._id)}
-                            disabled={verifying || record.status !== 'pending'}
-                            className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Verify
-                          </button>
+                          {record.status === 'pending' ? (
+                            <button
+                              onClick={() => handleVerifySingle(record._id)}
+                              disabled={verifyingRecords.has(record._id)}
+                              className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {verifyingRecords.has(record._id) ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600 mr-1"></div>
+                                  Verifying...
+                                </>
+                              ) : (
+                                'Verify'
+                              )}
+                            </button>
+                          ) : record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error' ? (
+                            <button
+                              onClick={() => handleVerifySingle(record._id)}
+                              disabled={verifyingRecords.has(record._id)}
+                              className="text-orange-600 hover:text-orange-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {verifyingRecords.has(record._id) ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600 mr-1"></div>
+                                  Re-verifying...
+                                </>
+                              ) : (
+                                'Re-verify'
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-green-600">Verified</span>
+                          )}
                         </td>
                       </tr>
                     ))}

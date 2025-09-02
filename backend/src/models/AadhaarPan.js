@@ -27,6 +27,10 @@ const AadhaarPanSchema = new mongoose.Schema({
     required: true,
     encrypted: true,
   },
+  fatherName: {
+    type: String,
+    encrypted: true,
+  },
   dateOfBirth: {
     type: String,
     encrypted: true,

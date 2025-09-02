@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
 import { 
   DocumentTextIcon, 
@@ -8,7 +9,8 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 interface Batch {
@@ -47,20 +49,21 @@ interface Record {
 
 const PanKyc: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<BatchDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
   const [verifying, setVerifying] = useState(false);
+  const [verifyingRecords, setVerifyingRecords] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const documentsPerPage = 5;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Table pagination and search
   const [tableCurrentPage, setTableCurrentPage] = useState(1);
@@ -70,6 +73,17 @@ const PanKyc: React.FC = () => {
 
   // Tab state
   const [activeTab, setActiveTab] = useState<'upload' | 'single'>('upload');
+  
+  // Reset file input when switching tabs
+  const handleTabChange = (tab: 'upload' | 'single') => {
+    setActiveTab(tab);
+    if (tab === 'upload') {
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   // Single KYC form state
   const [singleKycForm, setSingleKycForm] = useState({
@@ -89,16 +103,7 @@ const PanKyc: React.FC = () => {
     setCurrentPage(1);
   }, [batches.length]);
 
-  // Clear success/error messages after 5 seconds
-  useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess(null);
-        setError(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, error]);
+
 
   // Filter and paginate records when selectedBatch or search changes
   useEffect(() => {
@@ -122,10 +127,13 @@ const PanKyc: React.FC = () => {
       setLoading(true);
       const response = await api.get('/pan-kyc/batches');
       setBatches(response.data.data);
-    } catch (error) {
-      console.error('Error fetching batches:', error);
-      setError('Failed to fetch batches');
-    } finally {
+          } catch (error) {
+        console.error('Error fetching batches:', error);
+        showToast({
+          type: 'error',
+          message: 'Failed to fetch batches'
+        });
+      } finally {
       setLoading(false);
     }
   };
@@ -151,10 +159,13 @@ const PanKyc: React.FC = () => {
           tableElement.scrollTop = 0;
         }
       }, 100);
-    } catch (error) {
-      console.error('Error fetching batch details:', error);
-      setError('Failed to fetch batch details');
-    } finally {
+          } catch (error) {
+        console.error('Error fetching batch details:', error);
+        showToast({
+          type: 'error',
+          message: 'Failed to fetch batch details'
+        });
+      } finally {
       setLoading(false);
     }
   };
@@ -172,31 +183,37 @@ const PanKyc: React.FC = () => {
       console.log('File extension:', fileExtension);
       
       if (!allowedTypes.includes(fileExtension)) {
-        setError('Please select an Excel file (.xlsx or .xls)');
+        showToast({
+          type: 'error',
+          message: 'Please select an Excel file (.xlsx or .xls)'
+        });
         return;
       }
       
       if (file.size > 10 * 1024 * 1024) { // 10MB
-        setError('File size must be less than 10MB');
+        showToast({
+          type: 'error',
+          message: 'File size must be less than 10MB'
+        });
         return;
       }
       
       setSelectedFile(file);
-      setError(null);
       console.log('File set successfully:', file);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError('Please select a file to upload');
+      showToast({
+        type: 'error',
+        message: 'Please select a file to upload'
+      });
       return;
     }
 
     try {
       setUploading(true);
-      setError(null);
-      setSuccess(null);
 
       const formData = new FormData();
       console.log('Selected file before FormData:', selectedFile);
@@ -220,9 +237,17 @@ const PanKyc: React.FC = () => {
         },
       });
 
-      setSuccess(`Successfully uploaded ${response.data.data.recordCount} records`);
+      showToast({
+        type: 'success',
+        message: `Successfully uploaded ${response.data.data.recordCount} records`
+      });
       setSelectedFile(null);
       setUploadProgress(0);
+      
+      // Reset the file input element
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       
       // Fetch updated batches list
       await fetchBatches();
@@ -255,7 +280,10 @@ const PanKyc: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error uploading file:', error);
-      setError(error.response?.data?.message || 'Failed to upload file');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to upload file'
+      });
     } finally {
       setUploading(false);
     }
@@ -277,7 +305,10 @@ const PanKyc: React.FC = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading report:', error);
-      setError('Failed to download report');
+      showToast({
+        type: 'error',
+        message: 'Failed to download report'
+      });
     }
   };
 
@@ -303,17 +334,24 @@ const PanKyc: React.FC = () => {
 
   const handleVerifySelected = async () => {
     if (selectedRecords.length === 0) {
-      setError('Please select records to verify');
+      showToast({
+        type: 'error',
+        message: 'Please select records to verify'
+      });
       return;
     }
 
     try {
       setVerifying(true);
+      setVerifyingRecords(new Set(selectedRecords));
       const response = await api.post('/pan-kyc/verify', {
         recordIds: selectedRecords
       });
       
-      setSuccess(`Successfully verified ${selectedRecords.length} records`);
+      showToast({
+        type: 'success',
+        message: `Successfully verified ${selectedRecords.length} records`
+      });
       setSelectedRecords([]);
       
       // Refresh batch details
@@ -325,9 +363,13 @@ const PanKyc: React.FC = () => {
       await fetchBatches();
     } catch (error) {
       console.error('Error verifying records:', error);
-      setError('Failed to verify selected records');
+      showToast({
+        type: 'error',
+        message: 'Failed to verify selected records'
+      });
     } finally {
       setVerifying(false);
+      setVerifyingRecords(new Set());
     }
   };
 
@@ -347,12 +389,15 @@ const PanKyc: React.FC = () => {
     if (!confirmed) return;
 
     try {
-      setVerifying(true);
+      setVerifyingRecords(new Set([recordId]));
       const response = await api.post('/pan-kyc/verify', {
         recordIds: [recordId]
       });
       
-      setSuccess('Record verified successfully');
+      showToast({
+        type: 'success',
+        message: 'Record verified successfully'
+      });
       
       // Refresh batch details
       if (selectedBatch) {
@@ -363,9 +408,12 @@ const PanKyc: React.FC = () => {
       await fetchBatches();
     } catch (error) {
       console.error('Error verifying record:', error);
-      setError('Failed to verify record');
+      showToast({
+        type: 'error',
+        message: 'Failed to verify record'
+      });
     } finally {
-      setVerifying(false);
+      setVerifyingRecords(new Set());
     }
   };
 
@@ -378,7 +426,10 @@ const PanKyc: React.FC = () => {
       setLoading(true);
       const response = await api.delete(`/pan-kyc/batch/${batchId}`);
       
-      setSuccess(`Successfully deleted batch with ${response.data.data.deletedRecords} records`);
+      showToast({
+        type: 'success',
+        message: `Successfully deleted batch with ${response.data.data.deletedRecords} records`
+      });
       
       // Clear selected batch if it was the one deleted
       if (selectedBatch && selectedBatch.batchId === batchId) {
@@ -390,7 +441,10 @@ const PanKyc: React.FC = () => {
       await fetchBatches();
     } catch (error) {
       console.error('Error deleting batch:', error);
-      setError('Failed to delete batch');
+      showToast({
+        type: 'error',
+        message: 'Failed to delete batch'
+      });
     } finally {
       setLoading(false);
     }
@@ -398,20 +452,22 @@ const PanKyc: React.FC = () => {
 
   const handleDownloadTableData = () => {
     if (!selectedBatch || filteredRecords.length === 0) {
-      setError('No data to download');
+      showToast({
+        type: 'error',
+        message: 'No data to download'
+      });
       return;
     }
 
     try {
       // Create CSV content
-      const headers = ['PAN Number', 'Name', 'Date of Birth', 'Status', 'Processed At'];
+      const headers = ['PAN Number', 'Name', 'Date of Birth', 'Processed At'];
       const csvContent = [
         headers.join(','),
         ...filteredRecords.map(record => [
           record.panNumber || '',
           record.name || '',
           record.dateOfBirth || '',
-          record.status || '',
           record.processedAt ? new Date(record.processedAt).toLocaleString() : ''
         ].join(','))
       ].join('\n');
@@ -427,10 +483,16 @@ const PanKyc: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      setSuccess('Table data downloaded successfully');
+      showToast({
+        type: 'success',
+        message: 'Table data downloaded successfully'
+      });
     } catch (error) {
       console.error('Error downloading table data:', error);
-      setError('Failed to download table data');
+      showToast({
+        type: 'error',
+        message: 'Failed to download table data'
+      });
     }
   };
 
@@ -444,22 +506,34 @@ const PanKyc: React.FC = () => {
 
   const validateSingleKycForm = () => {
     if (!singleKycForm.panNumber.trim()) {
-      setError('PAN Number is required');
+      showToast({
+        type: 'error',
+        message: 'PAN Number is required'
+      });
       return false;
     }
     if (!singleKycForm.name.trim()) {
-      setError('Name is required');
+      showToast({
+        type: 'error',
+        message: 'Name is required'
+      });
       return false;
     }
     if (!singleKycForm.dateOfBirth.trim()) {
-      setError('Date of Birth is required');
+      showToast({
+        type: 'error',
+        message: 'Date of Birth is required'
+      });
       return false;
     }
     
     // Validate PAN format (basic validation)
     const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
     if (!panRegex.test(singleKycForm.panNumber.toUpperCase())) {
-      setError('Please enter a valid PAN number (e.g., ABCDE1234F)');
+      showToast({
+        type: 'error',
+        message: 'Please enter a valid PAN number (e.g., ABCDE1234F)'
+      });
       return false;
     }
 
@@ -475,8 +549,6 @@ const PanKyc: React.FC = () => {
 
     try {
       setSingleKycVerifying(true);
-      setError(null);
-      setSuccess(null);
       setSingleKycResult(null);
 
       // Create a temporary record for verification
@@ -490,7 +562,10 @@ const PanKyc: React.FC = () => {
       const response = await api.post('/pan-kyc/verify-single', tempRecord);
       
       setSingleKycResult(response.data.data);
-      setSuccess('KYC verification completed successfully');
+      showToast({
+        type: 'success',
+        message: 'KYC verification completed successfully'
+      });
       
       // Reset form
       setSingleKycForm({
@@ -500,7 +575,10 @@ const PanKyc: React.FC = () => {
       });
     } catch (error: any) {
       console.error('Error verifying single KYC:', error);
-      setError(error.response?.data?.message || 'Failed to verify KYC');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to verify KYC'
+      });
     } finally {
       setSingleKycVerifying(false);
     }
@@ -513,8 +591,6 @@ const PanKyc: React.FC = () => {
       dateOfBirth: ''
     });
     setSingleKycResult(null);
-    setError(null);
-    setSuccess(null);
   };
 
   const getStatusIcon = (status: string) => {
@@ -565,34 +641,13 @@ const PanKyc: React.FC = () => {
         </div>
       </div>
 
-      {/* Error and Success Messages */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <XCircleIcon className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex">
-            <CheckCircleIcon className="h-5 w-5 text-green-400" />
-            <div className="ml-3">
-              <p className="text-sm text-green-800">{success}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
-            onClick={() => setActiveTab('upload')}
+            onClick={() => handleTabChange('upload')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'upload'
                 ? 'border-blue-500 text-blue-600'
@@ -605,7 +660,7 @@ const PanKyc: React.FC = () => {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab('single')}
+            onClick={() => handleTabChange('single')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'single'
                 ? 'border-blue-500 text-blue-600'
@@ -633,6 +688,7 @@ const PanKyc: React.FC = () => {
                   Select Excel File (.xlsx, .xls)
                 </label>
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".xlsx,.xls"
                   onChange={handleFileSelect}
@@ -645,14 +701,27 @@ const PanKyc: React.FC = () => {
 
               {selectedFile && (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <DocumentTextIcon className="h-5 w-5 text-blue-500" />
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-blue-900">{selectedFile.name}</p>
-                      <p className="text-sm text-blue-700">
-                        {(selectedFile.size / 1024).toFixed(2)} KB
-                      </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-blue-900">{selectedFile.name}</p>
+                        <p className="text-sm text-blue-700">
+                          {(selectedFile.size / 1024).toFixed(2)} KB
+                        </p>
+                      </div>
                     </div>
+                    <button
+                      onClick={() => {
+                        setSelectedFile(null);
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = '';
+                        }
+                      }}
+                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                    >
+                      Clear
+                    </button>
                   </div>
                 </div>
               )}
@@ -969,9 +1038,6 @@ const PanKyc: React.FC = () => {
                         Date of Birth
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -980,14 +1046,16 @@ const PanKyc: React.FC = () => {
                     {filteredRecords
                       .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
                       .map((record) => (
-                      <tr key={record._id} className="hover:bg-gray-50">
+                                              <tr key={record._id} className={`hover:bg-gray-50 ${record.status === 'verified' ? 'opacity-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <input
-                            type="checkbox"
-                            checked={selectedRecords.includes(record._id)}
-                            onChange={() => handleRecordSelection(record._id)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
+                          {(record.status === 'pending' || record.status === 'rejected' || record.status === 'error') && (
+                            <input
+                              type="checkbox"
+                              checked={selectedRecords.includes(record._id)}
+                              onChange={() => handleRecordSelection(record._id)}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {record.panNumber}
@@ -998,23 +1066,15 @@ const PanKyc: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {record.dateOfBirth || '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {getStatusIcon(record.status)}
-                            <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                              {record.status}
-                            </span>
-                          </div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {record.status === 'pending' && (
+                          {record.status === 'pending' ? (
                             <button
                               onClick={() => handleVerifySingle(record._id)}
-                              disabled={verifying}
+                              disabled={verifyingRecords.has(record._id)}
                               className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors"
                               title={`Verify ${record.name} (${record.panNumber})`}
                             >
-                              {verifying ? (
+                              {verifyingRecords.has(record._id) ? (
                                 <>
                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                   Verifying...
@@ -1026,24 +1086,30 @@ const PanKyc: React.FC = () => {
                                 </>
                               )}
                             </button>
-                          )}
-                          {record.status === 'verified' && (
-                            <div className="inline-flex items-center text-green-600 text-sm">
+                          ) : record.status === 'rejected' || record.status === 'error' ? (
+                            <button
+                              onClick={() => handleVerifySingle(record._id)}
+                              disabled={verifyingRecords.has(record._id)}
+                              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 transition-colors"
+                              title={`Re-verify ${record.name} (${record.panNumber})`}
+                            >
+                              {verifyingRecords.has(record._id) ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Re-verifying...
+                                </>
+                              ) : (
+                                <>
+                                  <ArrowPathIcon className="h-4 w-4 mr-1" />
+                                  Re-verify
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="inline-flex items-center text-sm text-green-600">
                               <CheckCircleIcon className="h-4 w-4 mr-1" />
-                              ✓ Verified
-                            </div>
-                          )}
-                          {record.status === 'rejected' && (
-                            <div className="inline-flex items-center text-red-600 text-sm">
-                              <XCircleIcon className="h-4 w-4 mr-1" />
-                              ✗ Rejected
-                            </div>
-                          )}
-                          {record.status === 'error' && (
-                            <div className="inline-flex items-center text-orange-600 text-sm">
-                              <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                              ⚠ Error
-                            </div>
+                              Verified
+                            </span>
                           )}
                         </td>
                       </tr>

@@ -784,6 +784,19 @@ router.get('/users/:id/logo', async (req, res) => {
     }
 
     const logoPath = user.branding.logo.path;
+    
+    // Set CORS headers for image serving
+    res.set({
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
+        ? 'https://yourdomain.com' 
+        : 'http://localhost:3000',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none'
+    });
+    
     res.sendFile(logoPath, { root: '.' });
   } catch (error) {
     logger.error('Error serving user logo:', error);

@@ -53,6 +53,7 @@ interface AuthContextType extends AuthState {
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   refreshToken: () => Promise<void>;
+  refreshUserData: () => Promise<User | undefined>;
 }
 
 interface RegisterData {
@@ -253,6 +254,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'UPDATE_USER', payload: userData });
   };
 
+  // Refresh current user data
+  const refreshUserData = async () => {
+    try {
+      const response = await api.get('/auth/me', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      if (response.data && response.data.success && response.data.data) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: response.data.data,
+        });
+        return response.data.data;
+      }
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
+    }
+  };
+
   // Refresh token function
   const refreshToken = async () => {
     try {
@@ -304,6 +327,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     updateUser,
     refreshToken,
+    refreshUserData,
   };
 
   return (

@@ -116,27 +116,13 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: async (req, file, cb) => {
-    // Add index to prevent overwrites and ensure uniqueness
+    // Use timestamp to ensure each upload creates a unique file
     const originalName = path.parse(file.originalname).name;
     const extension = path.extname(file.originalname);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
     
-    // Get count of existing files with same base name for this user
-    const baseFileName = originalName.replace(/[^a-zA-Z0-9]/g, '_');
-    const uploadDir = path.join(__dirname, '../../uploads/pan-kyc');
-    const fs = require('fs');
-    
-    try {
-      const files = fs.readdirSync(uploadDir);
-      const existingFiles = files.filter(f => 
-        f.startsWith(baseFileName) && f.endsWith(extension)
-      );
-      
-      const nextIndex = existingFiles.length + 1;
-      cb(null, `${originalName}_${nextIndex}${extension}`);
-    } catch (error) {
-      // If directory doesn't exist or error, start with index 1
-      cb(null, `${originalName}_1${extension}`);
-    }
+    cb(null, `${originalName}_${timestamp}_${randomSuffix}${extension}`);
   }
 });
 
@@ -322,21 +308,33 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       });
     }
 
+    // Check if this is an Aadhaar-PAN linking file (contains only aadhaarNumber, panNumber, name)
+    const aadhaarPanIndicators = ['aadhaarNumber', 'AADHAAR', 'Aadhaar', 'aadhaar'];
+    const foundAadhaarPanColumns = Object.keys(firstRow).filter(col => 
+      aadhaarPanIndicators.some(indicator => 
+        col.toLowerCase().includes(indicator.toLowerCase())
+      )
+    );
+    
+    if (foundAadhaarPanColumns.length > 0 && Object.keys(firstRow).length <= 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'This appears to be an Aadhaar-PAN linking file. Please upload it to the Aadhaar-PAN linking module instead. PAN KYC requires: panNumber, name, and dateOfBirth columns.',
+        debug: {
+          foundAadhaarPanColumns: foundAadhaarPanColumns,
+          foundColumns: Object.keys(firstRow)
+        }
+      });
+    }
+
     // Debug: Log the final column map
     logger.info('Final column map for processing:', columnMap);
 
-    // Generate unique batch ID from original filename with index
+    // Generate unique batch ID with timestamp to ensure each upload is a new entry
     const originalName = path.parse(req.file.originalname).name;
-    
-    // Get count of existing batches with same base name for this user
-    const baseBatchName = originalName.replace(/[^a-zA-Z0-9]/g, '_');
-    const existingBatches = await PanKyc.distinct('batchId', {
-      userId: req.user.id,
-      batchId: new RegExp(`^${baseBatchName}_\\d+$`)
-    });
-    
-    const nextIndex = existingBatches.length + 1;
-    const batchId = `${baseBatchName}_${nextIndex}`; // Add index for uniqueness
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const batchId = `${originalName}_${timestamp}_${randomSuffix}`;
     const records = [];
 
     // Process each row

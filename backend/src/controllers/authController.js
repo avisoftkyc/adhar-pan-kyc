@@ -53,6 +53,7 @@ const register = async (userData) => {
       role: user.role,
       moduleAccess: user.moduleAccess,
       isEmailVerified: user.isEmailVerified,
+      branding: user.branding,
     },
   };
 };
@@ -105,6 +106,7 @@ const login = async (loginData) => {
       isEmailVerified: user.isEmailVerified,
       twoFactorEnabled: user.twoFactorEnabled,
       profile: user.profile,
+      branding: user.branding,
       preferences: user.preferences,
     },
   };
@@ -128,6 +130,7 @@ const getCurrentUser = async (userId) => {
     isEmailVerified: user.isEmailVerified,
     twoFactorEnabled: user.twoFactorEnabled,
     profile: user.profile,
+    branding: user.branding,
     preferences: user.preferences,
     createdAt: user.createdAt,
     lastLogin: user.lastLogin,
