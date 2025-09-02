@@ -68,7 +68,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem('token'),
   loading: true,
-  isAuthenticated: false, // Start as false, will be set to true after validation
+  isAuthenticated: !!localStorage.getItem('token'), // Start as true if token exists
 };
 
 // Action types
@@ -155,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Check if response has data
           if (response.data && response.data.success && response.data.data) {
+            console.log('✅ Dispatching AUTH_SUCCESS with user:', response.data.data);
             dispatch({
               type: 'AUTH_SUCCESS',
               payload: { user: response.data.data, token },
@@ -191,7 +192,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user: !!state.user,
       token: !!state.token,
       loading: state.loading,
-      isAuthenticated: state.isAuthenticated
+      isAuthenticated: state.isAuthenticated,
+      userDetails: state.user ? { id: state.user._id, name: state.user.name, email: state.user.email } : null
     });
   }, [state.user, state.token, state.loading, state.isAuthenticated]);
 

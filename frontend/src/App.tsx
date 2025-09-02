@@ -13,10 +13,12 @@ import ResetPassword from './pages/Auth/ResetPassword';
 import VerifyEmail from './pages/Auth/VerifyEmail';
 import Dashboard from './pages/Dashboard/Dashboard';
 import PanKyc from './pages/PanKyc/PanKyc';
+import PanKycRecords from './pages/PanKyc/PanKycRecords';
 import AadhaarPan from './pages/AadhaarPan/AadhaarPan';
+import AadhaarPanRecords from './pages/AadhaarPan/AadhaarPanRecords';
 import Profile from './pages/Profile/Profile';
 import Admin from './pages/Admin/Admin';
-import VerificationRecords from './pages/VerificationRecords/VerificationRecords';
+
 import NotFound from './pages/NotFound/NotFound';
 
 // Protected Route Component
@@ -56,17 +58,31 @@ const ModuleRoute: React.FC<{
   children: React.ReactNode; 
   module: string;
 }> = ({ children, module }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
+
+  console.log('🔒 ModuleRoute state:', { user: !!user, loading, isAuthenticated, module });
+
+  if (loading) {
+    console.log('🔒 ModuleRoute: Loading...');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated || !user) {
+    console.log('🔒 ModuleRoute: Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   // Check if user has access to the specific module (including admin users)
   if (!user.moduleAccess || !user.moduleAccess.includes(module)) {
+    console.log('🔒 ModuleRoute: Module access denied, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
+  console.log('🔒 ModuleRoute: Access granted');
   return <>{children}</>;
 };
 
@@ -107,6 +123,14 @@ const AppContent: React.FC = () => {
             </ModuleRoute>
           } />
 
+          <Route path="/pan-kyc-records" element={
+            <ModuleRoute module="pan-kyc">
+              <Layout>
+                <PanKycRecords />
+              </Layout>
+            </ModuleRoute>
+          } />
+
           <Route path="/aadhaar-pan" element={
             <ModuleRoute module="aadhaar-pan">
               <Layout>
@@ -115,13 +139,15 @@ const AppContent: React.FC = () => {
             </ModuleRoute>
           } />
 
-          <Route path="/verification-records" element={
-            <ProtectedRoute>
+          <Route path="/aadhaar-pan-records" element={
+            <ModuleRoute module="aadhaar-pan">
               <Layout>
-                <VerificationRecords />
+                <AadhaarPanRecords />
               </Layout>
-            </ProtectedRoute>
+            </ModuleRoute>
           } />
+
+
 
           <Route path="/profile" element={
             <ProtectedRoute>

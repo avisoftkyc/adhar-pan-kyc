@@ -537,7 +537,7 @@ const AadhaarPan: React.FC = () => {
             </p>
           </div>
           <button
-            onClick={() => window.location.href = '/verification-records'}
+            onClick={() => window.location.href = '/aadhaar-pan-records'}
             className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600"
           >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -8,11 +8,12 @@ import {
   HomeIcon,
   DocumentTextIcon,
   IdentificationIcon,
-  UserIcon,
   Cog6ToothIcon,
   SunIcon,
   MoonIcon,
   BellIcon,
+  ChevronDownIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -21,16 +22,30 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout, refreshUserData } = useAuth();
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Function to refresh user data and force re-render
-  const handleRefreshUserData = async () => {
-    if (refreshUserData) {
-      await refreshUserData();
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
     }
-  };
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
+
+
 
   // Memoize the logo URL to avoid unnecessary re-renders
   const logoUrl = useMemo(() => {
@@ -66,13 +81,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: IdentificationIcon,
       current: location.pathname === '/aadhaar-pan',
       module: 'aadhaar-pan',
-    },
-
-    {
-      name: 'Profile',
-      href: '/profile',
-      icon: UserIcon,
-      current: location.pathname === '/profile',
     },
     ...(user?.role === 'admin' ? [{
       name: 'Admin',
@@ -145,6 +153,44 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </Link>
             ))}
           </nav>
+          
+          {/* Mobile Profile Section */}
+          <div className="border-t border-gray-200 px-2 py-4">
+            <div className="flex items-center px-2 py-2">
+              <div className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
+                <span className="text-white font-medium text-sm">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div className="ml-3">
+                <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                <div className="text-xs text-gray-500">{user?.email}</div>
+              </div>
+            </div>
+            <div className="mt-2 space-y-1">
+              <Link
+                to="/profile"
+                className="flex items-center px-2 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-md"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <UserCircleIcon className="mr-3 h-5 w-5 text-gray-400" />
+                Profile
+              </Link>
+
+              <button
+                onClick={() => {
+                  logout();
+                  setSidebarOpen(false);
+                }}
+                className="flex w-full items-center px-2 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-900 rounded-md"
+              >
+                <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -229,38 +275,59 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
 
               {/* Profile dropdown */}
-              <div className="relative">
-                <div className="flex items-center gap-x-3">
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="flex items-center gap-x-3 p-2 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
                   <div className="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center">
                     <span className="text-white font-medium text-sm">
                       {user?.name?.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <div className="hidden lg:block">
+                  <div className="hidden lg:block text-left">
                     <div className="text-sm font-medium text-gray-900">{user?.name}</div>
                     <div className="text-xs text-gray-500">{user?.email}</div>
                     {user?.branding?.companyName && (
                       <div className="text-xs text-gray-400">{user.branding.companyName}</div>
                     )}
                   </div>
-                </div>
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                </button>
+
+                {/* Dropdown menu */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="py-1">
+                      {/* Profile link */}
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <UserCircleIcon className="mr-3 h-5 w-5 text-gray-400" />
+                        Profile
+                      </Link>
+                      
+
+                      
+                      {/* Logout button */}
+                      <button
+                        onClick={() => {
+                          logout();
+                          setProfileDropdownOpen(false);
+                        }}
+                        className="flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                      >
+                        <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              {/* Refresh button (temporary for debugging) */}
-              <button
-                onClick={handleRefreshUserData}
-                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Refresh
-              </button>
-
-              {/* Logout button */}
-              <button
-                onClick={logout}
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Logout
-              </button>
             </div>
           </div>
         </div>

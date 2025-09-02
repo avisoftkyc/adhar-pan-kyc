@@ -19,7 +19,14 @@ const schema = yup.object({
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+  
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      window.location.href = '/dashboard';
+    }
+  }, [isAuthenticated, user]);
 
   const {
     register,

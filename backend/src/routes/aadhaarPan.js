@@ -161,6 +161,27 @@ router.get('/batches', protect, async (req, res) => {
   }
 });
 
+// Get all records for a user
+router.get('/records', protect, async (req, res) => {
+  try {
+    const records = await AadhaarPan.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      data: records
+    });
+  } catch (error) {
+    logger.error('Error fetching Aadhaar-PAN records:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch records',
+      error: error.message
+    });
+  }
+});
+
 // Get batch details
 router.get('/batch/:batchId', protect, async (req, res) => {
   try {
