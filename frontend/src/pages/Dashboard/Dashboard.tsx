@@ -1,78 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   DocumentTextIcon,
-  IdentificationIcon,
+  UserGroupIcon,
   CheckCircleIcon,
-  XCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
+  ChartBarIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  CogIcon,
+  ClockIcon,
+  DocumentMagnifyingGlassIcon,
+  UserIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-interface DashboardStats {
-  panKyc: {
-    total: number;
-    verified: number;
-    rejected: number;
-    pending: number;
-    error: number;
-  };
-  aadhaarPan: {
-    total: number;
-    linked: number;
-    notLinked: number;
-    pending: number;
-    invalid: number;
-    error: number;
-  };
-  activity: {
-    totalActions: number;
-    lastActivity: string;
-  };
+interface Stats {
+  totalRecords: number;
+  panKycRecords: number;
+  aadhaarPanRecords: number;
+  verifiedRecords: number;
 }
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<Stats>({
+    totalRecords: 0,
+    panKycRecords: 0,
+    aadhaarPanRecords: 0,
+    verifiedRecords: 0
+  });
   const [loading, setLoading] = useState(true);
+  const [animateStats, setAnimateStats] = useState(false);
 
   useEffect(() => {
-    // Mock data for now - replace with actual API call
     const fetchStats = async () => {
       try {
-        // Simulate API call
+        // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        setStats({
-          panKyc: {
-            total: 1250,
-            verified: 980,
-            rejected: 45,
-            pending: 180,
-            error: 45,
-          },
-          aadhaarPan: {
-            total: 890,
-            linked: 720,
-            notLinked: 95,
-            pending: 50,
-            invalid: 15,
-            error: 10,
-          },
-          activity: {
-            totalActions: 45,
-            lastActivity: '2 hours ago',
-          },
-        });
+        // Use dummy data for demonstration
+        const newStats = {
+          totalRecords: 1250,
+          panKycRecords: 750,
+          aadhaarPanRecords: 500,
+          verifiedRecords: 980
+        };
+
+        setStats(newStats);
+        
+        // Trigger animation after data loads
+        setTimeout(() => setAnimateStats(true), 300);
       } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error);
+        console.error('Error fetching stats:', error);
       } finally {
         setLoading(false);
       }
@@ -81,315 +60,282 @@ const Dashboard: React.FC = () => {
     fetchStats();
   }, []);
 
+  const AnimatedNumber = ({ value, className }: { value: number; className?: string }) => (
+    <span className={`transition-all duration-1000 ease-out ${className}`}>
+      {value}
+    </span>
+  );
+
+  // Chart data
+  const totalRecordsData = [
+    { name: 'PAN KYC', value: stats.panKycRecords, color: '#3b82f6' },
+    { name: 'Aadhaar-PAN', value: stats.aadhaarPanRecords, color: '#10b981' }
+  ];
+
   const panKycData = [
-    { name: 'Verified', value: stats?.panKyc.verified || 0, color: '#22c55e' },
-    { name: 'Pending', value: stats?.panKyc.pending || 0, color: '#f59e0b' },
-    { name: 'Rejected', value: stats?.panKyc.rejected || 0, color: '#ef4444' },
-    { name: 'Error', value: stats?.panKyc.error || 0, color: '#6b7280' },
+    { name: 'Total Records', value: stats.panKycRecords, color: '#3b82f6' }
   ];
 
   const aadhaarPanData = [
-    { name: 'Linked', value: stats?.aadhaarPan.linked || 0, color: '#22c55e' },
-    { name: 'Not Linked', value: stats?.aadhaarPan.notLinked || 0, color: '#ef4444' },
-    { name: 'Pending', value: stats?.aadhaarPan.pending || 0, color: '#f59e0b' },
-    { name: 'Invalid', value: stats?.aadhaarPan.invalid || 0, color: '#6b7280' },
-  ];
-
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'pan_kyc_upload',
-      description: 'Uploaded PAN KYC batch with 50 records',
-      timestamp: '2 hours ago',
-      status: 'success',
-    },
-    {
-      id: 2,
-      type: 'aadhaar_pan_verification',
-      description: 'Completed Aadhaar-PAN verification for 25 records',
-      timestamp: '4 hours ago',
-      status: 'success',
-    },
-    {
-      id: 3,
-      type: 'pan_kyc_api_error',
-      description: 'API error occurred during PAN verification',
-      timestamp: '6 hours ago',
-      status: 'error',
-    },
-    {
-      id: 4,
-      type: 'report_downloaded',
-      description: 'Downloaded PAN KYC verification report',
-      timestamp: '1 day ago',
-      status: 'success',
-    },
-  ];
-
-  const quickActions = [
-    {
-      name: 'Upload PAN KYC',
-      description: 'Upload Excel file for PAN verification',
-      href: '/pan-kyc',
-      icon: DocumentTextIcon,
-      color: 'bg-blue-500',
-      available: user?.role === 'admin' || user?.moduleAccess?.includes('pan-kyc'),
-    },
-    {
-      name: 'Upload Aadhaar-PAN',
-      description: 'Upload Excel file for Aadhaar-PAN linking',
-      href: '/aadhaar-pan',
-      icon: IdentificationIcon,
-      color: 'bg-green-500',
-      available: user?.role === 'admin' || user?.moduleAccess?.includes('aadhaar-pan'),
-    },
-    {
-      name: 'View Reports',
-      description: 'Access verification reports and analytics',
-      href: '/reports',
-      icon: ChartBarIcon,
-      color: 'bg-purple-500',
-      available: true,
-    },
-    {
-      name: 'User Management',
-      description: 'Manage users and permissions',
-      href: '/admin',
-      icon: UserGroupIcon,
-      color: 'bg-orange-500',
-      available: user?.role === 'admin',
-    },
+    { name: 'Total Records', value: stats.aadhaarPanRecords, color: '#10b981' }
   ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Skeleton Loading */}
+          <div className="animate-pulse">
+            <div className="h-12 bg-gray-200 rounded-3xl w-1/3 mb-8"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-gray-200 rounded-3xl h-32"></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gray-200 rounded-3xl h-64"></div>
+              <div className="bg-gray-200 rounded-3xl h-64"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold">Welcome back, {user?.name}!</h1>
-        <p className="text-primary-100 mt-1">
-          Here's what's happening with your KYC verification system today.
-        </p>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <DocumentTextIcon className="h-8 w-8 text-blue-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">PAN KYC Total</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats?.panKyc.total || 0}</p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-center text-sm">
-              <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+12%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header with staggered animation */}
+        <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="text-4xl font-bold text-slate-800 tracking-tight drop-shadow-lg">
+            Welcome back, {user?.branding?.displayName || user?.name || 'User'}! 👋
+          </h1>
+          <p className="mt-2 text-slate-600 font-medium">
+            Here's what's happening with your KYC Aadhaar System today
+          </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <IdentificationIcon className="h-8 w-8 text-green-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Aadhaar-PAN Total</p>
-              <p className="text-2xl font-semibold text-gray-900">{stats?.aadhaarPan.total || 0}</p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-center text-sm">
-              <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+8%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-8 w-8 text-green-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Success Rate</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {stats ? Math.round(((stats.panKyc.verified + stats.aadhaarPan.linked) / (stats.panKyc.total + stats.aadhaarPan.total)) * 100) : 0}%
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-center text-sm">
-              <ArrowUpIcon className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+5%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <ClockIcon className="h-8 w-8 text-yellow-500" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Pending</p>
-              <p className="text-2xl font-semibold text-gray-900">
-                {(stats?.panKyc.pending || 0) + (stats?.aadhaarPan.pending || 0)}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="flex items-center text-sm">
-              <ArrowDownIcon className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-red-600">-3%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts and Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* PAN KYC Chart */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">PAN KYC Status</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={panKycData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {panKycData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            {panKycData.map((item) => (
-              <div key={item.name} className="flex items-center">
-                <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                <span className="text-sm text-gray-600">{item.name}: {item.value}</span>
+        {/* Stats Cards with staggered animations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {/* Total Records */}
+          <div 
+            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+            style={{ animationDelay: '0.2s' }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <DocumentTextIcon className="h-6 w-6 text-white" />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Aadhaar-PAN Chart */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Aadhaar-PAN Status</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={aadhaarPanData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {aadhaarPanData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            {aadhaarPanData.map((item) => (
-              <div key={item.name} className="flex items-center">
-                <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                <span className="text-sm text-gray-600">{item.name}: {item.value}</span>
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-600">Total Records</p>
+                <AnimatedNumber 
+                  value={stats.totalRecords} 
+                  className="text-2xl font-bold text-slate-900"
+                />
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Actions and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {quickActions.map((action) => (
-              action.available && (
-                <Link
-                  key={action.name}
-                  to={action.href}
-                  className="group relative rounded-lg border border-gray-200 p-4 hover:border-gray-300 hover:shadow-sm transition-all"
-                >
-                  <div className="flex items-center">
-                    <div className={`${action.color} p-2 rounded-lg`}>
-                      <action.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900 group-hover:text-primary-600">
-                        {action.name}
-                      </p>
-                      <p className="text-xs text-gray-500">{action.description}</p>
-                    </div>
-                  </div>
-                </Link>
-              )
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
-                  {activity.status === 'success' ? (
-                    <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                  ) : activity.status === 'error' ? (
-                    <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
-                  ) : (
-                    <ClockIcon className="h-5 w-5 text-yellow-500" />
-                  )}
+            </div>
+            {/* Pie Chart */}
+            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={totalRecordsData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={40}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {totalRecordsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Legend */}
+            <div className="mt-3 space-y-1">
+              {totalRecordsData.map((item) => (
+                <div key={item.name} className="flex items-center text-xs">
+                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                  <span className="text-slate-600">{item.name}: {item.value}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">{activity.description}</p>
-                  <p className="text-xs text-gray-500">{activity.timestamp}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-          <div className="mt-4">
-            <Link
-              to="/activity"
-              className="text-sm font-medium text-primary-600 hover:text-primary-500"
-            >
-              View all activity →
-            </Link>
+
+          {/* PAN KYC Records */}
+          <div 
+            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+            style={{ animationDelay: '0.3s' }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <DocumentMagnifyingGlassIcon className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-600">PAN KYC Records</p>
+                <AnimatedNumber 
+                  value={stats.panKycRecords} 
+                  className="text-2xl font-bold text-slate-900"
+                />
+              </div>
+            </div>
+            {/* Pie Chart */}
+            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={panKycData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={40}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {panKycData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Legend */}
+            <div className="mt-3 space-y-1">
+              {panKycData.map((item) => (
+                <div key={item.name} className="flex items-center text-xs">
+                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                  <span className="text-slate-600">{item.name}: {item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Aadhaar-PAN Records */}
+          <div 
+            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+            style={{ animationDelay: '0.4s' }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                <UserIcon className="h-6 w-6 text-white" />
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-600">Aadhaar-PAN Records</p>
+                <AnimatedNumber 
+                  value={stats.aadhaarPanRecords} 
+                  className="text-2xl font-bold text-slate-900"
+                />
+              </div>
+            </div>
+            {/* Pie Chart */}
+            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={aadhaarPanData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={40}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {aadhaarPanData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Legend */}
+            <div className="mt-3 space-y-1">
+              {aadhaarPanData.map((item) => (
+                <div key={item.name} className="flex items-center text-xs">
+                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                  <span className="text-slate-600">{item.name}: {item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions and Recent Activity with staggered animations */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Quick Actions */}
+          <div 
+            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 animate-fade-in-up"
+            style={{ animationDelay: '0.5s' }}
+          >
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl mr-3">
+                <ChartBarIcon className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-slate-800">Quick Actions</h2>
+            </div>
+            <div className="space-y-3">
+              <button className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
+                Upload PAN KYC Document
+              </button>
+              <button className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
+                Upload Aadhaar-PAN Document
+              </button>
+              <button className="w-full p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
+                View All Records
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div 
+            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 animate-fade-in-up"
+            style={{ animationDelay: '0.6s' }}
+          >
+            <div className="flex items-center mb-6">
+              <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl mr-3">
+                <ClockIcon className="h-5 w-5 text-white" />
+              </div>
+              <h2 className="text-xl font-semibold text-slate-800">Recent Activity</h2>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 transition-all duration-200 ease-out cursor-pointer group">
+                <div className="p-2 bg-blue-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
+                  <DocumentTextIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-800">New PAN KYC document uploaded</p>
+                  <p className="text-xs text-slate-500">2 minutes ago</p>
+                </div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              </div>
+              
+              <div className="flex items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 transition-all duration-200 ease-out cursor-pointer group">
+                <div className="p-2 bg-green-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
+                  <CheckCircleIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-800">5 records verified successfully</p>
+                  <p className="text-xs text-slate-500">15 minutes ago</p>
+                </div>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+              
+              <div className="flex items-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 transition-all duration-200 ease-out cursor-pointer group">
+                <div className="p-2 bg-orange-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
+                  <UserIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-slate-800">Aadhaar-PAN linking completed</p>
+                  <p className="text-xs text-slate-500">1 hour ago</p>
+                </div>
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
