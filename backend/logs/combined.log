@@ -16718,3 +16718,223 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-09-02 11:05:45'
 }
+{
+  service: 'kyc-aadhaar-api',
+  userId: new ObjectId("68b5d7cc412657bb1553daac"),
+  action: 'login',
+  module: 'auth',
+  resource: 'user',
+  resourceId: new ObjectId("68b5d7cc412657bb1553daac"),
+  level: 'info',
+  message: 'Audit event logged: login in auth',
+  timestamp: '2025-09-02 11:13:04'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:04 +0000] "POST /api/auth/login HTTP/1.1" 200 496 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:04'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:09 +0000] "GET /api/admin/users HTTP/1.1" 200 1018 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:09'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:09 +0000] "GET /api/admin/users HTTP/1.1" 200 1018 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:09'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:09 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:09'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:09 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:09'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: '68b5d7cc412657bb1553daac',
+  action: 'module_access_updated',
+  module: 'admin',
+  resource: 'user',
+  resourceId: new ObjectId("68b5d7cc412657bb1553daac"),
+  level: 'info',
+  message: 'Audit event logged: module_access_updated in admin',
+  timestamp: '2025-09-02 11:13:37'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:37 +0000] "PATCH /api/admin/users/68b5d7cc412657bb1553daac/module-access HTTP/1.1" 200 151 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:37'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:37 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:37'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/auth/me HTTP/1.1" 200 388 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/auth/me HTTP/1.1" 200 388 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:40 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:40'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:43:41 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:13:41'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:00 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 815 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:00'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:00 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 815 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:00'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:03 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:03'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:03 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:03'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:03 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:03'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:44:03 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:03'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:51'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:52'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:56'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:14:56'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:45:59 +0000] "GET /api/auth/me HTTP/1.1" 200 388 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:15:59'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:45:59 +0000] "GET /api/auth/me HTTP/1.1" 200 388 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:15:59'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:45:59 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:15:59'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:45:59 +0000] "GET /api/admin/users HTTP/1.1" 200 995 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:15:59'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:46:00 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:16:00'
+}
+{
+  message: '::1 - - [02/Sep/2025:05:46:00 +0000] "GET /api/admin/stats HTTP/1.1" 200 532 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:16:00'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:16:09'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-02 11:16:10'
+}

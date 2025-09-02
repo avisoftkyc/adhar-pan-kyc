@@ -62,12 +62,7 @@ const ModuleRoute: React.FC<{
     return <Navigate to="/login" replace />;
   }
 
-  // Admin has access to all modules
-  if (user.role === 'admin') {
-    return <>{children}</>;
-  }
-
-  // Check if user has access to the specific module
+  // Check if user has access to the specific module (including admin users)
   if (!user.moduleAccess || !user.moduleAccess.includes(module)) {
     return <Navigate to="/dashboard" replace />;
   }
