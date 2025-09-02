@@ -18,6 +18,17 @@ interface User {
     designation?: string;
     address?: string;
   };
+  branding?: {
+    logo?: {
+      filename: string;
+      originalName: string;
+      path: string;
+      mimetype: string;
+      size: number;
+    };
+    companyName?: string;
+    displayName?: string;
+  };
   preferences?: {
     notifications: {
       email: boolean;
