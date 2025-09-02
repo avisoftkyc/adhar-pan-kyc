@@ -22,6 +22,17 @@ interface User {
   role: string;
   moduleAccess: string[];
   status: string;
+  branding?: {
+    logo?: {
+      filename: string;
+      originalName: string;
+      path: string;
+      mimetype: string;
+      size: number;
+    };
+    companyName?: string;
+    displayName?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +80,14 @@ const Admin: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModuleAccess, setShowModuleAccess] = useState(false);
   const [selectedUserForModules, setSelectedUserForModules] = useState<User | null>(null);
+  const [showBranding, setShowBranding] = useState(false);
+  const [selectedUserForBranding, setSelectedUserForBranding] = useState<User | null>(null);
+  const [brandingForm, setBrandingForm] = useState({
+    companyName: '',
+    displayName: '',
+    logoFile: null as File | null
+  });
+  const [brandingLoading, setBrandingLoading] = useState(false);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -206,6 +225,52 @@ const Admin: React.FC = () => {
     } catch (error: any) {
       console.error('Error updating module access:', error);
       setError(error.response?.data?.message || 'Failed to update module access');
+    }
+  };
+
+  const handleManageBranding = (user: User) => {
+    setSelectedUserForBranding(user);
+    setBrandingForm({
+      companyName: user.branding?.companyName || '',
+      displayName: user.branding?.displayName || '',
+      logoFile: null
+    });
+    setShowBranding(true);
+  };
+
+  const handleUpdateBranding = async (userId: string) => {
+    try {
+      setBrandingLoading(true);
+      
+      // Update branding text fields
+      if (brandingForm.companyName || brandingForm.displayName) {
+        await api.patch(`/admin/users/${userId}/branding`, {
+          companyName: brandingForm.companyName,
+          displayName: brandingForm.displayName
+        });
+      }
+
+      // Upload logo if selected
+      if (brandingForm.logoFile) {
+        const formData = new FormData();
+        formData.append('logo', brandingForm.logoFile);
+        await api.post(`/admin/users/${userId}/logo`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      }
+
+      setSuccess('User branding updated successfully');
+      setShowBranding(false);
+      setSelectedUserForModules(null);
+      setBrandingForm({ companyName: '', displayName: '', logoFile: null });
+      fetchUsers();
+    } catch (error: any) {
+      console.error('Error updating branding:', error);
+      setError(error.response?.data?.message || 'Failed to update branding');
+    } finally {
+      setBrandingLoading(false);
     }
   };
 
@@ -453,6 +518,15 @@ const Admin: React.FC = () => {
                           title="Manage Module Access"
                         >
                           <CogIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleManageBranding(user)}
+                          className="text-gray-400 hover:text-green-600"
+                          title="Manage Branding"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                          </svg>
                         </button>
                         <button
                           onClick={() => handleEditUser(user)}
@@ -744,6 +818,88 @@ const Admin: React.FC = () => {
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
                   >
                     Update Access
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Branding Management Modal */}
+      {showBranding && selectedUserForBranding && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Manage Branding for {selectedUserForBranding.name}
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
+                  <input
+                    type="text"
+                    value={brandingForm.companyName || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, companyName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Enter company name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+                  <input
+                    type="text"
+                    value={brandingForm.displayName || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, displayName: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Enter display name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                  <div className="flex items-center space-x-3">
+                    {selectedUserForBranding.branding?.logo && (
+                      <img
+                        src={`/api/admin/users/${selectedUserForBranding._id}/logo`}
+                        alt="Current logo"
+                        className="w-12 h-12 object-contain border border-gray-300 rounded"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setBrandingForm({ ...brandingForm, logoFile: file });
+                        }
+                      }}
+                      className="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowBranding(false);
+                      setSelectedUserForBranding(null);
+                      setBrandingForm({ companyName: '', displayName: '', logoFile: null });
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleUpdateBranding(selectedUserForBranding._id)}
+                    disabled={brandingLoading}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {brandingLoading ? 'Updating...' : 'Update Branding'}
                   </button>
                 </div>
               </div>

@@ -76,10 +76,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
           <div className="flex h-16 items-center justify-between px-4">
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-              <span className="ml-2 text-lg font-semibold text-gray-900">KYC System</span>
+              {user?.branding?.logo ? (
+                <img
+                  src={`/api/admin/users/${user._id}/logo`}
+                  alt="Company Logo"
+                  className="h-8 w-8 object-contain rounded-lg"
+                />
+              ) : (
+                <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">K</span>
+                </div>
+              )}
+              <span className="ml-2 text-lg font-semibold text-gray-900">
+                {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
+              </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -116,10 +126,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white shadow-xl">
           <div className="flex h-16 items-center px-4">
-            <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">K</span>
-            </div>
-            <span className="ml-2 text-lg font-semibold text-gray-900">KYC System</span>
+            {user?.branding?.logo ? (
+              <img
+                src={`/api/admin/users/${user._id}/logo`}
+                alt="Company Logo"
+                className="h-8 w-8 object-contain rounded-lg"
+              />
+            ) : (
+              <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">K</span>
+              </div>
+            )}
+            <span className="ml-2 text-lg font-semibold text-gray-900">
+              {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
+            </span>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
             {filteredNavigation.map((item) => (
@@ -188,6 +208,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <div className="hidden lg:block">
                     <div className="text-sm font-medium text-gray-900">{user?.name}</div>
                     <div className="text-xs text-gray-500">{user?.email}</div>
+                    {user?.branding?.companyName && (
+                      <div className="text-xs text-gray-400">{user.branding.companyName}</div>
+                    )}
                   </div>
                 </div>
               </div>

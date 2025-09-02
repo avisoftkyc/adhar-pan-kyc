@@ -71,6 +71,25 @@ const UserSchema = new mongoose.Schema({
     designation: String,
     address: String,
   },
+  branding: {
+    logo: {
+      filename: String,
+      originalName: String,
+      path: String,
+      mimetype: String,
+      size: Number,
+    },
+    companyName: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Company name cannot be more than 100 characters'],
+    },
+    displayName: {
+      type: String,
+      trim: true,
+      maxlength: [50, 'Display name cannot be more than 50 characters'],
+    },
+  },
   preferences: {
     notifications: {
       email: { type: Boolean, default: true },

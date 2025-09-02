@@ -7,6 +7,33 @@ const PanKyc = require('../models/PanKyc');
 const AadhaarPan = require('../models/AadhaarPan');
 const { logEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
+const multer = require('multer');
+const path = require('path');
+
+// Configure multer for logo uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/logos/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'logo-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // Admin middleware - check if user is admin
 const adminAuth = (req, res, next) => {
@@ -604,6 +631,165 @@ router.get('/modules', protect, adminAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch modules'
+    });
+  }
+});
+
+// Update user branding (admin only)
+router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
+  try {
+    const { companyName, displayName } = req.body;
+
+    if (!companyName && !displayName) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one branding field must be provided'
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Store old branding for audit
+    const oldBranding = {
+      companyName: user.branding?.companyName || '',
+      displayName: user.branding?.displayName || ''
+    };
+
+    // Update branding fields
+    if (!user.branding) user.branding = {};
+    if (companyName !== undefined) user.branding.companyName = companyName;
+    if (displayName !== undefined) user.branding.displayName = displayName;
+
+    await user.save();
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'user_branding_updated',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        targetUserEmail: user.email,
+        oldBranding,
+        newBranding: {
+          companyName: user.branding.companyName,
+          displayName: user.branding.displayName
+        }
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({
+      success: true,
+      message: 'User branding updated successfully',
+      data: {
+        id: user._id,
+        email: user.email,
+        branding: user.branding
+      }
+    });
+  } catch (error) {
+    logger.error('Error updating user branding:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user branding'
+    });
+  }
+});
+
+// Upload user logo (admin only)
+router.post('/users/:id/logo', protect, adminAuth, upload.single('logo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No logo file provided'
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Store old logo info for audit
+    const oldLogo = user.branding?.logo || null;
+
+    // Update logo information
+    if (!user.branding) user.branding = {};
+    user.branding.logo = {
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      path: req.file.path,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    };
+
+    await user.save();
+
+    // Log the event
+    await logEvent({
+      userId: req.user.id,
+      action: 'user_logo_updated',
+      module: 'admin',
+      resource: 'user',
+      resourceId: user._id,
+      details: {
+        targetUserEmail: user.email,
+        oldLogo: oldLogo ? oldLogo.filename : null,
+        newLogo: req.file.filename
+      },
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    res.json({
+      success: true,
+      message: 'User logo updated successfully',
+      data: {
+        id: user._id,
+        email: user.email,
+        logo: user.branding.logo
+      }
+    });
+  } catch (error) {
+    logger.error('Error updating user logo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user logo'
+      });
+  }
+});
+
+// Get user logo (public endpoint)
+router.get('/users/:id/logo', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || !user.branding?.logo) {
+      return res.status(404).json({
+        success: false,
+        message: 'Logo not found'
+      });
+    }
+
+    const logoPath = user.branding.logo.path;
+    res.sendFile(logoPath, { root: '.' });
+  } catch (error) {
+    logger.error('Error serving user logo:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to serve logo'
     });
   }
 });
