@@ -103,13 +103,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white/90 backdrop-blur-xl shadow-2xl border-r border-white/20">
-          <div className="flex h-16 items-center justify-between px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20">
-            <div className="flex items-center">
+          <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20 relative">
+            <div className="flex flex-col items-center">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt="Company Logo"
-                  className="h-8 w-8 object-contain rounded-xl shadow-lg"
+                  className="h-20 w-20 object-contain rounded-2xl shadow-2xl mb-3 border-2 border-white/30"
                   onError={(e) => {
                     console.error('Failed to load logo:', logoUrl);
                     const target = e.target as HTMLImageElement;
@@ -117,17 +117,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                 />
               ) : (
-                <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-sm">K</span>
+                <div className="h-20 w-20 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/30 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <span className="text-white font-bold text-3xl relative z-10">K</span>
                 </div>
               )}
-              <span className="ml-2 text-lg font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <span className="text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-center">
                 {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
               </span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-white/50 transition-all duration-200"
+              className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-white/50 transition-all duration-200"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -199,26 +200,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white/90 backdrop-blur-xl shadow-2xl border-r border-white/20">
-          <div className="flex h-16 items-center px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20">
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt="Company Logo"
-                className="h-8 w-8 object-contain rounded-xl shadow-lg"
-                onError={(e) => {
-                  console.error('Failed to load logo:', logoUrl);
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-            )}
-            <span className="ml-2 text-lg font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-              {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
-            </span>
+          <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-b border-white/20">
+            <div className="flex flex-col items-center">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt="Company Logo"
+                  className="h-20 w-20 object-contain rounded-2xl shadow-2xl mb-3 border-2 border-white/30"
+                  onError={(e) => {
+                    console.error('Failed to load logo:', logoUrl);
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="h-20 w-20 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/30 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                  <span className="text-white font-bold text-3xl relative z-10">K</span>
+                </div>
+              )}
+              <span className="text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-center">
+                {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
+              </span>
+            </div>
           </div>
           <nav className="flex-1 space-y-2 px-3 py-6">
             {filteredNavigation.map((item) => (
