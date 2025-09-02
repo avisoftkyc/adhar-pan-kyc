@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 interface LoginFormData {
   email: string;
@@ -20,7 +20,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, user } = useAuth();
-  
+
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
@@ -28,12 +28,8 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, user]);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: yupResolver(schema),
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: yupResolver(schema)
   });
 
   const onSubmit = async (data: LoginFormData) => {
@@ -41,151 +37,149 @@ const Login: React.FC = () => {
     try {
       await login(data.email, data.password);
     } catch (error) {
-      // Error is handled by the auth context
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">K</span>
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-indigo-950 to-black relative overflow-hidden">
+      {/* Enhanced Cosmic Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Floating Stars */}
+        <div className="absolute top-20 left-20 w-3 h-3 bg-white rounded-full animate-pulse opacity-80 shadow-lg shadow-white/50"></div>
+        <div className="absolute top-40 right-32 w-2 h-2 bg-blue-300 rounded-full animate-pulse opacity-90 shadow-lg shadow-blue-300/50"></div>
+        <div className="absolute bottom-32 left-32 w-2.5 h-2.5 bg-purple-300 rounded-full animate-pulse opacity-80 shadow-lg shadow-purple-300/50"></div>
+        <div className="absolute top-1/2 left-1/4 w-1.5 h-1.5 bg-cyan-300 rounded-full animate-pulse opacity-70 shadow-lg shadow-cyan-300/50"></div>
+        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-pink-300 rounded-full animate-pulse opacity-80 shadow-lg shadow-pink-300/50"></div>
+        
+        {/* Additional Cosmic Elements */}
+        <div className="absolute top-1/4 left-1/3 w-1 h-1 bg-yellow-200 rounded-full animate-pulse opacity-60 shadow-lg shadow-yellow-200/50"></div>
+        <div className="absolute bottom-1/4 right-1/3 w-1.5 h-1.5 bg-emerald-300 rounded-full animate-pulse opacity-70 shadow-lg shadow-emerald-300/50"></div>
+        
+        {/* Large Nebula Effect */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+      
+      {/* Centered Form */}
+      <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+        <div className="max-w-md w-full space-y-8">
+          {/* Enhanced Header */}
+          <div className="text-center">
+            <div className="mx-auto h-24 w-24 bg-gradient-to-br from-purple-500 via-indigo-500 to-cyan-400 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-purple-500/30 transform hover:scale-110 transition-transform duration-300">
+              <SparklesIcon className="h-12 w-12 text-white drop-shadow-lg" />
+            </div>
+            <h2 className="mt-8 text-6xl font-black text-white tracking-tight drop-shadow-2xl">
+              Welcome back
+            </h2>
+            <p className="mt-4 text-xl text-purple-100 font-medium drop-shadow-lg">
+              Sign in to your KYC Aadhaar System account
+            </p>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Welcome back to the KYC Aadhaar System
-          </p>
-        </div>
 
-        <div className="bg-white py-8 px-6 shadow-xl rounded-xl">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  {...register('email')}
-                  className={`input-field ${errors.email ? 'border-error-300 focus:ring-error-500' : ''}`}
-                  placeholder="Enter your email"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-error-600">{errors.email.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  {...register('password')}
-                  className={`input-field pr-10 ${errors.password ? 'border-error-300 focus:ring-error-500' : ''}`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-error-600">{errors.password.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
+          {/* Enhanced Form Container */}
+          <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] p-10 shadow-2xl shadow-purple-500/20 border border-white/50 transform hover:scale-[1.02] transition-all duration-500">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+              {/* Enhanced Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-3">
+                  Email address
                 </label>
+                <div className="relative group">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-purple-500 transition-colors duration-300 group-focus-within:text-purple-600" />
+                  <input
+                    id="email"
+                    type="email"
+                    {...register('email')}
+                    className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-sm text-red-600 mt-2 ml-1">{errors.email.message}</p>
+                )}
               </div>
 
-              <div className="text-sm">
+              {/* Enhanced Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-3">
+                  Password
+                </label>
+                <div className="relative group">
+                  <LockClosedIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-purple-500 transition-colors duration-300 group-focus-within:text-purple-600" />
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    {...register('password')}
+                    className="block w-full pl-12 pr-16 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors duration-300 p-1 rounded-lg hover:bg-purple-50"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-red-600 mt-2 ml-1">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* Enhanced Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center group">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-5 w-5 text-purple-600 focus:ring-4 focus:ring-purple-500/20 border-2 border-gray-300 rounded-xl transition-all duration-300 hover:border-purple-400"
+                  />
+                  <label htmlFor="remember-me" className="ml-3 block text-sm text-gray-700 font-medium group-hover:text-gray-900 transition-colors duration-300">
+                    Remember me
+                  </label>
+                </div>
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-primary-600 hover:text-primary-500"
+                  className="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors duration-300 hover:underline"
                 >
-                  Forgot your password?
+                  Forgot password?
                 </Link>
               </div>
-            </div>
 
-            <div>
+              {/* Magnificent Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-primary w-full flex justify-center py-3 px-4"
+                className="w-full flex justify-center py-4 px-6 border border-transparent rounded-2xl shadow-2xl shadow-purple-500/30 text-sm font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-700 hover:via-indigo-700 hover:to-cyan-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30 disabled:opacity-50 transform hover:scale-[1.02] hover:shadow-3xl hover:shadow-purple-500/40 transition-all duration-300"
               >
                 {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Signing in...
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Signing in...</span>
                   </div>
                 ) : (
                   'Sign in'
                 )}
               </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">New to the platform?</span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Link
-                to="/register"
-                className="btn-secondary w-full flex justify-center py-3 px-4"
-              >
-                Create a new account
-              </Link>
-            </div>
+            </form>
           </div>
-        </div>
 
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            By signing in, you agree to our{' '}
-            <a href="#" className="text-primary-600 hover:text-primary-500">
-              Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="#" className="text-primary-600 hover:text-primary-500">
-              Privacy Policy
-            </a>
-          </p>
+          {/* Enhanced Footer */}
+          <div className="text-center">
+            <p className="text-sm text-purple-100 drop-shadow-lg">
+              By signing in, you agree to our{' '}
+              <a href="#" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="#" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
+                Privacy Policy
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
