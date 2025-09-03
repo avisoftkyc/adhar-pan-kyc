@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
   UserGroupIcon, 
@@ -90,12 +91,14 @@ interface SystemStats {
 
 const Admin: React.FC = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('users');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [users, setUsers] = useState<User[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [userStats, setUserStats] = useState<any>(null);
   const [apiUsageStats, setApiUsageStats] = useState<any>(null);
+  const [userApiHitCounts, setUserApiHitCounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -123,13 +126,23 @@ const Admin: React.FC = () => {
   });
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchUsers();
-      fetchSystemStats();
-      fetchUserStats();
-      fetchApiUsageStats();
+    if (!user) {
+      navigate('/login');
+      return;
     }
-  }, [user]);
+    
+    if (user.role !== 'admin') {
+      navigate('/dashboard');
+      return;
+    }
+
+    // User is admin, fetch data
+    fetchUsers();
+    fetchSystemStats();
+    fetchUserStats();
+    fetchApiUsageStats();
+    fetchUserApiHitCounts();
+  }, [user, navigate]);
 
   const fetchUsers = async () => {
     try {
@@ -182,6 +195,66 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error('Error fetching API usage stats:', error);
     }
+  };
+
+  // Mock data for user API hit counts
+  const mockUserApiHitCounts = [
+    {
+      userId: 'user1',
+      userName: 'John Doe',
+      userEmail: 'john.doe@example.com',
+      totalHits: 1247,
+      lastActive: new Date(Date.now() - 300000).toISOString(),
+      endpoints: [
+        { endpoint: '/api/pan-kyc/upload', hits: 456, lastUsed: new Date(Date.now() - 5000).toISOString() },
+        { endpoint: '/api/pan-kyc/batches', hits: 234, lastUsed: new Date(Date.now() - 12000).toISOString() },
+        { endpoint: '/api/aadhaar-pan/verify', hits: 189, lastUsed: new Date(Date.now() - 18000).toISOString() },
+        { endpoint: '/api/users/profile', hits: 123, lastUsed: new Date(Date.now() - 25000).toISOString() }
+      ],
+      modules: [
+        { module: 'pan-kyc', hits: 690 },
+        { module: 'aadhaar-pan', hits: 189 },
+        { module: 'users', hits: 123 }
+      ]
+    },
+    {
+      userId: 'user2',
+      userName: 'Jane Smith',
+      userEmail: 'jane.smith@example.com',
+      totalHits: 892,
+      lastActive: new Date(Date.now() - 600000).toISOString(),
+      endpoints: [
+        { endpoint: '/api/aadhaar-pan/verify', hits: 345, lastUsed: new Date(Date.now() - 12000).toISOString() },
+        { endpoint: '/api/aadhaar-pan/upload', hits: 234, lastUsed: new Date(Date.now() - 18000).toISOString() },
+        { endpoint: '/api/pan-kyc/batches', hits: 123, lastUsed: new Date(Date.now() - 25000).toISOString() }
+      ],
+      modules: [
+        { module: 'aadhaar-pan', hits: 579 },
+        { module: 'pan-kyc', hits: 123 }
+      ]
+    },
+    {
+      userId: 'user3',
+      userName: 'Mike Johnson',
+      userEmail: 'mike.johnson@example.com',
+      totalHits: 567,
+      lastActive: new Date(Date.now() - 900000).toISOString(),
+      endpoints: [
+        { endpoint: '/api/users/profile', hits: 234, lastUsed: new Date(Date.now() - 18000).toISOString() },
+        { endpoint: '/api/pan-kyc/upload', hits: 123, lastUsed: new Date(Date.now() - 25000).toISOString() },
+        { endpoint: '/api/admin/stats', hits: 89, lastUsed: new Date(Date.now() - 32000).toISOString() }
+      ],
+      modules: [
+        { module: 'users', hits: 234 },
+        { module: 'pan-kyc', hits: 123 },
+        { module: 'admin', hits: 89 }
+      ]
+    }
+  ];
+
+  const fetchUserApiHitCounts = async () => {
+    // Simulate API call with mock data
+    setUserApiHitCounts(mockUserApiHitCounts);
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -484,6 +557,7 @@ const Admin: React.FC = () => {
       {/* Enhanced Tab Navigation */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
         <nav className="flex space-x-2">
+        
           <button
             onClick={() => setActiveTab('users')}
             className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
@@ -546,8 +620,133 @@ const Admin: React.FC = () => {
             </svg>
             API Analytics
           </button>
+          <button
+            onClick={() => setActiveTab('user-api-counts')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'user-api-counts'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            User API Counts
+          </button>
         </nav>
       </div>
+
+      {/* Dashboard Tab */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5v14" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 5v14" />
+                </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard</h2>
+                <p className="text-gray-600 mt-1">Welcome back! Here's an overview of your system</p>
+              </div>
+            </div>
+
+            {/* Quick Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Total Users</p>
+                    <p className="text-2xl font-bold text-blue-900">{systemStats?.users?.total || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                    <UserGroupIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">Active Users</p>
+                    <p className="text-2xl font-bold text-emerald-900">{systemStats?.users?.active || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">PAN KYC Records</p>
+                    <p className="text-2xl font-bold text-purple-900">{systemStats?.panKyc?.length || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-600">Aadhaar Records</p>
+                    <p className="text-2xl font-bold text-orange-900">{systemStats?.aadhaarPan?.length || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Recent System Activity
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Latest updates and activities across your system
+                </p>
+              </div>
+              
+              <div className="p-6">
+                {systemStats?.userPerformance?.recentActivity?.slice(0, 5).map((activity, idx) => (
+                  <div key={idx} className="flex items-center py-3 border-b border-gray-100 last:border-b-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+                      {activity.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{activity.name}</p>
+                      <p className="text-xs text-gray-500">{activity.action}</p>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {new Date(activity.timestamp).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Users Tab */}
       {activeTab === 'users' && (
@@ -1201,6 +1400,176 @@ const Admin: React.FC = () => {
                     <p>No API performance data available</p>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User API Hit Counts Tab */}
+      {activeTab === 'user-api-counts' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">User API Hit Counts & Details</h2>
+                <p className="text-gray-600 mt-1">Comprehensive overview of user API usage patterns and statistics</p>
+              </div>
+            </div>
+
+            {/* User API Usage Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Total Users</p>
+                    <p className="text-2xl font-bold text-blue-900">{userApiHitCounts.length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                    <UserGroupIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">Total API Hits</p>
+                    <p className="text-2xl font-bold text-emerald-900">
+                      {userApiHitCounts.reduce((sum, user) => sum + user.totalHits, 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">Avg Hits/User</p>
+                    <p className="text-2xl font-bold text-purple-900">
+                      {userApiHitCounts.length > 0 
+                        ? Math.round(userApiHitCounts.reduce((sum, user) => sum + user.totalHits, 0) / userApiHitCounts.length)
+                        : 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2zm0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* User API Usage Details Table */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  User API Usage Details
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Detailed breakdown of each user's API usage patterns and endpoint preferences
+                </p>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        User Details
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        API Usage Summary
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Top Endpoints
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Module Usage
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Last Activity
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {userApiHitCounts.map((user) => (
+                      <tr key={user.userId} className="hover:bg-gray-50 transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold mr-4">
+                              {user.userName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold text-gray-900">{user.userName}</div>
+                              <div className="text-sm text-gray-500">{user.userEmail}</div>
+                              <div className="text-xs text-gray-400">ID: {user.userId}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-emerald-600">{user.totalHits.toLocaleString()}</div>
+                            <div className="text-sm text-gray-500">Total API Hits</div>
+                            <div className="text-xs text-gray-400 mt-1">
+                              {user.endpoints.length} endpoints used
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            {user.endpoints.slice(0, 3).map((endpoint: any, idx: number) => (
+                              <div key={idx} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
+                                <div className="text-sm font-mono text-gray-700 truncate max-w-32" title={endpoint.endpoint}>
+                                  {endpoint.endpoint}
+                                </div>
+                                <div className="text-sm font-bold text-emerald-600">{endpoint.hits}</div>
+                              </div>
+                            ))}
+                            {user.endpoints.length > 3 && (
+                              <div className="text-xs text-gray-500 text-center">
+                                +{user.endpoints.length - 3} more endpoints
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            {user.modules.map((module: any, idx: number) => (
+                              <div key={idx} className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700 capitalize">{module.module}</span>
+                                <span className="text-sm font-bold text-purple-600">{module.hits}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          <div>{new Date(user.lastActive).toLocaleDateString()}</div>
+                          <div className="text-xs">{new Date(user.lastActive).toLocaleTimeString()}</div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {Math.round((Date.now() - new Date(user.lastActive).getTime()) / 60000)} min ago
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
