@@ -892,13 +892,17 @@ const AadhaarPan: React.FC = () => {
                 <h2 className="text-lg font-medium text-gray-900">
                   Batch Details: {selectedBatch.batchId}
                 </h2>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <button
                     onClick={() => downloadBatchData(selectedBatch.batchId, selectedBatch.records)}
-                    className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    className="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 text-white font-semibold rounded-2xl shadow-xl hover:shadow-2xl hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-700 transform hover:scale-105 transition-all duration-300 border border-emerald-400/20 hover:border-emerald-300/40"
                   >
-                    <ArrowDownTrayIcon className="h-4 w-4 mr-1" />
-                    Download
+                    <div className="relative">
+                      <ArrowDownTrayIcon className="h-5 w-5 mr-2 transition-transform duration-300 group-hover:translate-y-0.5" />
+                      <div className="absolute inset-0 w-5 h-5 bg-white/20 rounded-full blur-sm group-hover:blur-md transition-all duration-300"></div>
+                    </div>
+                    <span className="relative z-10">Download Data</span>
+                    <div className="ml-2 w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
                   </button>
                 </div>
               </div>
