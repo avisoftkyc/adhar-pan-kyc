@@ -596,168 +596,293 @@ const AadhaarPan: React.FC = () => {
       {activeTab === 'upload' && (
         <>
           {/* File Upload Section */}
-          <div className="card">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Upload Aadhaar-PAN Linking File</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+            {/* Card Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-teal-50/50"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200/30 rounded-full blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-200/30 rounded-full blur-2xl"></div>
             
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Excel File
-                </label>
-                <input
-                  ref={fileInputRef}
-                  id="file-upload"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  File should contain columns: aadhaarNumber, panNumber, name
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl mb-4 shadow-lg">
+                  <CloudArrowUpIcon className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Aadhaar-PAN Linking File</h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Upload your Excel file to verify Aadhaar-PAN linking in bulk. 
+                  The system will process and verify each record automatically.
                 </p>
               </div>
 
-              {selectedFile && (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <DocumentTextIcon className="h-5 w-5 text-green-500" />
-                    <span className="text-sm text-gray-700">{selectedFile.name}</span>
+              {/* File Upload Area */}
+              <div className="space-y-6">
+                {/* File Input Card */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border-2 border-dashed border-emerald-200 hover:border-emerald-300 transition-all duration-300">
+                  <div className="text-center">
+                    <DocumentTextIcon className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <div className="space-y-2">
+                        <span className="text-lg font-semibold text-emerald-700">
+                          {selectedFile ? 'File Selected' : 'Choose Excel File'}
+                        </span>
+                        <p className="text-sm text-emerald-600">
+                          {selectedFile ? selectedFile.name : 'or drag and drop here'}
+                        </p>
+                        <p className="text-xs text-emerald-500">
+                          Supports .xlsx and .xls files
+                        </p>
+                      </div>
+                    </label>
+                    <input
+                      ref={fileInputRef}
+                      id="file-upload"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
                   </div>
-                  <button
-                    onClick={() => {
-                      setSelectedFile(null);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = '';
-                      }
-                    }}
-                    className="text-red-500 hover:text-red-700 text-sm font-medium"
-                  >
-                    Clear
-                  </button>
                 </div>
-              )}
 
-              {uploadProgress > 0 && uploadProgress < 100 && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-green-600 h-2.5 rounded-full transition-all duration-300" 
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+                {/* File Requirements Card */}
+                <div className="bg-blue-50 rounded-2xl p-6 border border-blue-200">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <CheckIcon className="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-blue-900 mb-2">File Requirements</h3>
+                      <div className="space-y-2 text-sm text-blue-800">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">aadhaarNumber</code></span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">panNumber</code></span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">name</code></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              <button
-                onClick={handleUpload}
-                disabled={!selectedFile || uploading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <CloudArrowUpIcon className="h-4 w-4 mr-2" />
-                    Upload File
-                  </>
+                {/* Selected File Display */}
+                {selectedFile && (
+                  <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                          <DocumentTextIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-green-900">{selectedFile.name}</h3>
+                          <p className="text-sm text-green-700">
+                            Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = '';
+                          }
+                        }}
+                        className="p-2 text-green-600 hover:text-green-800 hover:bg-green-100 rounded-xl transition-colors duration-200"
+                        title="Clear file"
+                      >
+                        <XCircleIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </button>
+
+                {/* Upload Progress */}
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Upload Progress</span>
+                        <span className="text-sm font-medium text-gray-900">{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-emerald-500 to-teal-600 h-3 rounded-full transition-all duration-300 ease-out" 
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="text-center">
+                  <button
+                    onClick={handleUpload}
+                    disabled={!selectedFile || uploading}
+                    className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-2xl shadow-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                        Processing Upload...
+                      </>
+                    ) : (
+                      <>
+                        <CloudArrowUpIcon className="h-6 w-6 mr-3" />
+                        {selectedFile ? 'Upload & Process File' : 'Select File First'}
+                      </>
+                    )}
+                  </button>
+                  {!selectedFile && (
+                    <p className="text-sm text-gray-500 mt-3">
+                      Please select a file to enable upload
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Batches List */}
-          <div className="card">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Uploaded Documents</h2>
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/30 relative overflow-hidden">
+            {/* Card Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-50/50 to-gray-50/50"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-slate-200/30 rounded-full blur-2xl"></div>
             
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-slate-500 to-gray-600 rounded-2xl mb-4 shadow-lg">
+                  <DocumentTextIcon className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Uploaded Documents</h2>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  View and manage your uploaded Aadhaar-PAN linking batches. 
+                  Click on any batch to see detailed records and verification status.
+                </p>
               </div>
-            ) : batches.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p>No documents uploaded yet</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {currentBatches.map((batch) => (
-                  <div
-                    key={batch._id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-                      selectedBatch?.batchId === batch._id
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => fetchBatchDetails(batch._id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          selectedBatch?.batchId === batch._id ? 'bg-green-500' : 'bg-gray-300'
-                        }`}></div>
-                        <div>
-                          <h3 className="font-medium text-gray-900">{batch._id}</h3>
-                          <p className="text-sm text-gray-500">
-                            {batch.totalRecords} records • {formatDate(batch.createdAt)}
-                          </p>
+            
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600 mx-auto mb-4"></div>
+                    <p className="text-slate-600">Loading batches...</p>
+                  </div>
+                </div>
+              ) : batches.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <DocumentTextIcon className="h-12 w-12 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-700 mb-2">No Documents Yet</h3>
+                  <p className="text-slate-500 max-w-sm mx-auto">
+                    Upload your first Excel file to get started with Aadhaar-PAN linking verification.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {currentBatches.map((batch) => (
+                    <div
+                      key={batch._id}
+                      className={`bg-white rounded-2xl p-6 cursor-pointer transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl border-2 ${
+                        selectedBatch?.batchId === batch._id
+                          ? 'border-emerald-500 bg-emerald-50/30 shadow-emerald-100'
+                          : 'border-gray-100 hover:border-gray-200'
+                      }`}
+                      onClick={() => fetchBatchDetails(batch._id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                            selectedBatch?.batchId === batch._id ? 'bg-emerald-500 scale-125' : 'bg-slate-300'
+                          }`}></div>
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl flex items-center justify-center">
+                              <DocumentTextIcon className="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 text-lg">{batch._id}</h3>
+                              <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                                <span className="flex items-center space-x-1">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <span>{batch.totalRecords} records</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <ClockIcon className="h-4 w-4" />
+                                  <span>{formatDate(batch.createdAt)}</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadBatchData(batch._id, selectedBatch?.records || []);
+                            }}
+                            className="p-3 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all duration-200"
+                            title="Download batch data"
+                          >
+                            <ArrowDownTrayIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteBatch(batch._id);
+                            }}
+                            className="p-3 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                            title="Delete batch"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            downloadBatchData(batch._id, selectedBatch?.records || []);
-                          }}
-                          className="p-2 text-gray-400 hover:text-gray-600"
-                          title="Download"
-                        >
-                          <ArrowDownTrayIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteBatch(batch._id);
-                          }}
-                          className="p-2 text-gray-400 hover:text-red-600"
-                          title="Delete"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
+                    </div>
+                  ))}
+
+                  {/* Enhanced Pagination */}
+                  {totalPages > 1 && (
+                    <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-8">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-gray-700">
+                          Showing <span className="font-semibold">{indexOfFirstDocument + 1}</span> to{' '}
+                          <span className="font-semibold">{Math.min(indexOfLastDocument, batches.length)}</span> of{' '}
+                          <span className="font-semibold">{batches.length}</span> documents
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            Previous
+                          </button>
+                          <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-xl">
+                            {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                          >
+                            Next
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm text-gray-700">
-                      Showing {indexOfFirstDocument + 1} to {Math.min(indexOfLastDocument, batches.length)} of {batches.length} documents
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
-                      >
-                        Previous
-                      </button>
-                      <span className="px-3 py-1 text-sm text-gray-700">
-                        {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Batch Details */}
