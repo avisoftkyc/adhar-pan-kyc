@@ -282,7 +282,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Enhanced Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/30 bg-white/90 backdrop-blur-xl px-4 shadow-xl sm:gap-x-6 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/30 bg-white/90 backdrop-blur-xl px-4 shadow-xl sm:gap-x-6 sm:px-6 lg:px-8 relative overflow-visible">
           {/* Enhanced Background Pattern */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/40 via-teal-50/40 to-cyan-50/40"></div>
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200/20 rounded-full blur-2xl"></div>
@@ -319,7 +319,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </button>
 
                 {/* Enhanced Profile dropdown */}
-                <div className="relative" ref={profileDropdownRef}>
+                <div className="relative overflow-visible" ref={profileDropdownRef}>
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     className="flex items-center gap-x-3 p-2.5 rounded-2xl hover:bg-white/60 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300"
@@ -339,18 +339,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <ChevronDownIcon className="h-4 w-4 text-slate-500" />
                   </button>
 
-                  {/* Enhanced Dropdown menu */}
+                  {/* Simple Dropdown menu */}
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl ring-1 ring-black/5 z-50 border border-white/30 animate-fade-in-up">
-                      <div className="py-2">
+                    <div 
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+                      style={{ 
+                        display: 'block',
+                        position: 'absolute',
+                        top: '100%',
+                        right: '0',
+                        marginTop: '8px'
+                      }}
+                    >
+                      <div className="py-1">
                         {/* Profile link */}
                         <Link
                           to="/profile"
-                          className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300 rounded-xl mx-2"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
                           onClick={() => setProfileDropdownOpen(false)}
                         >
-                          <UserCircleIcon className="mr-3 h-5 w-5 text-slate-400" />
-                          Profile
+                          <div className="flex items-center">
+                            <UserCircleIcon className="mr-3 h-5 w-5 text-gray-400" />
+                            Profile
+                          </div>
                         </Link>
                         
                         {/* Logout button */}
@@ -359,12 +370,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             logout();
                             setProfileDropdownOpen(false);
                           }}
-                          className="flex w-full items-center px-4 py-3 text-sm text-red-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 rounded-xl mx-2"
+                          className="block w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
                         >
-                          <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                          </svg>
-                          Logout
+                          <div className="flex items-center">
+                            <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout
+                          </div>
                         </button>
                       </div>
                     </div>
