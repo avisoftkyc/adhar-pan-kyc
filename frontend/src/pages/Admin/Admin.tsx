@@ -77,6 +77,15 @@ interface SystemStats {
     recentActivity: Array<{ userId: string; name: string; action: string; timestamp: string }>;
     userEngagement: Array<{ userId: string; name: string; loginCount: number; lastLogin: string }>;
   };
+  apiUsage: {
+    totalHits: number;
+    uniqueUsers: number;
+    topApiEndpoints: Array<{ endpoint: string; hits: number; users: number }>;
+    userApiHits: Array<{ userId: string; name: string; email: string; totalHits: number; endpoints: Array<{ endpoint: string; hits: number; lastUsed: string }>; modules: Array<{ module: string; hits: number }>; hourlyDistribution: Array<{ hour: number; hits: number }>; dailyDistribution: Array<{ date: string; hits: number }> }>;
+    moduleUsage: Array<{ module: string; totalHits: number; uniqueUsers: number; avgHitsPerUser: number }>;
+    peakUsageHours: Array<{ hour: number; hits: number; users: number }>;
+    apiPerformance: Array<{ endpoint: string; avgResponseTime: number; successRate: number; errorRate: number }>;
+  };
 }
 
 const Admin: React.FC = () => {
@@ -86,6 +95,7 @@ const Admin: React.FC = () => {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [userStats, setUserStats] = useState<any>(null);
+  const [apiUsageStats, setApiUsageStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -117,6 +127,7 @@ const Admin: React.FC = () => {
       fetchUsers();
       fetchSystemStats();
       fetchUserStats();
+      fetchApiUsageStats();
     }
   }, [user]);
 
@@ -161,6 +172,15 @@ const Admin: React.FC = () => {
       setUserStats(response.data.data);
     } catch (error) {
       console.error('Error fetching user stats:', error);
+    }
+  };
+
+  const fetchApiUsageStats = async () => {
+    try {
+      const response = await api.get('/admin/api-usage-stats');
+      setApiUsageStats(response.data.data);
+    } catch (error) {
+      console.error('Error fetching API usage stats:', error);
     }
   };
 
@@ -512,6 +532,19 @@ const Admin: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             User Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('api')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'api'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            API Analytics
           </button>
         </nav>
       </div>
@@ -911,6 +944,263 @@ const Admin: React.FC = () => {
                   <p className="text-2xl font-bold text-blue-900">{systemStats?.users.new || 0}</p>
                   <p className="text-sm text-gray-600">New This Month</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* API Analytics Tab */}
+      {activeTab === 'api' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">API Usage Analytics Dashboard</h2>
+            </div>
+
+            {/* API Overview Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-indigo-600">Total API Hits</p>
+                    <p className="text-2xl font-bold text-indigo-900">{systemStats?.apiUsage?.totalHits || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">Unique Users</p>
+                    <p className="text-2xl font-bold text-purple-900">{systemStats?.apiUsage?.uniqueUsers || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                    <UserGroupIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">Avg Hits/User</p>
+                    <p className="text-2xl font-bold text-emerald-900">
+                      {systemStats?.apiUsage?.totalHits && systemStats?.apiUsage?.uniqueUsers 
+                        ? Math.round(systemStats.apiUsage.totalHits / systemStats.apiUsage.uniqueUsers) 
+                        : 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2zm0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top API Endpoints */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Top API Endpoints
+              </h3>
+              <div className="space-y-3">
+                {systemStats?.apiUsage?.topApiEndpoints?.slice(0, 8).map((endpoint, index) => (
+                  <div key={endpoint.endpoint} className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900 font-mono text-sm">{endpoint.endpoint}</p>
+                        <p className="text-sm text-gray-600">{endpoint.users} users</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-indigo-600">{endpoint.hits.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500">hits</p>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p>No API usage data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* User API Usage Ranking */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                User API Usage Ranking
+              </h3>
+              <div className="space-y-3">
+                {systemStats?.apiUsage?.userApiHits?.slice(0, 10).map((user, index) => (
+                  <div key={user.userId} className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-lg font-bold mr-4">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{user.name}</p>
+                        <p className="text-sm text-gray-600">{user.email}</p>
+                        <div className="flex items-center mt-1 space-x-2">
+                          {user.modules.slice(0, 3).map((module, idx) => (
+                            <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              {module.module}: {module.hits}
+                            </span>
+                          ))}
+                          {user.modules.length > 3 && (
+                            <span className="text-xs text-gray-500">+{user.modules.length - 3} more</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-purple-600">{user.totalHits.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">total hits</p>
+                      <p className="text-xs text-gray-400">{user.endpoints.length} endpoints</p>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p>No user API usage data available</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Module Usage Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                  </svg>
+                  Module Usage Analytics
+                </h3>
+                <div className="space-y-3">
+                  {systemStats?.apiUsage?.moduleUsage?.map((module) => (
+                    <div key={module.module} className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+                      <div>
+                        <p className="font-medium text-gray-900 capitalize">{module.module}</p>
+                        <p className="text-sm text-gray-600">{module.uniqueUsers} users</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-emerald-600">{module.totalHits.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">hits</p>
+                        <p className="text-xs text-emerald-500">{Math.round(module.avgHitsPerUser)} avg/user</p>
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
+                      </svg>
+                      <p>No module usage data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Peak Usage Hours
+                </h3>
+                <div className="space-y-3">
+                  {systemStats?.apiUsage?.peakUsageHours?.slice(0, 6).map((hour) => (
+                    <div key={hour.hour} className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold mr-3">
+                          {hour.hour}:00
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{hour.users} users</p>
+                          <p className="text-sm text-gray-600">active</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-blue-600">{hour.hits.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">hits</p>
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p>No peak usage data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* API Performance Metrics */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                API Performance Metrics
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {systemStats?.apiUsage?.apiPerformance?.slice(0, 6).map((api) => (
+                  <div key={api.endpoint} className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
+                    <div className="mb-3">
+                      <p className="font-medium text-gray-900 font-mono text-sm truncate">{api.endpoint}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Response Time:</span>
+                        <span className="text-sm font-medium text-gray-900">{api.avgResponseTime}ms</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Success Rate:</span>
+                        <span className="text-sm font-medium text-emerald-600">{api.successRate}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Error Rate:</span>
+                        <span className="text-sm font-medium text-red-600">{api.errorRate}%</span>
+                      </div>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p>No API performance data available</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
