@@ -721,13 +721,28 @@ const PanKyc: React.FC = () => {
                   <p className="text-blue-600/70 mb-4">
                     Supports .xlsx and .xls formats
                   </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleFileSelect}
-                    className="block w-full text-sm text-blue-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-purple-600 file:text-white file:hover:from-blue-600 file:hover:to-purple-700 file:transition-all file:duration-300 file:shadow-lg file:hover:shadow-xl"
-                  />
+                  
+                  {/* Centered File Input */}
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="file-input"
+                      />
+                      <label
+                        htmlFor="file-input"
+                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-400/30"
+                      >
+                        <DocumentTextIcon className="h-6 w-6 mr-3" />
+                        Choose File
+                      </label>
+                    </div>
+                  </div>
+                  
                   <p className="mt-3 text-sm text-blue-500/70">
                     Required columns: <span className="font-semibold">panNumber</span>, <span className="font-semibold">name</span>, <span className="font-semibold">dateOfBirth</span>
                   </p>
