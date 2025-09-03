@@ -102,96 +102,111 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Sidebar for mobile */}
       <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white/90 backdrop-blur-xl shadow-2xl border-r border-white/20">
-          <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-white/20 relative">
-            <div className="flex flex-col items-center">
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt="Company Logo"
-                  className="h-20 w-20 object-contain rounded-2xl shadow-2xl mb-3 border-2 border-white/30"
-                  onError={(e) => {
-                    console.error('Failed to load logo:', logoUrl);
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="h-20 w-20 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/30 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                  <span className="text-white font-bold text-3xl relative z-10">K</span>
-                </div>
-              )}
-              <span className="text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-center">
-                {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
-              </span>
-            </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-white/50 transition-all duration-200"
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-          <nav className="flex-1 space-y-2 px-3 py-6">
-            {filteredNavigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform hover:scale-105 ${
-                  item.current
-                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-700 shadow-lg border border-blue-200/50'
-                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-800 hover:shadow-md'
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <div className={`p-2 rounded-lg mr-3 transition-all duration-300 ${
-                  item.current 
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg' 
-                    : 'bg-slate-100 text-slate-500 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:to-purple-600 group-hover:text-white'
-                }`}>
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                </div>
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white/95 backdrop-blur-xl shadow-2xl border-r border-white/30 relative overflow-hidden">
+          {/* Enhanced Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-teal-50/30 to-cyan-50/30"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-200/20 rounded-full blur-3xl"></div>
           
-          {/* Mobile Profile Section */}
-          <div className="border-t border-white/20 px-3 py-4 bg-gradient-to-r from-slate-50/50 to-blue-50/50">
-            <div className="flex items-center px-3 py-3 bg-white/60 rounded-xl backdrop-blur-sm">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                <span className="text-white font-medium text-sm">
-                  {user?.name?.charAt(0).toUpperCase()}
+          <div className="relative z-10">
+            {/* Enhanced Header */}
+            <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-b border-white/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+              <div className="relative z-10 flex flex-col items-center">
+                {logoUrl ? (
+                  <div className="relative group">
+                    <img
+                      src={logoUrl}
+                      alt="Company Logo"
+                      className="h-20 w-20 object-contain rounded-3xl shadow-2xl mb-3 border-2 border-white/40 transition-all duration-300 group-hover:scale-105 group-hover:shadow-3xl"
+                      onError={(e) => {
+                        console.error('Failed to load logo:', logoUrl);
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-400/20 to-teal-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 rounded-3xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/40 relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                    <span className="text-white font-bold text-3xl relative z-10">K</span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                )}
+                <span className="text-sm font-semibold bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-600 bg-clip-text text-transparent text-center">
+                  {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
                 </span>
               </div>
-              <div className="ml-3">
-                <div className="text-sm font-medium text-slate-800">{user?.name}</div>
-                <div className="text-xs text-slate-500">{user?.email}</div>
-              </div>
-            </div>
-            <div className="mt-3 space-y-2">
-              <Link
-                to="/profile"
-                className="flex items-center px-3 py-2 text-sm text-slate-600 hover:bg-white/60 hover:text-slate-800 rounded-xl transition-all duration-200"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <UserCircleIcon className="mr-3 h-5 w-5 text-slate-400" />
-                Profile
-              </Link>
-
               <button
-                onClick={() => {
-                  logout();
-                  setSidebarOpen(false);
-                }}
-                className="flex w-full items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-800 rounded-xl transition-all duration-200"
+                onClick={() => setSidebarOpen(false)}
+                className="absolute top-3 right-3 text-slate-500 hover:text-slate-700 p-2 rounded-2xl hover:bg-white/60 hover:shadow-lg transition-all duration-300"
               >
-                <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Logout
+                <XMarkIcon className="h-5 w-5" />
               </button>
+            </div>
+            
+            {/* Enhanced Navigation */}
+            <nav className="flex-1 space-y-3 px-4 py-6">
+              {filteredNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                    item.current
+                      ? 'bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 text-emerald-700 shadow-xl border border-emerald-200/50'
+                      : 'text-slate-600 hover:bg-white/80 hover:text-slate-800 hover:shadow-lg'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <div className={`p-2.5 rounded-xl mr-3 transition-all duration-300 ${
+                    item.current 
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg' 
+                      : 'bg-slate-100 text-slate-500 group-hover:bg-gradient-to-br group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:text-white group-hover:shadow-lg'
+                  }`}>
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                  </div>
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+            
+            {/* Enhanced Mobile Profile Section */}
+            <div className="border-t border-white/30 px-4 py-6 bg-gradient-to-r from-slate-50/60 to-emerald-50/60">
+              <div className="flex items-center px-4 py-4 bg-white/80 rounded-2xl backdrop-blur-sm shadow-lg border border-white/40">
+                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-semibold text-lg">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="ml-4">
+                  <div className="text-sm font-semibold text-slate-800">{user?.name}</div>
+                  <div className="text-xs text-slate-600">{user?.email}</div>
+                </div>
+              </div>
+              <div className="mt-4 space-y-3">
+                <Link
+                  to="/profile"
+                  className="flex items-center px-4 py-3 text-sm text-slate-600 hover:bg-white/80 hover:text-slate-800 rounded-2xl transition-all duration-300 hover:shadow-lg"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <UserCircleIcon className="mr-3 h-5 w-5 text-slate-400" />
+                  Profile
+                </Link>
+
+                <button
+                  onClick={() => {
+                    logout();
+                    setSidebarOpen(false);
+                  }}
+                  className="flex w-full items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 hover:text-red-800 rounded-2xl transition-all duration-300 hover:shadow-lg"
+                >
+                  <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -199,141 +214,162 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white/90 backdrop-blur-xl shadow-2xl border-r border-white/20">
-          <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-b border-b border-white/20">
-            <div className="flex flex-col items-center">
-              {logoUrl ? (
-                <img
-                  src={logoUrl}
-                  alt="Company Logo"
-                  className="h-20 w-20 object-contain rounded-2xl shadow-2xl mb-3 border-2 border-white/30"
-                  onError={(e) => {
-                    console.error('Failed to load logo:', logoUrl);
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="h-20 w-20 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/30 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                  <span className="text-white font-bold text-3xl relative z-10">K</span>
-                </div>
-              )}
-              <span className="text-sm font-semibold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-center">
-                {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
-              </span>
+        <div className="flex flex-col flex-grow bg-white/95 backdrop-blur-xl shadow-2xl border-r border-white/30 relative overflow-hidden">
+          {/* Enhanced Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 via-teal-50/30 to-cyan-50/30"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-teal-200/20 rounded-full blur-3xl"></div>
+          
+          <div className="relative z-10">
+            {/* Enhanced Header */}
+            <div className="flex flex-col items-center justify-center h-48 px-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 border-b border-white/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+              <div className="relative z-10 flex flex-col items-center">
+                {logoUrl ? (
+                  <div className="relative group">
+                    <img
+                      src={logoUrl}
+                      alt="Company Logo"
+                      className="h-20 w-20 object-contain rounded-3xl shadow-2xl mb-3 border-2 border-white/40 transition-all duration-300 group-hover:scale-105 group-hover:shadow-3xl"
+                      onError={(e) => {
+                        console.error('Failed to load logo:', logoUrl);
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-400/20 to-teal-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                ) : (
+                  <div className="h-20 w-20 bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 rounded-3xl flex items-center justify-center shadow-2xl mb-3 border-2 border-white/40 relative overflow-hidden group hover:scale-105 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                    <span className="text-white font-bold text-3xl relative z-10">K</span>
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-400/20 to-teal-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                )}
+                <span className="text-sm font-semibold bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-600 bg-clip-text text-transparent text-center">
+                  {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
+                </span>
+              </div>
             </div>
+            
+            {/* Enhanced Navigation */}
+            <nav className="flex-1 space-y-3 px-4 py-6">
+              {filteredNavigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+                    item.current
+                      ? 'bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 text-emerald-700 shadow-xl border border-emerald-200/50'
+                      : 'text-slate-600 hover:bg-white/80 hover:text-slate-800 hover:shadow-lg'
+                  }`}
+                >
+                  <div className={`p-2.5 rounded-xl mr-3 transition-all duration-300 ${
+                    item.current 
+                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg' 
+                      : 'bg-slate-100 text-slate-500 group-hover:bg-gradient-to-br group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:text-white group-hover:shadow-lg'
+                  }`}>
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                  </div>
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
           </div>
-          <nav className="flex-1 space-y-2 px-3 py-6">
-            {filteredNavigation.map((item) => (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 transform hover:scale-105 ${
-                  item.current
-                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 text-blue-700 shadow-lg border border-blue-200/50'
-                    : 'text-slate-600 hover:bg-white/60 hover:text-slate-800 hover:shadow-md'
-                }`}
-              >
-                <div className={`p-2 rounded-lg mr-3 transition-all duration-300 ${
-                  item.current 
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg' 
-                    : 'bg-slate-100 text-slate-500 group-hover:bg-gradient-to-br group-hover:from-blue-500 group-hover:to-purple-600 group-hover:text-white'
-                }`}>
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                </div>
-                {item.name}
-              </Link>
-            ))}
-          </nav>
         </div>
       </div>
 
       {/* Main content */}
       <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/20 bg-white/80 backdrop-blur-xl px-4 shadow-lg sm:gap-x-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200 lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" />
-          </button>
+        {/* Enhanced Top bar */}
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/30 bg-white/90 backdrop-blur-xl px-4 shadow-xl sm:gap-x-6 sm:px-6 lg:px-8 relative overflow-hidden">
+          {/* Enhanced Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/40 via-teal-50/40 to-cyan-50/40"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200/20 rounded-full blur-2xl"></div>
+          
+          <div className="relative z-10 flex items-center w-full">
+            <button
+              type="button"
+              className="-m-2.5 p-2.5 text-slate-700 hover:text-slate-900 hover:bg-white/60 rounded-2xl transition-all duration-300 lg:hidden hover:shadow-lg"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="sr-only">Open sidebar</span>
+              <Bars3Icon className="h-6 w-6" />
+            </button>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1"></div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200"
-              >
-                {theme === 'dark' ? (
-                  <SunIcon className="h-5 w-5" />
-                ) : (
-                  <MoonIcon className="h-5 w-5" />
-                )}
-              </button>
-
-              {/* Notifications */}
-              <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all duration-200 relative">
-                <BellIcon className="h-5 w-5" />
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
-              </button>
-
-              {/* Profile dropdown */}
-              <div className="relative" ref={profileDropdownRef}>
+            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+              <div className="flex flex-1"></div>
+              <div className="flex items-center gap-x-4 lg:gap-x-6">
+                {/* Enhanced Theme toggle */}
                 <button
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-x-3 p-2 rounded-xl hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-200"
+                  onClick={toggleTheme}
+                  className="p-2.5 text-slate-500 hover:text-slate-700 hover:bg-white/60 rounded-2xl transition-all duration-300 hover:shadow-lg"
                 >
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                    <span className="text-white font-medium text-sm">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="hidden lg:block text-left">
-                    <div className="text-sm font-medium text-slate-900">{user?.name}</div>
-                    <div className="text-xs text-slate-500">{user?.email}</div>
-                    {user?.branding?.companyName && (
-                      <div className="text-xs text-slate-400">{user.branding.companyName}</div>
-                    )}
-                  </div>
-                  <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+                  {theme === 'dark' ? (
+                    <SunIcon className="h-5 w-5" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5" />
+                  )}
                 </button>
 
-                {/* Dropdown menu */}
-                {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl ring-1 ring-black/5 z-50 border border-white/20 animate-fade-in-up">
-                    <div className="py-1">
-                      {/* Profile link */}
-                      <Link
-                        to="/profile"
-                        className="flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200"
-                        onClick={() => setProfileDropdownOpen(false)}
-                      >
-                        <UserCircleIcon className="mr-3 h-5 w-5 text-slate-400" />
-                        Profile
-                      </Link>
-                      
-                      {/* Logout button */}
-                      <button
-                        onClick={() => {
-                          logout();
-                          setProfileDropdownOpen(false);
-                        }}
-                        className="flex w-full items-center px-4 py-2 text-sm text-red-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-200"
-                      >
-                        <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Logout
-                      </button>
+                {/* Enhanced Notifications */}
+                <button className="p-2.5 text-slate-500 hover:text-slate-700 hover:bg-white/60 rounded-2xl transition-all duration-300 relative hover:shadow-lg">
+                  <BellIcon className="h-5 w-5" />
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse shadow-lg"></div>
+                </button>
+
+                {/* Enhanced Profile dropdown */}
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center gap-x-3 p-2.5 rounded-2xl hover:bg-white/60 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300"
+                  >
+                    <div className="h-9 w-9 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+                      <span className="text-white font-semibold text-sm">
+                        {user?.name?.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                  </div>
-                )}
+                    <div className="hidden lg:block text-left">
+                      <div className="text-sm font-semibold text-slate-900">{user?.name}</div>
+                      <div className="text-xs text-slate-600">{user?.email}</div>
+                      {user?.branding?.companyName && (
+                        <div className="text-xs text-slate-500">{user.branding.companyName}</div>
+                      )}
+                    </div>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-500" />
+                  </button>
+
+                  {/* Enhanced Dropdown menu */}
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl ring-1 ring-black/5 z-50 border border-white/30 animate-fade-in-up">
+                      <div className="py-2">
+                        {/* Profile link */}
+                        <Link
+                          to="/profile"
+                          className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 transition-all duration-300 rounded-xl mx-2"
+                          onClick={() => setProfileDropdownOpen(false)}
+                        >
+                          <UserCircleIcon className="mr-3 h-5 w-5 text-slate-400" />
+                          Profile
+                        </Link>
+                        
+                        {/* Logout button */}
+                        <button
+                          onClick={() => {
+                            logout();
+                            setProfileDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center px-4 py-3 text-sm text-red-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 rounded-xl mx-2"
+                        >
+                          <svg className="mr-3 h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
