@@ -212,7 +212,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       toast.success('Login successful!');
-      navigate('/dashboard');
+      // Redirect admin users to admin panel, others to dashboard
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       dispatch({ type: 'AUTH_FAILURE' });
       toast.error(error.response?.data?.error || 'Login failed');
@@ -235,7 +240,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       toast.success('Registration successful! Please check your email for verification.');
-      navigate('/dashboard');
+      // Redirect admin users to admin panel, others to dashboard
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       dispatch({ type: 'AUTH_FAILURE' });
       toast.error(error.response?.data?.error || 'Registration failed');
