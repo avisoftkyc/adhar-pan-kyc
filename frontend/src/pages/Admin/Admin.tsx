@@ -336,17 +336,19 @@ const Admin: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center mb-4">
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-6">
-              <CogIcon className="h-8 w-8 text-white" />
+                      <div className="flex items-center mb-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-white/30 to-white/10 rounded-3xl flex items-center justify-center mr-8 shadow-2xl border border-white/20 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <CogIcon className="h-10 w-10 text-white relative z-10 group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-3xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+                <p className="text-purple-100 text-lg mt-2">
+                  Manage users, view system statistics, and monitor audit logs
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-              <p className="text-purple-100 text-lg mt-2">
-                Manage users, view system statistics, and monitor audit logs
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -376,50 +378,58 @@ const Admin: React.FC = () => {
       {/* Enhanced System Statistics */}
       {systemStats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-blue-200 cursor-pointer group">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
-                <UserGroupIcon className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <UserGroupIcon className="h-7 w-7 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-blue-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.users.total}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-blue-600 transition-colors duration-300">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors duration-300">{systemStats.users.total}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-emerald-200 cursor-pointer group">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-4">
-                <CheckCircleIcon className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <CheckCircleIcon className="h-7 w-7 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.users.active}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-emerald-600 transition-colors duration-300">Active Users</p>
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-emerald-700 transition-colors duration-300">{systemStats.users.active}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-purple-200 cursor-pointer group">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
-                <PlusIcon className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <PlusIcon className="h-7 w-7 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">New Users (30d)</p>
-                <p className="text-2xl font-bold text-gray-900">{systemStats.users.new}</p>
+                <p className="text-sm font-medium text-gray-600 group-hover:text-purple-600 transition-colors duration-300">New Users (30d)</p>
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-purple-700 transition-colors duration-300">{systemStats.users.new}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-orange-200 cursor-pointer group">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-                <ChartBarIcon className="h-6 w-6 text-white" />
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mr-4 group-hover:scale-110 transition-transform duration-300 shadow-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <ChartBarIcon className="h-7 w-7 text-white relative z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Activity</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-600 group-hover:text-orange-600 transition-colors duration-300">Total Activity</p>
+                <p className="text-2xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors duration-300">
                   {systemStats.activity.reduce((sum, item) => sum + item.count, 0)}
                 </p>
               </div>
@@ -433,10 +443,10 @@ const Admin: React.FC = () => {
         <nav className="flex space-x-2">
           <button
             onClick={() => setActiveTab('users')}
-            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'users'
-                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
             }`}
           >
             <UserGroupIcon className="h-5 w-5 mr-2" />
@@ -447,10 +457,10 @@ const Admin: React.FC = () => {
               setActiveTab('audit');
               fetchAuditLogs();
             }}
-            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'audit'
-                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
             }`}
           >
             <DocumentTextIcon className="h-5 w-5 mr-2" />
@@ -458,10 +468,10 @@ const Admin: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('stats')}
-            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'stats'
-                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
             }`}
           >
             <ChartBarIcon className="h-5 w-5 mr-2" />
@@ -476,14 +486,16 @@ const Admin: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
-                  <UserGroupIcon className="h-5 w-5 text-white" />
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <UserGroupIcon className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
               </div>
               <button
                 onClick={() => setShowCreateUser(true)}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 hover:shadow-xl active:scale-95 transition-all duration-300 ring-2 ring-purple-200/50 hover:ring-purple-300/50"
               >
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Add User
@@ -503,10 +515,12 @@ const Admin: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <span className="text-sm font-bold text-white">
+                          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg relative overflow-hidden group cursor-pointer">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <span className="text-lg font-bold text-white relative z-10 group-hover:scale-110 transition-transform duration-300">
                               {user.name.charAt(0).toUpperCase()}
                             </span>
+                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                           </div>
                         </div>
                         <div className="ml-4">
@@ -543,33 +557,37 @@ const Admin: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <button
                           onClick={() => handleManageModuleAccess(user)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200"
+                          className="p-3 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
                           title="Manage Module Access"
                         >
-                          <CogIcon className="h-5 w-5" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <CogIcon className="h-5 w-5 relative z-10 group-hover:rotate-180 transition-transform duration-500 ease-in-out" />
                         </button>
                         <button
                           onClick={() => handleManageBranding(user)}
-                          className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200"
+                          className="p-3 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
                           title="Manage Branding"
                         >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-100 to-green-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <svg className="h-5 w-5 relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                           </svg>
                         </button>
                         <button
                           onClick={() => handleEditUser(user)}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
+                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
                           title="Edit User"
                         >
-                          <PencilIcon className="h-5 w-5" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <PencilIcon className="h-5 w-5 relative z-10 group-hover:rotate-12 transition-transform duration-300 ease-in-out" />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user._id)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                          className="p-3 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
                           title="Delete User"
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-red-100 to-red-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <TrashIcon className="h-5 w-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
                         </button>
                       </div>
                     </div>
