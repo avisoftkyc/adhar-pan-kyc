@@ -691,38 +691,93 @@ const PanKyc: React.FC = () => {
       {/* Upload Tab Content */}
       {activeTab === 'upload' && (
         <>
-          {/* File Upload Section */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30 hover:shadow-3xl transition-all duration-300">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
-              <CloudArrowUpIcon className="h-7 w-7 text-blue-500 mr-3" />
-              Upload PAN KYC Data
-            </h2>
+          {/* Enhanced File Upload Section */}
+          <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-3xl p-8 shadow-2xl border border-blue-100/50 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-200/20 rounded-full blur-3xl"></div>
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Excel File (.xlsx, .xls)
-                </label>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileSelect}
-                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-purple-600 file:text-white file:hover:from-blue-600 file:hover:to-purple-700 file:transition-all file:duration-300 file:shadow-lg file:hover:shadow-xl"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  File should contain columns: panNumber, name, dateOfBirth (all required)
+            <div className="relative z-10">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <CloudArrowUpIcon className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                  Upload PAN KYC Data
+                </h2>
+                <p className="text-blue-600/80 text-lg">
+                  Upload Excel files and verify PAN details in bulk
                 </p>
               </div>
 
+              {/* File Input Area */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-blue-300/50 hover:border-blue-400/70 transition-all duration-300 mb-6">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <DocumentTextIcon className="h-10 w-10 text-blue-500" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-blue-800 mb-2">Select Excel File</h3>
+                  <p className="text-blue-600/70 mb-4">
+                    Supports .xlsx and .xls formats
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileSelect}
+                    className="block w-full text-sm text-blue-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-purple-600 file:text-white file:hover:from-blue-600 file:hover:to-purple-700 file:transition-all file:duration-300 file:shadow-lg file:hover:shadow-xl"
+                  />
+                  <p className="mt-3 text-sm text-blue-500/70">
+                    Required columns: <span className="font-semibold">panNumber</span>, <span className="font-semibold">name</span>, <span className="font-semibold">dateOfBirth</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* File Requirements Card */}
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-blue-200/30 mb-6">
+                <h4 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  File Requirements
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-white/60 rounded-xl p-3 text-center">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white text-xs font-bold">1</span>
+                    </div>
+                    <p className="text-sm font-medium text-blue-800">Excel Format</p>
+                    <p className="text-xs text-blue-600/70">.xlsx or .xls files only</p>
+                  </div>
+                  <div className="bg-white/60 rounded-xl p-3 text-center">
+                    <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white text-xs font-bold">2</span>
+                    </div>
+                    <p className="text-sm font-medium text-blue-800">Required Columns</p>
+                    <p className="text-xs text-blue-600/70">panNumber, name, dateOfBirth</p>
+                  </div>
+                  <div className="bg-white/60 rounded-xl p-3 text-center">
+                    <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                      <span className="text-white text-xs font-bold">3</span>
+                    </div>
+                    <p className="text-sm font-medium text-blue-800">Data Validation</p>
+                    <p className="text-xs text-blue-600/70">Automatic format checking</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Selected File Display */}
               {selectedFile && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl p-6 border border-blue-200/50 mb-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <DocumentTextIcon className="h-5 w-5 text-blue-500" />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-blue-900">{selectedFile.name}</p>
-                        <p className="text-sm text-blue-700">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                        <DocumentTextIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-blue-900">{selectedFile.name}</p>
+                        <p className="text-blue-700">
                           {(selectedFile.size / 1024).toFixed(2)} KB
                         </p>
                       </div>
@@ -734,7 +789,7 @@ const PanKyc: React.FC = () => {
                           fileInputRef.current.value = '';
                         }
                       }}
-                      className="text-red-500 hover:text-red-700 text-sm font-medium"
+                      className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-all duration-300 hover:scale-105"
                     >
                       Clear
                     </button>
@@ -742,38 +797,42 @@ const PanKyc: React.FC = () => {
                 </div>
               )}
 
+              {/* Upload Progress */}
               {uploading && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Uploading...</span>
-                    <span className="text-sm text-gray-500">{uploadProgress}%</span>
+                <div className="bg-white/80 rounded-2xl p-6 border border-blue-200/50 mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-semibold text-blue-800">Uploading...</span>
+                    <span className="text-lg font-bold text-blue-600">{uploadProgress}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300 shadow-lg"
                       style={{ width: `${uploadProgress}%` }}
                     ></div>
                   </div>
                 </div>
               )}
 
-              <button
-                onClick={handleUpload}
-                disabled={!selectedFile || uploading}
-                className="inline-flex items-center px-8 py-4 border border-transparent text-base font-semibold rounded-2xl shadow-xl text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300 disabled:hover:scale-100"
-              >
-                {uploading ? (
-                  <>
-                    <CloudArrowUpIcon className="h-4 w-4 mr-2 animate-pulse" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <CloudArrowUpIcon className="h-4 w-4 mr-2" />
-                    Upload File
-                  </>
-                )}
-              </button>
+              {/* Upload Button */}
+              <div className="text-center">
+                <button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || uploading}
+                  className="inline-flex items-center px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:cursor-not-allowed"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <CloudArrowUpIcon className="h-6 w-6 mr-3" />
+                      Upload File
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1005,12 +1064,12 @@ const PanKyc: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                         <input
                           type="checkbox"
                           checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 rounded border-gray-300 text-white focus:ring-emerald-500"
+                          className="w-4 h-4 rounded border-gray-300 text-white focus:ring-blue-500"
                         />
                       </div>
                       <span className="text-sm font-medium text-gray-700">
@@ -1021,7 +1080,7 @@ const PanKyc: React.FC = () => {
                       <button
                         onClick={handleVerifySelected}
                         disabled={verifying}
-                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {verifying ? (
                           <>
@@ -1045,7 +1104,7 @@ const PanKyc: React.FC = () => {
                         placeholder="Search by PAN, Name, DOB, or Status..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -1056,7 +1115,7 @@ const PanKyc: React.FC = () => {
                           setTableRecordsPerPage(Number(e.target.value));
                           setTableCurrentPage(1);
                         }}
-                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                       >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
@@ -1066,7 +1125,7 @@ const PanKyc: React.FC = () => {
                     </div>
                     <button
                       onClick={handleDownloadTableData}
-                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300"
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300"
                     >
                       <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
                       Download CSV
@@ -1079,35 +1138,35 @@ const PanKyc: React.FC = () => {
               <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
-                    <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
+                    <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
                       <tr>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                           <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                             <span>Select</span>
                           </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                           <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                             <span>PAN Number</span>
                           </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                           <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                             <span>Name</span>
                           </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                           <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                             <span>Date of Birth</span>
                           </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                           <div className="flex items-center space-x-2">
-                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                             <span>Actions</span>
                           </div>
                         </th>
@@ -1117,15 +1176,15 @@ const PanKyc: React.FC = () => {
                       {filteredRecords
                         .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
                         .map((record) => (
-                          <tr key={record._id} className={`hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 transition-all duration-200 ${record.status === 'verified' ? 'opacity-60' : ''}`}>
+                          <tr key={record._id} className={`hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 transition-all duration-200 ${record.status === 'verified' ? 'opacity-60' : ''}`}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               {(record.status === 'pending' || record.status === 'rejected' || record.status === 'error') && (
-                                <div className="w-6 h-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                                   <input
                                     type="checkbox"
                                     checked={selectedRecords.includes(record._id)}
                                     onChange={() => handleRecordSelection(record._id)}
-                                    className="w-4 h-4 rounded border-gray-300 text-white focus:ring-emerald-500"
+                                    className="w-4 h-4 rounded border-gray-300 text-white focus:ring-blue-500"
                                   />
                                 </div>
                               )}
@@ -1150,7 +1209,7 @@ const PanKyc: React.FC = () => {
                                 <button
                                   onClick={() => handleVerifySingle(record._id)}
                                   disabled={verifyingRecords.has(record._id)}
-                                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                   title={`Verify ${record.name} (${record.panNumber})`}
                                 >
                                   {verifyingRecords.has(record._id) ? (
@@ -1185,7 +1244,7 @@ const PanKyc: React.FC = () => {
                                   )}
                                 </button>
                               ) : (
-                                <span className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-xl">
+                                <span className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium rounded-xl">
                                   <CheckCircleIcon className="h-4 w-4 mr-1" />
                                   Verified
                                 </span>
