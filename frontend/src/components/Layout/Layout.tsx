@@ -5,7 +5,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import {
   Bars3Icon,
   XMarkIcon,
-  HomeIcon,
   DocumentTextIcon,
   IdentificationIcon,
   Cog6ToothIcon,
@@ -62,12 +61,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
   const navigation = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: HomeIcon,
-      current: location.pathname === '/dashboard',
-    },
     {
       name: 'PAN KYC',
       href: '/pan-kyc',
