@@ -931,168 +931,199 @@ const AadhaarPan: React.FC = () => {
                 </div>
               </div>
 
-              {/* Table Controls */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedRecords.size === selectedBatch.records.length && selectedBatch.records.length > 0}
-                      onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                    />
-                    <span className="text-sm text-gray-700">
-                      {selectedRecords.size} of {selectedBatch.records.length} selected
-                    </span>
-                  </div>
-                  {selectedRecords.size > 0 && (
-                    <button
-                      onClick={handleVerifySelected}
-                      disabled={verifying}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
-                    >
-                      {verifying ? (
-                        <>
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                          Verifying...
-                        </>
-                      ) : (
-                        <>
-                          <CheckIcon className="h-3 w-3 mr-1" />
-                          Verify Selected ({selectedRecords.size})
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search records..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-1 border border-gray-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Records Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* Enhanced Table Controls */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                         <input
                           type="checkbox"
                           checked={selectedRecords.size === selectedBatch.records.length && selectedBatch.records.length > 0}
                           onChange={handleSelectAll}
-                          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                          className="w-4 h-4 rounded border-gray-300 text-white focus:ring-green-500"
                         />
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aadhaar Number
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        PAN Number
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {paginatedRecords.map((record) => (
-                                              <tr key={record._id} className={`hover:bg-gray-50 ${record.status === 'linked' ? 'opacity-50' : ''}`}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {(record.status === 'pending' || record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error') && (
-                            <input
-                              type="checkbox"
-                              checked={selectedRecords.has(record._id)}
-                              onChange={() => handleRecordSelection(record._id)}
-                              className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                            />
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {record.aadhaarNumber}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.panNumber}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {record.status === 'pending' ? (
-                            <button
-                              onClick={() => handleVerifySingle(record._id)}
-                              disabled={verifyingRecords.has(record._id)}
-                              className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {verifyingRecords.has(record._id) ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600 mr-1"></div>
-                                  Verifying...
-                                </>
-                              ) : (
-                                'Verify'
-                              )}
-                            </button>
-                          ) : record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error' ? (
-                            <button
-                              onClick={() => handleVerifySingle(record._id)}
-                              disabled={verifyingRecords.has(record._id)}
-                              className="text-orange-600 hover:text-orange-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {verifyingRecords.has(record._id) ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600 mr-1"></div>
-                                  Re-verifying...
-                                </>
-                              ) : (
-                                'Re-verify'
-                              )}
-                            </button>
-                          ) : (
-                            <span className="text-green-600">Verified</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {selectedRecords.size} of {selectedBatch.records.length} selected
+                      </span>
+                    </div>
+                    {selectedRecords.size > 0 && (
+                      <button
+                        onClick={handleVerifySelected}
+                        disabled={verifying}
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium rounded-xl shadow-lg hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {verifying ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <CheckIcon className="h-4 w-4 mr-2" />
+                            Verify Selected ({selectedRecords.size})
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search records..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Table Pagination */}
+              {/* Enhanced Records Table */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead className="bg-gradient-to-r from-indigo-50 to-purple-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                            <span>Select</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                            <span>Aadhaar Number</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                            <span>PAN Number</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                            <span>Name</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
+                            <span>Actions</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {paginatedRecords.map((record) => (
+                        <tr key={record._id} className={`hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200 ${record.status === 'linked' ? 'opacity-60' : ''}`}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {(record.status === 'pending' || record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error') && (
+                              <div className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedRecords.has(record._id)}
+                                  onChange={() => handleRecordSelection(record._id)}
+                                  className="w-4 h-4 rounded border-gray-300 text-white focus:ring-green-500"
+                                />
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                              {record.aadhaarNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                              {record.panNumber}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                              {record.name}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {record.status === 'pending' ? (
+                              <button
+                                onClick={() => handleVerifySingle(record._id)}
+                                disabled={verifyingRecords.has(record._id)}
+                                className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-green-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {verifyingRecords.has(record._id) ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                                    Verifying...
+                                  </>
+                                ) : (
+                                  'Verify'
+                                )}
+                              </button>
+                            ) : record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error' ? (
+                              <button
+                                onClick={() => handleVerifySingle(record._id)}
+                                disabled={verifyingRecords.has(record._id)}
+                                className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {verifyingRecords.has(record._id) ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                                    Re-verifying...
+                                  </>
+                                ) : (
+                                  'Re-verify'
+                                )}
+                              </button>
+                            ) : (
+                              <span className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-medium rounded-xl">
+                                <CheckIcon className="h-4 w-4 mr-2" />
+                                Verified
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Enhanced Table Pagination */}
               {totalTablePages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-700">
-                    Showing {((currentTablePage - 1) * recordsPerPage) + 1} to {Math.min(currentTablePage * recordsPerPage, filteredRecords.length)} of {filteredRecords.length} records
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setCurrentTablePage(currentTablePage - 1)}
-                      disabled={currentTablePage === 1}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
-                    >
-                      Previous
-                    </button>
-                    <span className="px-3 py-1 text-sm text-gray-700">
-                      {currentTablePage} of {totalTablePages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentTablePage(currentTablePage + 1)}
-                      disabled={currentTablePage === totalTablePages}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50"
-                    >
-                      Next
-                    </button>
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg mt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{((currentTablePage - 1) * recordsPerPage) + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(currentTablePage * recordsPerPage, filteredRecords.length)}</span> of{' '}
+                      <span className="font-semibold">{filteredRecords.length}</span> records
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setCurrentTablePage(currentTablePage - 1)}
+                        disabled={currentTablePage === 1}
+                        className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        Previous
+                      </button>
+                      <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-xl">
+                        {currentTablePage} of {totalTablePages}
+                      </span>
+                      <button
+                        onClick={() => setCurrentTablePage(currentTablePage + 1)}
+                        disabled={currentTablePage === totalTablePages}
+                        className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
