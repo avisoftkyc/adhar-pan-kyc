@@ -329,11 +329,25 @@ const Admin: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-purple-100 mt-1">
-          Manage users, view system statistics, and monitor audit logs
-        </p>
+      {/* Enhanced Admin Header */}
+      <div className="bg-gradient-to-br from-purple-600 via-indigo-700 to-blue-800 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mr-6">
+              <CogIcon className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+              <p className="text-purple-100 text-lg mt-2">
+                Manage users, view system statistics, and monitor audit logs
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Error and Success Messages */}
@@ -359,45 +373,53 @@ const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* System Statistics */}
+      {/* Enhanced System Statistics */}
       {systemStats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center">
-              <UserGroupIcon className="h-8 w-8 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Users</p>
-                <p className="text-2xl font-semibold text-gray-900">{systemStats.users.total}</p>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
+                <UserGroupIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                <p className="text-2xl font-bold text-gray-900">{systemStats.users.total}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center">
-              <CheckCircleIcon className="h-8 w-8 text-green-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Users</p>
-                <p className="text-2xl font-semibold text-gray-900">{systemStats.users.active}</p>
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-4">
+                <CheckCircleIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Users</p>
+                <p className="text-2xl font-bold text-gray-900">{systemStats.users.active}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center">
-              <PlusIcon className="h-8 w-8 text-purple-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">New Users (30d)</p>
-                <p className="text-2xl font-semibold text-gray-900">{systemStats.users.new}</p>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
+                <PlusIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">New Users (30d)</p>
+                <p className="text-2xl font-bold text-gray-900">{systemStats.users.new}</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center">
-              <ChartBarIcon className="h-8 w-8 text-orange-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Activity</p>
-                <p className="text-2xl font-semibold text-gray-900">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
+                <ChartBarIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Activity</p>
+                <p className="text-2xl font-bold text-gray-900">
                   {systemStats.activity.reduce((sum, item) => sum + item.count, 0)}
                 </p>
               </div>
@@ -406,18 +428,18 @@ const Admin: React.FC = () => {
         </div>
       )}
 
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      {/* Enhanced Tab Navigation */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
+        <nav className="flex space-x-2">
           <button
             onClick={() => setActiveTab('users')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
               activeTab === 'users'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <UserGroupIcon className="h-5 w-5 inline mr-2" />
+            <UserGroupIcon className="h-5 w-5 mr-2" />
             Users
           </button>
           <button
@@ -425,82 +447,89 @@ const Admin: React.FC = () => {
               setActiveTab('audit');
               fetchAuditLogs();
             }}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
               activeTab === 'audit'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <DocumentTextIcon className="h-5 w-5 inline mr-2" />
+            <DocumentTextIcon className="h-5 w-5 mr-2" />
             Audit Logs
           </button>
           <button
             onClick={() => setActiveTab('stats')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 ${
               activeTab === 'stats'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
             }`}
           >
-            <ChartBarIcon className="h-5 w-5 inline mr-2" />
+            <ChartBarIcon className="h-5 w-5 mr-2" />
             Statistics
           </button>
         </nav>
       </div>
 
-      {/* Users Tab */}
+      {/* Enhanced Users Tab */}
       {activeTab === 'users' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium text-gray-900">User Management</h2>
-            <button
-              onClick={() => setShowCreateUser(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
-            >
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Add User
-            </button>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
+                  <UserGroupIcon className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+              </div>
+              <button
+                onClick={() => setShowCreateUser(true)}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add User
+              </button>
+            </div>
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
           ) : (
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul className="divide-y divide-gray-200">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="divide-y divide-gray-100">
                 {users.map((user) => (
-                  <li key={user._id} className="px-6 py-4">
+                  <div key={user._id} className="p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-indigo-50/50 transition-all duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                            <span className="text-sm font-medium text-purple-600">
+                          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                            <span className="text-sm font-bold text-white">
                               {user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
-                          <div className="flex items-center mt-1">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-2">
+                          <div className="text-lg font-semibold text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-600">{user.email}</div>
+                          <div className="flex items-center mt-2 space-x-2">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                               {user.role}
                             </span>
                             <div className="flex items-center">
                               {getStatusIcon(user.status)}
-                              <span className={`ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                              <span className={`ml-1 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
                                 {user.status}
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center mt-2">
+                          <div className="flex items-center mt-3">
                             <span className="text-xs text-gray-500 mr-2">Modules:</span>
                             {user.moduleAccess.length > 0 ? (
                               user.moduleAccess.map((module) => (
                                 <span
                                   key={module}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1"
+                                  className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 mr-2"
                                 >
                                   {module === 'pan-kyc' ? 'PAN KYC' : 'Aadhaar-PAN'}
                                 </span>
@@ -511,42 +540,42 @@ const Admin: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <button
                           onClick={() => handleManageModuleAccess(user)}
-                          className="text-gray-400 hover:text-blue-600"
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200"
                           title="Manage Module Access"
                         >
-                          <CogIcon className="h-4 w-4" />
+                          <CogIcon className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleManageBranding(user)}
-                          className="text-gray-400 hover:text-green-600"
+                          className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200"
                           title="Manage Branding"
                         >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
                           </svg>
                         </button>
                         <button
                           onClick={() => handleEditUser(user)}
-                          className="text-gray-400 hover:text-gray-600"
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all duration-200"
                           title="Edit User"
                         >
-                          <PencilIcon className="h-4 w-4" />
+                          <PencilIcon className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDeleteUser(user._id)}
-                          className="text-gray-400 hover:text-red-600"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
                           title="Delete User"
                         >
-                          <TrashIcon className="h-4 w-4" />
+                          <TrashIcon className="h-5 w-5" />
                         </button>
                       </div>
                     </div>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
