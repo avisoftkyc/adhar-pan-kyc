@@ -351,6 +351,9 @@ router.post('/batch/:batchId/process', protect, async (req, res) => {
 
 // Batch record verification endpoint (frontend calls this with recordIds)
 router.post('/verify', protect, async (req, res) => {
+  // Set a longer timeout for batch processing
+  req.setTimeout(300000); // 5 minutes timeout
+  res.setTimeout(300000); // 5 minutes timeout
   try {
     console.log('🔍 Received verification request:', {
       body: req.body,
@@ -358,13 +361,16 @@ router.post('/verify', protect, async (req, res) => {
       user: req.user.id
     });
 
-    // Check if this is a batch verification request
-    if (req.body.recordIds && Array.isArray(req.body.recordIds)) {
-      console.log('📦 Processing batch verification for records:', req.body.recordIds);
-      
-      const results = [];
-      
-      for (const recordId of req.body.recordIds) {
+          // Check if this is a batch verification request
+      if (req.body.recordIds && Array.isArray(req.body.recordIds)) {
+        console.log('📦 Processing batch verification for records:', req.body.recordIds.length, 'records');
+        
+        const results = [];
+        const totalRecords = req.body.recordIds.length;
+        
+        for (let i = 0; i < req.body.recordIds.length; i++) {
+          const recordId = req.body.recordIds[i];
+          console.log(`🔄 Processing record ${i + 1}/${totalRecords}: ${recordId}`);
         try {
           // Find the record
           const record = await PanKyc.findOne({
@@ -427,8 +433,8 @@ router.post('/verify', protect, async (req, res) => {
             processingTime: processingTime
           }, req);
 
-          // Add delay between API calls to avoid overwhelming the Sandbox API
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Reduced delay between API calls for better performance
+          await new Promise(resolve => setTimeout(resolve, 200));
 
         } catch (error) {
           console.error(`❌ Error processing record ${recordId}:`, error);
