@@ -526,20 +526,30 @@ const AadhaarPan: React.FC = () => {
   const totalPages = Math.ceil(batches.length / documentsPerPage);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50 to-teal-50 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-teal-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+      
+      <div className="relative z-10 space-y-8 p-6">
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 rounded-3xl p-8 text-white shadow-2xl border border-white/20 backdrop-blur-xl relative overflow-hidden">
+          {/* Header Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+                    <div className="relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Aadhaar-PAN Linking</h1>
-            <p className="text-green-100 mt-1">
-              Upload Excel files and verify Aadhaar-PAN linking in bulk
+            <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg">Aadhaar-PAN Linking</h1>
+            <p className="text-emerald-100 mt-3 text-lg font-medium">
+              Upload Excel files and verify Aadhaar-PAN linking in bulk with advanced verification
             </p>
           </div>
-          <button
-            onClick={() => window.location.href = '/aadhaar-pan-records'}
-            className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-green-600"
-          >
+                      <button
+              onClick={() => window.location.href = '/aadhaar-pan-records'}
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent border border-white/30 hover:border-white/50 hover:scale-105 transform"
+            >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -551,14 +561,14 @@ const AadhaarPan: React.FC = () => {
 
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-2 shadow-xl border border-white/20">
+        <nav className="flex space-x-2">
           <button
             onClick={() => handleTabChange('upload')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'upload'
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg border border-white/30'
+                : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -568,10 +578,10 @@ const AadhaarPan: React.FC = () => {
           </button>
           <button
             onClick={() => handleTabChange('single')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'single'
-                ? 'border-green-500 text-green-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg border border-white/30'
+                : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -1106,6 +1116,7 @@ const AadhaarPan: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

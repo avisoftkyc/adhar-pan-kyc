@@ -10,7 +10,9 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ExclamationTriangleIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  TrashIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 interface Batch {
@@ -620,19 +622,30 @@ const PanKyc: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">PAN KYC Verification</h1>
-            <p className="text-blue-100 mt-1">
-              Upload Excel files and verify PAN details in bulk
-            </p>
-          </div>
-          <button
-            onClick={() => window.location.href = '/pan-kyc-records'}
-            className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
-          >
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+      
+      <div className="relative z-10 space-y-8 p-6">
+              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl border border-white/20 backdrop-blur-xl relative overflow-hidden">
+          {/* Header Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
+          <div className="relative z-10 flex items-center justify-between">
+                      <div>
+              <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg">PAN KYC Verification</h1>
+              <p className="text-blue-100 mt-3 text-lg font-medium">
+                Upload Excel files and verify PAN details in bulk with advanced verification
+              </p>
+            </div>
+                      <button
+              onClick={() => window.location.href = '/pan-kyc-records'}
+              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent border border-white/30 hover:border-white/50 hover:scale-105 transform"
+            >
             <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -644,14 +657,14 @@ const PanKyc: React.FC = () => {
 
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-2 shadow-xl border border-white/20">
+        <nav className="flex space-x-2">
           <button
             onClick={() => handleTabChange('upload')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'upload'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg border border-white/30'
+                : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -661,10 +674,10 @@ const PanKyc: React.FC = () => {
           </button>
           <button
             onClick={() => handleTabChange('single')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'single'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg border border-white/30'
+                : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -679,8 +692,11 @@ const PanKyc: React.FC = () => {
       {activeTab === 'upload' && (
         <>
           {/* File Upload Section */}
-          <div className="card">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Upload PAN KYC Data</h2>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30 hover:shadow-3xl transition-all duration-300">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+              <CloudArrowUpIcon className="h-7 w-7 text-blue-500 mr-3" />
+              Upload PAN KYC Data
+            </h2>
             
             <div className="space-y-4">
               <div>
@@ -692,7 +708,7 @@ const PanKyc: React.FC = () => {
                   type="file"
                   accept=".xlsx,.xls"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-slate-600 file:mr-4 file:py-3 file:px-6 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-blue-500 file:to-purple-600 file:text-white file:hover:from-blue-600 file:hover:to-purple-700 file:transition-all file:duration-300 file:shadow-lg file:hover:shadow-xl"
                 />
                 <p className="mt-1 text-sm text-gray-500">
                   File should contain columns: panNumber, name, dateOfBirth (all required)
@@ -744,7 +760,7 @@ const PanKyc: React.FC = () => {
               <button
                 onClick={handleUpload}
                 disabled={!selectedFile || uploading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-8 py-4 border border-transparent text-base font-semibold rounded-2xl shadow-xl text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300 disabled:hover:scale-100"
               >
                 {uploading ? (
                   <>
@@ -762,88 +778,151 @@ const PanKyc: React.FC = () => {
           </div>
 
           {/* Batches List */}
-          <div className="card">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Uploaded Documents</h2>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30 hover:shadow-3xl transition-all duration-300">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+              <DocumentTextIcon className="h-7 w-7 text-emerald-500 mr-3" />
+              Uploaded Documents
+            </h2>
+            
+            {/* Enhanced Search and Filter Bar */}
+            <div className="mb-6 flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="Search batches by ID, date, or records..."
+                  className="w-full px-4 py-3 pl-10 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+              </div>
+              <div className="flex gap-2">
+                <select className="px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300">
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <select className="px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300">
+                  <option value="">Sort By</option>
+                  <option value="date">Date</option>
+                  <option value="records">Records</option>
+                  <option value="status">Status</option>
+                </select>
+              </div>
+            </div>
             
             {loading ? (
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
             ) : batches.length === 0 ? (
-              <div className="text-center py-8">
-                <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto" />
-                <p className="mt-2 text-sm text-gray-500">No documents uploaded yet</p>
+              <div className="text-center py-12">
+                <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DocumentTextIcon className="h-12 w-12 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-600 mb-2">No Documents Yet</h3>
+                <p className="text-slate-500 mb-4">Upload your first PAN KYC document to get started</p>
+                <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                  <CloudArrowUpIcon className="h-5 w-4 mr-2" />
+                  Upload First Document
+                </button>
               </div>
             ) : (
               <>
-                <div className="space-y-4">
+                <div className="grid gap-4">
                   {batches
                     .slice((currentPage - 1) * documentsPerPage, currentPage * documentsPerPage)
                     .map((batch) => (
                     <div
                       key={batch._id}
-                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                      className={`group relative bg-white/60 backdrop-blur-sm rounded-2xl p-6 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
                         selectedBatch && selectedBatch.batchId === batch._id
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:bg-gray-50'
-                      }`}
+                          ? 'ring-2 ring-blue-500/50 bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-xl'
+                          : 'border border-white/40 hover:border-blue-200/50 hover:shadow-lg'
+                      } ${newlyUploadedBatchId === batch._id ? 'animate-pulse ring-2 ring-emerald-500/50' : ''}`}
                       onClick={() => fetchBatchDetails(batch._id)}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {selectedBatch && selectedBatch.batchId === batch._id && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          )}
-                          <div>
-                            <h3 className="text-sm font-medium text-gray-900">{batch._id}</h3>
-                            <p className="text-sm text-gray-500">
-                              {new Date(batch.createdAt).toLocaleDateString()} - {batch.totalRecords} records
-                            </p>
+                      {/* Active Indicator */}
+                      {selectedBatch && selectedBatch.batchId === batch._id && (
+                        <div className="absolute top-4 right-4 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+                      )}
+                      
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                              <DocumentTextIcon className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                {batch._id}
+                              </h3>
+                              <p className="text-sm text-slate-500">
+                                Uploaded {new Date(batch.createdAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {/* Enhanced Stats Display */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                              <div className="text-2xl font-bold text-blue-600">{batch.totalRecords}</div>
+                              <div className="text-xs text-blue-600 font-medium">Total Records</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
+                              <div className="text-2xl font-bold text-yellow-600">{batch.pendingRecords}</div>
+                              <div className="text-xs text-yellow-600 font-medium">Pending</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                              <div className="text-2xl font-bold text-green-600">{batch.verifiedRecords}</div>
+                              <div className="text-xs text-green-600 font-medium">Verified</div>
+                            </div>
+                            <div className="text-center p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
+                              <div className="text-2xl font-bold text-red-600">{batch.rejectedRecords + batch.errorRecords}</div>
+                              <div className="text-xs text-red-600 font-medium">Issues</div>
+                            </div>
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {batch.pendingRecords} Pending
-                            </span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              {batch.verifiedRecords} Verified
-                            </span>
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              {batch.rejectedRecords} Rejected
-                            </span>
-                            {batch.errorRecords > 0 && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                {batch.errorRecords} Error
-                              </span>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDownloadReport(batch._id);
-                              }}
-                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                            >
-                              <DocumentArrowDownIcon className="h-3 w-3 mr-1" />
-                              Download
-                            </button>
-                            
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteBatch(batch._id);
-                              }}
-                              className="inline-flex items-center px-3 py-1 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-                            >
-                              <svg className="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Delete
-                            </button>
+                        {/* Quick Actions */}
+                        <div className="flex flex-col gap-2 ml-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDownloadReport(batch._id);
+                            }}
+                            className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-110"
+                            title="Download Report"
+                          >
+                            <DocumentArrowDownIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteBatch(batch._id);
+                            }}
+                            className="p-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-110"
+                            title="Delete Batch"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar for Processing */}
+                      <div className="mt-4">
+                        <div className="flex justify-between text-sm text-slate-600 mb-2">
+                          <span>Processing Progress</span>
+                          <span>{Math.round(((batch.verifiedRecords + batch.rejectedRecords + batch.errorRecords) / batch.totalRecords) * 100)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500" 
+                               style={{ width: `${((batch.verifiedRecords + batch.rejectedRecords + batch.errorRecords) / batch.totalRecords) * 100}%` }}>
                           </div>
                         </div>
                       </div>
@@ -851,29 +930,29 @@ const PanKyc: React.FC = () => {
                   ))}
                 </div>
                 
-                {/* Pagination */}
+                {/* Enhanced Pagination */}
                 {batches.length > documentsPerPage && (
-                  <div className="flex items-center justify-between mt-6">
-                    <div className="text-sm text-gray-700">
-                      Showing {((currentPage - 1) * documentsPerPage) + 1} to {Math.min(currentPage * documentsPerPage, batches.length)} of {batches.length} documents
+                  <div className="flex flex-col sm:flex-row items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/30">
+                    <div className="text-sm text-slate-600 mb-4 sm:mb-0">
+                      Showing <span className="font-semibold text-slate-800">{((currentPage - 1) * documentsPerPage) + 1}</span> to <span className="font-semibold text-slate-800">{Math.min(currentPage * documentsPerPage, batches.length)}</span> of <span className="font-semibold text-slate-800">{batches.length}</span> documents
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                       >
-                        Previous
+                        ← Previous
                       </button>
-                      <span className="px-3 py-1 text-sm text-gray-700">
+                      <div className="px-4 py-2 text-sm font-medium text-slate-700 bg-white/60 backdrop-blur-sm rounded-xl border border-white/30">
                         Page {currentPage} of {Math.ceil(batches.length / documentsPerPage)}
-                      </span>
+                      </div>
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(batches.length / documentsPerPage)))}
                         disabled={currentPage === Math.ceil(batches.length / documentsPerPage)}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                       >
-                        Next
+                        Next →
                       </button>
                     </div>
                   </div>
@@ -921,72 +1000,70 @@ const PanKyc: React.FC = () => {
                 </div>
               </div>
 
-              {/* Table Controls - Search, Pagination, Download */}
-              <div className="mb-4 space-y-4">
+              {/* Premium Table Controls */}
+              <div className="mb-6 space-y-6">
                 {/* Search and Actions Row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    {/* Search Input */}
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    {/* Enhanced Search Input */}
                     <div className="relative">
                       <input
                         type="text"
                         placeholder="Search by PAN, Name, DOB, or Status..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 w-80"
+                        className="pl-12 pr-6 py-3 border border-white/30 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 w-80 text-slate-700 placeholder-slate-500 transition-all duration-300"
                       />
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />
                       </div>
                     </div>
 
-                    {/* Records per page selector */}
-                    <div className="flex items-center space-x-2">
-                      <label className="text-sm text-gray-700">Show:</label>
+                    {/* Enhanced Records per page selector */}
+                    <div className="flex items-center gap-3">
+                      <label className="text-sm font-medium text-slate-600">Show:</label>
                       <select
                         value={tableRecordsPerPage}
                         onChange={(e) => {
                           setTableRecordsPerPage(Number(e.target.value));
                           setTableCurrentPage(1);
                         }}
-                        className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500"
+                        className="px-4 py-2 border border-white/30 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-slate-700 transition-all duration-300"
                       >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
                         <option value={25}>25</option>
                         <option value={50}>50</option>
                       </select>
-                      <span className="text-sm text-gray-700">records</span>
+                      <span className="text-sm font-medium text-slate-600">records</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    {/* Download CSV Button */}
+                  <div className="flex items-center gap-3">
+                    {/* Premium Download CSV Button */}
                     <button
                       onClick={handleDownloadTableData}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      className="inline-flex items-center px-6 py-3 border border-white/30 bg-white/60 backdrop-blur-sm text-sm font-semibold rounded-2xl text-slate-700 hover:bg-white/80 hover:border-white/50 transition-all duration-300 transform hover:scale-105"
                     >
-                      <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                      <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
                       Download CSV
                     </button>
 
-                    {/* Verify Selected Button */}
+                    {/* Premium Verify Selected Button */}
                     {selectedRecords.length > 0 && (
                       <button
                         onClick={handleVerifySelected}
                         disabled={verifying}
-                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                        className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-2xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
                       >
                         {verifying ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                             Verifying...
                           </>
                         ) : (
                           <>
-                            <CheckCircleIcon className="h-4 w-4 mr-2" />
+                            <CheckCircleIcon className="h-5 w-5 mr-2" />
                             Verify Selected ({selectedRecords.length})
                           </>
                         )}
@@ -995,83 +1072,93 @@ const PanKyc: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Select All and Results Info */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center">
+                {/* Premium Select All and Results Info */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30">
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center cursor-pointer group">
                       <input
                         type="checkbox"
                         checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
                         onChange={handleSelectAll}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Select all pending</span>
+                      <span className="ml-3 text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
+                        Select all pending records
+                      </span>
                     </label>
                   </div>
-                  <div className="text-sm text-gray-700">
-                    {selectedRecords.length} of {filteredRecords.length} records selected
-                    {searchTerm && ` (filtered from ${selectedBatch.records.length} total)`}
+                  <div className="text-sm text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
+                    <span className="font-semibold text-slate-800">{selectedRecords.length}</span> of <span className="font-semibold text-slate-800">{filteredRecords.length}</span> records selected
+                    {searchTerm && (
+                      <span className="text-slate-500"> (filtered from {selectedBatch.records.length} total)</span>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Records Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              {/* Premium Records Table */}
+              <div className="overflow-x-auto bg-white/60 backdrop-blur-sm rounded-3xl border border-white/30 shadow-xl">
+                <table className="min-w-full divide-y divide-white/20">
+                  <thead className="bg-gradient-to-r from-slate-50/80 to-blue-50/80 backdrop-blur-sm">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         <input
                           type="checkbox"
                           checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
                           onChange={handleSelectAll}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
                         />
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         PAN Number
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Date of Birth
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-white/20">
                     {filteredRecords
                       .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
                       .map((record) => (
-                                              <tr key={record._id} className={`hover:bg-gray-50 ${record.status === 'verified' ? 'opacity-50' : ''}`}>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                                              <tr key={record._id} className={`group transition-all duration-300 hover:bg-white/40 ${record.status === 'verified' ? 'opacity-60 bg-green-50/30' : ''} ${record.status === 'rejected' ? 'bg-red-50/30' : ''} ${record.status === 'error' ? 'bg-yellow-50/30' : ''}`}>
+                        <td className="px-8 py-5 whitespace-nowrap">
                           {(record.status === 'pending' || record.status === 'rejected' || record.status === 'error') && (
                             <input
                               type="checkbox"
                               checked={selectedRecords.includes(record._id)}
                               onChange={() => handleRecordSelection(record._id)}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
                             />
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.panNumber}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm font-medium text-slate-800 group-hover:text-blue-600 transition-colors">
+                            {record.panNumber}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.name}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm font-medium text-slate-800 group-hover:text-slate-900 transition-colors">
+                            {record.name}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.dateOfBirth || '-'}
+                        <td className="px-8 py-5 whitespace-nowrap">
+                          <div className="text-sm font-medium text-slate-700">
+                            {record.dateOfBirth || '-'}
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-8 py-5 whitespace-nowrap">
                           {record.status === 'pending' ? (
                             <button
                               onClick={() => handleVerifySingle(record._id)}
                               disabled={verifyingRecords.has(record._id)}
-                              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors"
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
                               title={`Verify ${record.name} (${record.panNumber})`}
                             >
                               {verifyingRecords.has(record._id) ? (
@@ -1090,7 +1177,7 @@ const PanKyc: React.FC = () => {
                             <button
                               onClick={() => handleVerifySingle(record._id)}
                               disabled={verifyingRecords.has(record._id)}
-                              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 transition-colors"
+                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500/50 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
                               title={`Re-verify ${record.name} (${record.panNumber})`}
                             >
                               {verifyingRecords.has(record._id) ? (
@@ -1106,7 +1193,7 @@ const PanKyc: React.FC = () => {
                               )}
                             </button>
                           ) : (
-                            <span className="inline-flex items-center text-sm text-green-600">
+                            <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-green-700 bg-green-100/60 backdrop-blur-sm rounded-xl border border-green-200/30">
                               <CheckCircleIcon className="h-4 w-4 mr-1" />
                               Verified
                             </span>
@@ -1118,30 +1205,32 @@ const PanKyc: React.FC = () => {
                 </table>
               </div>
               
-              {/* Table Pagination */}
+              {/* Premium Table Pagination */}
               {filteredRecords.length > tableRecordsPerPage && (
-                <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-700">
-                    Showing {((tableCurrentPage - 1) * tableRecordsPerPage) + 1} to {Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)} of {filteredRecords.length} results
-                    {searchTerm && ` (filtered from ${selectedBatch.records.length} total)`}
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30">
+                  <div className="text-sm text-slate-600 mb-4 sm:mb-0 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
+                    Showing <span className="font-semibold text-slate-800">{((tableCurrentPage - 1) * tableRecordsPerPage) + 1}</span> to <span className="font-semibold text-slate-800">{Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)}</span> of <span className="font-semibold text-slate-800">{filteredRecords.length}</span> results
+                    {searchTerm && (
+                      <span className="text-slate-500"> (filtered from {selectedBatch.records.length} total)</span>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setTableCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={tableCurrentPage === 1}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                     >
-                      Previous
+                      ← Previous
                     </button>
-                    <span className="px-3 py-1 text-sm text-gray-700">
+                    <div className="px-4 py-2 text-sm font-medium text-slate-700 bg-white/60 backdrop-blur-sm rounded-xl border border-white/30">
                       Page {tableCurrentPage} of {Math.ceil(filteredRecords.length / tableRecordsPerPage)}
-                    </span>
+                    </div>
                     <button
                       onClick={() => setTableCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRecords.length / tableRecordsPerPage)))}
                       disabled={tableCurrentPage === Math.ceil(filteredRecords.length / tableRecordsPerPage)}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                     >
-                      Next
+                      Next →
                     </button>
                   </div>
                 </div>
@@ -1290,6 +1379,7 @@ const PanKyc: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
