@@ -136,7 +136,7 @@ const Admin: React.FC = () => {
       return;
     }
 
-    // User is admin, fetch data
+    // User is admin, stay on /admin and fetch data
     fetchUsers();
     fetchSystemStats();
     fetchUserStats();
