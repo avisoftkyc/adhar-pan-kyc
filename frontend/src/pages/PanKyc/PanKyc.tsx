@@ -854,7 +854,7 @@ const PanKyc: React.FC = () => {
                             </div>
                             <div>
                               <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
-                                {batch._id}
+                                {batch._id.split('_')[0]}
                               </h3>
                               <p className="text-sm text-slate-500">
                                 Uploaded {new Date(batch.createdAt).toLocaleDateString('en-US', {
@@ -1000,238 +1000,235 @@ const PanKyc: React.FC = () => {
                 </div>
               </div>
 
-              {/* Premium Table Controls */}
-              <div className="mb-6 space-y-6">
-                {/* Search and Actions Row */}
-                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    {/* Enhanced Search Input */}
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Search by PAN, Name, DOB, or Status..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-12 pr-6 py-3 border border-white/30 bg-white/60 backdrop-blur-sm rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 w-80 text-slate-700 placeholder-slate-500 transition-all duration-300"
-                      />
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />
+              {/* Enhanced Table Controls */}
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 rounded border-gray-300 text-white focus:ring-emerald-500"
+                        />
                       </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {selectedRecords.length} of {filteredRecords.length} selected
+                      </span>
                     </div>
-
-                    {/* Enhanced Records per page selector */}
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm font-medium text-slate-600">Show:</label>
-                      <select
-                        value={tableRecordsPerPage}
-                        onChange={(e) => {
-                          setTableRecordsPerPage(Number(e.target.value));
-                          setTableCurrentPage(1);
-                        }}
-                        className="px-4 py-2 border border-white/30 bg-white/60 backdrop-blur-sm rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-slate-700 transition-all duration-300"
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                      </select>
-                      <span className="text-sm font-medium text-slate-600">records</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {/* Premium Download CSV Button */}
-                    <button
-                      onClick={handleDownloadTableData}
-                      className="inline-flex items-center px-6 py-3 border border-white/30 bg-white/60 backdrop-blur-sm text-sm font-semibold rounded-2xl text-slate-700 hover:bg-white/80 hover:border-white/50 transition-all duration-300 transform hover:scale-105"
-                    >
-                      <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
-                      Download CSV
-                    </button>
-
-                    {/* Premium Verify Selected Button */}
                     {selectedRecords.length > 0 && (
                       <button
                         onClick={handleVerifySelected}
                         disabled={verifying}
-                        className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-semibold rounded-2xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100"
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {verifying ? (
                           <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                             Verifying...
                           </>
                         ) : (
                           <>
-                            <CheckCircleIcon className="h-5 w-5 mr-2" />
+                            <CheckCircleIcon className="h-4 w-4 mr-2" />
                             Verify Selected ({selectedRecords.length})
                           </>
                         )}
                       </button>
                     )}
                   </div>
-                </div>
-
-                {/* Premium Select All and Results Info */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30">
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center cursor-pointer group">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <input
-                        type="checkbox"
-                        checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
-                        onChange={handleSelectAll}
-                        className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
+                        type="text"
+                        placeholder="Search by PAN, Name, DOB, or Status..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                       />
-                      <span className="ml-3 text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">
-                        Select all pending records
-                      </span>
-                    </label>
-                  </div>
-                  <div className="text-sm text-slate-600 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
-                    <span className="font-semibold text-slate-800">{selectedRecords.length}</span> of <span className="font-semibold text-slate-800">{filteredRecords.length}</span> records selected
-                    {searchTerm && (
-                      <span className="text-slate-500"> (filtered from {selectedBatch.records.length} total)</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Premium Records Table */}
-              <div className="overflow-x-auto bg-white/60 backdrop-blur-sm rounded-3xl border border-white/30 shadow-xl">
-                <table className="min-w-full divide-y divide-white/20">
-                  <thead className="bg-gradient-to-r from-slate-50/80 to-blue-50/80 backdrop-blur-sm">
-                    <tr>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        <input
-                          type="checkbox"
-                          checked={selectedRecords.length === filteredRecords.length && filteredRecords.length > 0}
-                          onChange={handleSelectAll}
-                          className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
-                        />
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        PAN Number
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Date of Birth
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/20">
-                    {filteredRecords
-                      .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
-                      .map((record) => (
-                                              <tr key={record._id} className={`group transition-all duration-300 hover:bg-white/40 ${record.status === 'verified' ? 'opacity-60 bg-green-50/30' : ''} ${record.status === 'rejected' ? 'bg-red-50/30' : ''} ${record.status === 'error' ? 'bg-yellow-50/30' : ''}`}>
-                        <td className="px-8 py-5 whitespace-nowrap">
-                          {(record.status === 'pending' || record.status === 'rejected' || record.status === 'error') && (
-                            <input
-                              type="checkbox"
-                              checked={selectedRecords.includes(record._id)}
-                              onChange={() => handleRecordSelection(record._id)}
-                              className="w-5 h-5 rounded-lg border-2 border-white/50 text-blue-600 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-0 transition-all duration-300"
-                            />
-                          )}
-                        </td>
-                        <td className="px-8 py-5 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-800 group-hover:text-blue-600 transition-colors">
-                            {record.panNumber}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-800 group-hover:text-slate-900 transition-colors">
-                            {record.name}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 whitespace-nowrap">
-                          <div className="text-sm font-medium text-slate-700">
-                            {record.dateOfBirth || '-'}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 whitespace-nowrap">
-                          {record.status === 'pending' ? (
-                            <button
-                              onClick={() => handleVerifySingle(record._id)}
-                              disabled={verifyingRecords.has(record._id)}
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
-                              title={`Verify ${record.name} (${record.panNumber})`}
-                            >
-                              {verifyingRecords.has(record._id) ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                  Verifying...
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircleIcon className="h-4 w-4 mr-1" />
-                                  Verify
-                                </>
-                              )}
-                            </button>
-                          ) : record.status === 'rejected' || record.status === 'error' ? (
-                            <button
-                              onClick={() => handleVerifySingle(record._id)}
-                              disabled={verifyingRecords.has(record._id)}
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-orange-500/50 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 disabled:hover:scale-100 shadow-lg"
-                              title={`Re-verify ${record.name} (${record.panNumber})`}
-                            >
-                              {verifyingRecords.has(record._id) ? (
-                                <>
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                  Re-verifying...
-                                </>
-                              ) : (
-                                <>
-                                  <ArrowPathIcon className="h-4 w-4 mr-1" />
-                                  Re-verify
-                                </>
-                              )}
-                            </button>
-                          ) : (
-                            <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-green-700 bg-green-100/60 backdrop-blur-sm rounded-xl border border-green-200/30">
-                              <CheckCircleIcon className="h-4 w-4 mr-1" />
-                              Verified
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Premium Table Pagination */}
-              {filteredRecords.length > tableRecordsPerPage && (
-                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30">
-                  <div className="text-sm text-slate-600 mb-4 sm:mb-0 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/30">
-                    Showing <span className="font-semibold text-slate-800">{((tableCurrentPage - 1) * tableRecordsPerPage) + 1}</span> to <span className="font-semibold text-slate-800">{Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)}</span> of <span className="font-semibold text-slate-800">{filteredRecords.length}</span> results
-                    {searchTerm && (
-                      <span className="text-slate-500"> (filtered from {selectedBatch.records.length} total)</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setTableCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={tableCurrentPage === 1}
-                      className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                    >
-                      ← Previous
-                    </button>
-                    <div className="px-4 py-2 text-sm font-medium text-slate-700 bg-white/60 backdrop-blur-sm rounded-xl border border-white/30">
-                      Page {tableCurrentPage} of {Math.ceil(filteredRecords.length / tableRecordsPerPage)}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm font-medium text-gray-600">Show:</label>
+                      <select
+                        value={tableRecordsPerPage}
+                        onChange={(e) => {
+                          setTableRecordsPerPage(Number(e.target.value));
+                          setTableCurrentPage(1);
+                        }}
+                        className="px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                      >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                      </select>
                     </div>
                     <button
-                      onClick={() => setTableCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRecords.length / tableRecordsPerPage)))}
-                      disabled={tableCurrentPage === Math.ceil(filteredRecords.length / tableRecordsPerPage)}
-                      className="px-4 py-2 text-sm font-medium rounded-xl border border-white/40 bg-white/60 backdrop-blur-sm text-slate-700 hover:bg-white/80 hover:border-white/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                      onClick={handleDownloadTableData}
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-xl shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300"
                     >
-                      Next →
+                      <DocumentArrowDownIcon className="h-4 w-4 mr-2" />
+                      Download CSV
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Enhanced Records Table */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span>Select</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span>PAN Number</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span>Name</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span>Date of Birth</span>
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
+                            <span>Actions</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredRecords
+                        .slice((tableCurrentPage - 1) * tableRecordsPerPage, tableCurrentPage * tableRecordsPerPage)
+                        .map((record) => (
+                          <tr key={record._id} className={`hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 transition-all duration-200 ${record.status === 'verified' ? 'opacity-60' : ''}`}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {(record.status === 'pending' || record.status === 'rejected' || record.status === 'error') && (
+                                <div className="w-6 h-6 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedRecords.includes(record._id)}
+                                    onChange={() => handleRecordSelection(record._id)}
+                                    className="w-4 h-4 rounded border-gray-300 text-white focus:ring-emerald-500"
+                                  />
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                                {record.panNumber}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                                {record.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">
+                                {record.dateOfBirth || '-'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {record.status === 'pending' ? (
+                                <button
+                                  onClick={() => handleVerifySingle(record._id)}
+                                  disabled={verifyingRecords.has(record._id)}
+                                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title={`Verify ${record.name} (${record.panNumber})`}
+                                >
+                                  {verifyingRecords.has(record._id) ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                                      Verifying...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircleIcon className="h-4 w-4 mr-1" />
+                                      Verify
+                                    </>
+                                  )}
+                                </button>
+                              ) : record.status === 'rejected' || record.status === 'error' ? (
+                                <button
+                                  onClick={() => handleVerifySingle(record._id)}
+                                  disabled={verifyingRecords.has(record._id)}
+                                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm font-medium rounded-xl shadow-md hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title={`Re-verify ${record.name} (${record.panNumber})`}
+                                >
+                                  {verifyingRecords.has(record._id) ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                                      Re-verifying...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ArrowPathIcon className="h-4 w-4 mr-1" />
+                                      Re-verify
+                                    </>
+                                  )}
+                                </button>
+                              ) : (
+                                <span className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-medium rounded-xl">
+                                  <CheckCircleIcon className="h-4 w-4 mr-1" />
+                                  Verified
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Enhanced Table Pagination */}
+              {filteredRecords.length > tableRecordsPerPage && (
+                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-lg mt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      Showing <span className="font-semibold">{((tableCurrentPage - 1) * tableRecordsPerPage) + 1}</span> to{' '}
+                      <span className="font-semibold">{Math.min(tableCurrentPage * tableRecordsPerPage, filteredRecords.length)}</span> of{' '}
+                      <span className="font-semibold">{filteredRecords.length}</span> results
+                      {searchTerm && (
+                        <span className="text-gray-500"> (filtered from {selectedBatch.records.length} total)</span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setTableCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={tableCurrentPage === 1}
+                        className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        Previous
+                      </button>
+                      <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-xl">
+                        {tableCurrentPage} of {Math.ceil(filteredRecords.length / tableRecordsPerPage)}
+                      </span>
+                      <button
+                        onClick={() => setTableCurrentPage(prev => Math.min(prev + 1, Math.ceil(filteredRecords.length / tableRecordsPerPage)))}
+                        disabled={tableCurrentPage === Math.ceil(filteredRecords.length / tableRecordsPerPage)}
+                        className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
