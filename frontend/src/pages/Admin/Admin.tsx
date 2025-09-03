@@ -60,11 +60,23 @@ interface SystemStats {
     total: number;
     active: number;
     new: number;
+    inactive: number;
+    suspended: number;
+    premium: number;
+    basic: number;
+    lastActive: Array<{ _id: string; count: number }>;
+    roleDistribution: Array<{ role: string; count: number }>;
+    moduleAccessStats: Array<{ module: string; count: number }>;
   };
   panKyc: Array<{ _id: string; count: number }>;
   aadhaarPan: Array<{ _id: string; count: number }>;
   activity: Array<{ _id: string; count: number }>;
   dailyActivity: Array<{ _id: string; count: number }>;
+  userPerformance: {
+    topPerformers: Array<{ userId: string; name: string; count: number; module: string }>;
+    recentActivity: Array<{ userId: string; name: string; action: string; timestamp: string }>;
+    userEngagement: Array<{ userId: string; name: string; loginCount: number; lastLogin: string }>;
+  };
 }
 
 const Admin: React.FC = () => {
@@ -73,6 +85,7 @@ const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
+  const [userStats, setUserStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -103,6 +116,7 @@ const Admin: React.FC = () => {
     if (user?.role === 'admin') {
       fetchUsers();
       fetchSystemStats();
+      fetchUserStats();
     }
   }, [user]);
 
@@ -138,6 +152,15 @@ const Admin: React.FC = () => {
       setSystemStats(response.data.data);
     } catch (error) {
       console.error('Error fetching system stats:', error);
+    }
+  };
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await api.get('/admin/user-stats');
+      setUserStats(response.data.data);
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
     }
   };
 
@@ -477,6 +500,19 @@ const Admin: React.FC = () => {
             <ChartBarIcon className="h-5 w-5 mr-2" />
             Statistics
           </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'analytics'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            User Analytics
+          </button>
         </nav>
       </div>
 
@@ -691,6 +727,191 @@ const Admin: React.FC = () => {
                   <span className="text-sm font-medium text-gray-900">{stat.count}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Analytics Tab */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900">User Analytics Dashboard</h2>
+            </div>
+
+            {/* Enhanced User Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Total Users</p>
+                    <p className="text-2xl font-bold text-blue-900">{systemStats?.users.total || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                    <UserGroupIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600">Active Users</p>
+                    <p className="text-2xl font-bold text-emerald-900">{systemStats?.users.active || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <CheckCircleIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">New Users (30d)</p>
+                    <p className="text-2xl font-bold text-purple-900">{systemStats?.users.new || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                    <PlusIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-orange-600">Inactive Users</p>
+                    <p className="text-2xl font-bold text-orange-900">{systemStats?.users.inactive || 0}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+                    <ExclamationTriangleIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* User Performance Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Top Performers */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Top Performers
+                </h3>
+                <div className="space-y-3">
+                  {systemStats?.userPerformance?.topPerformers?.slice(0, 5).map((performer, index) => (
+                    <div key={performer.userId} className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{performer.name}</p>
+                          <p className="text-sm text-gray-600">{performer.module}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-emerald-600">{performer.count}</p>
+                        <p className="text-xs text-gray-500">records</p>
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <p>No performance data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent User Activity */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Recent User Activity
+                </h3>
+                <div className="space-y-3">
+                  {systemStats?.userPerformance?.recentActivity?.slice(0, 5).map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{activity.name}</p>
+                          <p className="text-sm text-gray-600">{activity.action}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">{new Date(activity.timestamp).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p>No recent activity data</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* User Engagement Metrics */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                User Engagement Metrics
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200">
+                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-900">{(systemStats?.users.total || 0) - (systemStats?.users.inactive || 0)}</p>
+                  <p className="text-sm text-gray-600">Engaged Users</p>
+                </div>
+
+                <div className="text-center p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-2xl font-bold text-emerald-900">{Math.round(((systemStats?.users.active || 0) / (systemStats?.users.total || 1)) * 100)}%</p>
+                  <p className="text-sm text-gray-600">Active Rate</p>
+                </div>
+
+                <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-900">{systemStats?.users.new || 0}</p>
+                  <p className="text-sm text-gray-600">New This Month</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
