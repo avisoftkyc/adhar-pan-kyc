@@ -1119,6 +1119,8 @@ router.post('/verify', protect, async (req, res) => {
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
+      console.log(`✅ Batch processing completed: ${totalRecords} records processed`);
+
       // Calculate summary
       const verified = results.filter(r => r.status === 'linked').length;
       const rejected = results.filter(r => r.status === 'not-linked').length;
@@ -1176,6 +1178,10 @@ router.post('/status', protect, async (req, res) => {
     if (req.body.recordIds && Array.isArray(req.body.recordIds)) {
       console.log('📦 Processing Aadhaar-PAN batch verification for records:', req.body.recordIds.length, 'records');
       
+      // Set a longer timeout for batch processing
+      req.setTimeout(300000); // 5 minutes timeout
+      res.setTimeout(300000); // 5 minutes timeout
+      
       const { recordIds } = req.body;
       const totalRecords = recordIds.length;
       const results = [];
@@ -1184,6 +1190,11 @@ router.post('/status', protect, async (req, res) => {
       for (let i = 0; i < totalRecords; i++) {
         const recordId = recordIds[i];
         console.log(`🔄 Processing Aadhaar-PAN record ${i + 1}/${totalRecords}: ${recordId}`);
+        
+        // Log progress every 5 records
+        if ((i + 1) % 5 === 0) {
+          console.log(`📊 Progress: ${i + 1}/${totalRecords} records processed (${Math.round(((i + 1) / totalRecords) * 100)}%)`);
+        }
 
         try {
           // Find the record
