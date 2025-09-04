@@ -9,6 +9,102 @@ const { protect } = require('../middleware/auth');
 const AadhaarPan = require('../models/AadhaarPan');
 const { logAadhaarPanEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
+const axios = require('axios');
+
+// Function to check Aadhaar-PAN status with Sandbox API
+async function checkAadhaarPANStatusWithSandbox(aadhaarNumber, panNumber, consent, reason) {
+  try {
+    logger.info('Starting Aadhaar-PAN status check:', {
+      aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+      panNumber: panNumber.toUpperCase(),
+      consent,
+      reason
+    });
+
+    logger.info('Starting Sandbox API status check...');
+
+    // 1. Authenticate with Sandbox API
+    logger.info('Authenticating with Sandbox API...');
+    const authResponse = await fetch("https://api.sandbox.co.in/authenticate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.SANDBOX_API_KEY,
+        "x-api-secret": process.env.SANDBOX_API_SECRET,
+      },
+    });
+
+    const authData = await authResponse.json();
+    
+    if (!authResponse.ok) {
+      throw new Error('Authentication failed');
+    }
+
+    const accessToken = authData.access_token || authData.data?.access_token;
+    if (!accessToken) {
+      throw new Error('Failed to authenticate with Sandbox API');
+    }
+    
+    logger.info('Sandbox authentication successful');
+
+    // 2. Check Aadhaar-PAN status with Sandbox API
+    logger.info('Calling Sandbox Aadhaar-PAN status API...');
+    
+    const verifyResponse = await fetch("https://api.sandbox.co.in/kyc/pan-aadhaar/status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "authorization": accessToken,
+        "x-api-key": process.env.SANDBOX_API_KEY,
+        "x-accept-cache": "true",
+      },
+      body: JSON.stringify({
+        "@entity": "in.co.sandbox.kyc.pan_aadhaar.status",
+        aadhaar_number: aadhaarNumber.replace(/\s/g, ''),
+        pan: panNumber.toUpperCase(),
+        consent: "Y",
+        reason: "KYC Verification",
+      }),
+    });
+
+    const verifyData = await verifyResponse.json();
+
+    logger.info('Sandbox Aadhaar-PAN status check successful:', {
+      status: verifyResponse.status,
+      data: verifyData,
+      aadhaarSeedingStatus: verifyData.data?.aadhaar_seeding_status,
+      isValid: verifyData.data?.aadhaar_seeding_status === 'y' || verifyData.data?.status === 'valid'
+    });
+
+    // Return status check result
+    // Consider aadhaar_seeding_status = 'y' as success
+    const isValid = verifyData.data?.aadhaar_seeding_status === 'y' || verifyData.data?.status === 'valid';
+    return {
+      valid: isValid,
+      message: isValid ? 'Aadhaar-PAN status check successful' : 'Aadhaar-PAN status check failed',
+      sandboxApiResponse: verifyData,
+      source: 'sandbox_api'
+    };
+
+  } catch (error) {
+    // Extract only the necessary error information to avoid circular references
+    const errorInfo = {
+      message: error.message,
+      status: error.status,
+      statusText: error.statusText,
+      data: error.data
+    };
+    
+    logger.error('Sandbox API verification failed:', errorInfo);
+    
+    // Create a more detailed error with Sandbox API response
+    const detailedError = new Error(`Verification failed: ${error.message}`);
+    detailedError.sandboxApiResponse = error.data;
+    detailedError.sandboxApiStatus = error.status;
+    
+    throw detailedError;
+  }
+}
 
 // Simulate Aadhaar-PAN linking verification function
 const simulateAadhaarPanLinking = async (record) => {
@@ -177,7 +273,9 @@ router.get('/records', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch records',
-      error: error.message
+      error: error.message,
+            sandboxApiResponse: error.sandboxApiResponse,
+            sandboxApiStatus: error.sandboxApiStatus
     });
   }
 });
@@ -476,6 +574,7 @@ router.post('/batch/:batchId/process', protect, async (req, res) => {
           
           await record.save();
           
+                    // Include Sandbox API response in error details
           results.push({
             recordId: record._id,
             status: status,
@@ -501,10 +600,13 @@ router.post('/batch/:batchId/process', protect, async (req, res) => {
           record.processedAt = new Date();
           await record.save();
           
+                    // Include Sandbox API response in error details
           results.push({
             recordId: record._id,
             status: 'error',
-            error: error.message
+            error: error.message,
+            sandboxApiResponse: error.sandboxApiResponse,
+            sandboxApiStatus: error.sandboxApiStatus
           });
         }
       }
@@ -910,6 +1012,457 @@ router.get('/recent-verifications', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch recent verifications'
+    });
+  }
+});
+
+// Aadhaar-PAN Verification endpoint (frontend calls this for batch verification)
+router.post('/verify', protect, async (req, res) => {
+  try {
+    console.log('🔍 Received Aadhaar-PAN verification request:', {
+      body: req.body,
+      contentType: req.get('Content-Type'),
+      user: req.user.id
+    });
+
+    // Check if this is a batch verification request
+    if (req.body.recordIds && Array.isArray(req.body.recordIds)) {
+      console.log('📦 Processing Aadhaar-PAN batch verification for records:', req.body.recordIds.length, 'records');
+      
+      const results = [];
+      const totalRecords = req.body.recordIds.length;
+      
+      for (let i = 0; i < req.body.recordIds.length; i++) {
+        const recordId = req.body.recordIds[i];
+        console.log(`🔄 Processing Aadhaar-PAN record ${i + 1}/${totalRecords}: ${recordId}`);
+        
+        try {
+          // Find the record
+          const record = await AadhaarPan.findOne({
+            _id: recordId,
+            userId: req.user.id
+          });
+
+          if (!record) {
+                      // Include Sandbox API response in error details
+          results.push({
+              recordId,
+              status: 'error',
+              error: 'Record not found'
+            });
+            continue;
+          }
+
+          // Decrypt the record data
+          const decryptedRecord = record.decryptData();
+          
+          // Check status with Sandbox API
+          const verificationResult = await checkAadhaarPANStatusWithSandbox(
+            decryptedRecord.aadhaarNumber,
+            decryptedRecord.panNumber,
+            'Y',
+            'KYC Verification'
+          );
+
+          // Update record with verification result
+          record.status = verificationResult.valid ? 'linked' : 'not-linked';
+          record.verificationDetails = {
+            ...verificationResult,
+            verifiedAt: new Date(),
+            source: 'sandbox_api'
+          };
+          record.processedAt = new Date();
+
+          await record.save();
+
+          // Log verification event
+          await logAadhaarPanEvent('record_verified', req.user.id, {
+            aadhaarNumber: record.aadhaarNumber,
+            panNumber: record.panNumber,
+            status: record.status
+          }, req);
+
+                    // Include Sandbox API response in error details
+          results.push({
+            recordId,
+            status: record.status,
+            result: verificationResult,
+            details: {
+              aadhaarNumber: decryptedRecord.aadhaarNumber,
+              panNumber: decryptedRecord.panNumber,
+              name: decryptedRecord.name,
+              dateOfBirth: decryptedRecord.dateOfBirth
+            },
+            verifiedAt: record.verifiedAt,
+            source: 'sandbox_api'
+          });
+
+        } catch (error) {
+          // Extract only the necessary error information to avoid circular references
+          const errorInfo = {
+            message: error.message,
+            stack: error.stack?.split('\n')[0] // Only first line of stack trace
+          };
+          
+          console.error(`Error processing record ${recordId}:`, errorInfo);
+                    // Include Sandbox API response in error details
+          results.push({
+            recordId,
+            status: 'error',
+            error: error.message,
+            sandboxApiResponse: error.sandboxApiResponse,
+            sandboxApiStatus: error.sandboxApiStatus
+          });
+        }
+
+        // Reduced delay between API calls for better performance
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Calculate summary
+      const verified = results.filter(r => r.status === 'linked').length;
+      const rejected = results.filter(r => r.status === 'not-linked').length;
+      const error = results.filter(r => r.status === 'error').length;
+
+      res.json({
+        success: true,
+        message: `Processed ${totalRecords} records`,
+        data: {
+          total: totalRecords,
+          verified,
+          rejected,
+          error,
+          sourceBreakdown: {
+            sandbox_api: verified + rejected,
+            error: error
+          },
+          results
+        }
+      });
+
+    } else {
+      // Single verification (if needed)
+      res.status(400).json({
+        success: false,
+        message: 'Batch verification requires recordIds array'
+      });
+    }
+
+  } catch (error) {
+    // Extract only the necessary error information to avoid circular references
+    const errorInfo = {
+      message: error.message,
+      stack: error.stack?.split('\n')[0] // Only first line of stack trace
+    };
+    
+    console.error('Error in Aadhaar-PAN batch verification:', errorInfo);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process Aadhaar-PAN verification'
+    });
+  }
+});
+
+// Aadhaar-PAN Status API using Sandbox API - handles both single and batch verification
+router.post('/status', protect, async (req, res) => {
+  try {
+    console.log('🔍 Received Aadhaar-PAN status request:', {
+      body: req.body,
+      contentType: req.get('Content-Type'),
+      user: req.user.id
+    });
+
+    // Check if this is a batch verification request
+    if (req.body.recordIds && Array.isArray(req.body.recordIds)) {
+      console.log('📦 Processing Aadhaar-PAN batch verification for records:', req.body.recordIds.length, 'records');
+      
+      const { recordIds } = req.body;
+      const totalRecords = recordIds.length;
+      const results = [];
+
+      // Process each record
+      for (let i = 0; i < totalRecords; i++) {
+        const recordId = recordIds[i];
+        console.log(`🔄 Processing Aadhaar-PAN record ${i + 1}/${totalRecords}: ${recordId}`);
+
+        try {
+          // Find the record
+          const record = await AadhaarPan.findById(recordId);
+          if (!record) {
+                      // Include Sandbox API response in error details
+          results.push({
+              recordId,
+              status: 'error',
+              error: 'Record not found'
+            });
+            continue;
+          }
+
+          // Check if user owns this record
+          if (record.userId.toString() !== req.user.id) {
+                      // Include Sandbox API response in error details
+          results.push({
+              recordId,
+              status: 'error',
+              error: 'Access denied'
+            });
+            continue;
+          }
+
+          // Decrypt the record data
+          const decryptedRecord = record.decryptData();
+
+          // Check status with Sandbox API
+          const verificationResult = await checkAadhaarPANStatusWithSandbox(
+            decryptedRecord.aadhaarNumber,
+            decryptedRecord.panNumber,
+            'Y',
+            'KYC Verification'
+          );
+
+          // Update record status
+          record.status = verificationResult.valid ? 'linked' : 'not-linked';
+          record.verificationDetails = {
+            ...verificationResult,
+            verifiedAt: new Date(),
+            source: 'sandbox_api'
+          };
+          record.processedAt = new Date();
+
+          await record.save();
+
+          // Log verification event
+          await logAadhaarPanEvent('record_verified', req.user.id, {
+            aadhaarNumber: record.aadhaarNumber,
+            panNumber: record.panNumber,
+            status: record.status
+          }, req);
+
+                    // Include Sandbox API response in error details
+          results.push({
+            recordId,
+            status: record.status,
+            result: verificationResult,
+            details: {
+              aadhaarNumber: decryptedRecord.aadhaarNumber,
+              panNumber: decryptedRecord.panNumber,
+              name: decryptedRecord.name,
+              dateOfBirth: decryptedRecord.dateOfBirth
+            },
+            verifiedAt: record.verifiedAt,
+            source: 'sandbox_api'
+          });
+
+        } catch (error) {
+          // Extract only the necessary error information to avoid circular references
+          const errorInfo = {
+            message: error.message,
+            stack: error.stack?.split('\n')[0] // Only first line of stack trace
+          };
+          
+          console.error(`Error processing record ${recordId}:`, errorInfo);
+                    // Include Sandbox API response in error details
+          results.push({
+            recordId,
+            status: 'error',
+            error: error.message,
+            sandboxApiResponse: error.sandboxApiResponse,
+            sandboxApiStatus: error.sandboxApiStatus
+          });
+        }
+
+        // Reduced delay between API calls for better performance
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Calculate summary
+      const verified = results.filter(r => r.status === 'linked').length;
+      const rejected = results.filter(r => r.status === 'not-linked').length;
+      const error = results.filter(r => r.status === 'error').length;
+
+      res.json({
+        success: true,
+        message: `Processed ${totalRecords} records`,
+        data: {
+          total: totalRecords,
+          verified,
+          rejected,
+          error,
+          sourceBreakdown: {
+            sandbox_api: verified + rejected,
+            error: error
+          },
+          results
+        }
+      });
+
+    } else {
+      // Single verification
+      const { aadhaarNumber, panNumber } = req.body;
+
+      // Validate required fields
+      if (!aadhaarNumber || !panNumber) {
+        return res.status(400).json({
+          success: false,
+          message: 'Aadhaar Number and PAN Number are required'
+        });
+      }
+
+      // Validate Aadhaar format
+      const aadhaarRegex = /^\d{12}$/;
+      if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid Aadhaar number format'
+        });
+      }
+
+      // Validate PAN format
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(panNumber.toUpperCase())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid PAN number format'
+        });
+      }
+
+      logger.info('Starting Aadhaar-PAN status check:', {
+        aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+        panNumber: panNumber.toUpperCase()
+      });
+
+      logger.info('Authenticating with Sandbox API...');
+
+      // Call Sandbox API for Aadhaar-PAN status
+      const axios = require('axios');
+      
+      // First authenticate with Sandbox API
+      const authResponse = await axios.post('https://api.sandbox.co.in/authenticate', {
+        x_api_key: process.env.SANDBOX_API_KEY,
+        x_api_secret: process.env.SANDBOX_API_SECRET
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.SANDBOX_API_KEY,
+          'x-api-secret': process.env.SANDBOX_API_SECRET
+        }
+      });
+
+      if (!authResponse.data.access_token) {
+        throw new Error('Failed to authenticate with Sandbox API');
+      }
+
+      const accessToken = authResponse.data.access_token;
+      logger.info('Sandbox authentication successful');
+      
+      // Now call the Aadhaar-PAN status API
+      logger.info('Calling Sandbox Aadhaar-PAN status API...');
+      const options = {
+        method: 'POST',
+        url: 'https://api.sandbox.co.in/kyc/pan-aadhaar/status',
+        headers: {
+          accept: 'application/json', 
+          'content-type': 'application/json',
+          'authorization': accessToken,
+          'x-api-key': process.env.SANDBOX_API_KEY
+        },
+        data: {
+          '@entity': 'in.co.sandbox.kyc.pan_aadhaar.status',
+          aadhaar_number: aadhaarNumber.replace(/\s/g, ''),
+          pan: panNumber.toUpperCase(),
+          consent: "Y",
+          reason: "KYC Verification",  
+        }
+      };
+
+      try {
+        const response = await axios.request(options);
+        
+        logger.info('Sandbox API response received:', {
+          status: response.status,
+          data: response.data
+        });
+
+        // Create a temporary record for logging
+        const tempRecord = new AadhaarPan({
+          userId: req.user.id,
+          batchId: 'STATUS_CHECK_' + Date.now(),
+          aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+          panNumber: panNumber.toUpperCase(),
+          name: 'Status Check',
+          status: 'status_checked',
+          verificationDetails: {
+            apiResponse: response.data,
+            source: 'sandbox_api',
+            verificationDate: new Date()
+            },
+          processedAt: new Date()
+        });
+
+        await tempRecord.save();
+
+        // Log verification event
+        await logAadhaarPanEvent('status_check_completed', req.user.id, {
+          aadhaarNumber: tempRecord.aadhaarNumber,
+          panNumber: tempRecord.panNumber,
+          status: 'status_checked'
+        }, req);
+
+        res.json({
+          success: true,
+          message: 'Aadhaar-PAN status check completed',
+          data: {
+            aadhaarNumber: tempRecord.aadhaarNumber,
+            panNumber: tempRecord.panNumber,
+            status: 'status_checked',
+            apiResponse: response.data,
+            processedAt: tempRecord.processedAt,
+            source: 'sandbox_api'
+          }
+        });
+
+      } catch (apiError) {
+        logger.error('Sandbox API error:', apiError);
+        
+        // Create error record
+        const tempRecord = new AadhaarPan({
+          userId: req.user.id,
+          batchId: 'STATUS_CHECK_' + Date.now(),
+          aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+          panNumber: panNumber.toUpperCase(),
+          name: 'Status Check',
+          status: 'error',
+          errorMessage: apiError.message,
+          verificationDetails: {
+            error: apiError.message,
+            source: 'sandbox_api_error',
+            verificationDate: new Date()
+          },
+          processedAt: new Date()
+        });
+
+        await tempRecord.save();
+
+        res.status(500).json({
+          success: false,
+          message: 'Failed to check Aadhaar-PAN status',
+          error: apiError.message,
+          data: {
+            aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+            panNumber: panNumber.toUpperCase(),
+            status: 'error',
+            processedAt: new Date(),
+            source: 'sandbox_api_error'
+          }
+        });
+      }
+    }
+
+  } catch (error) {
+    logger.error('Error in Aadhaar-PAN status check:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check Aadhaar-PAN status'
     });
   }
 });

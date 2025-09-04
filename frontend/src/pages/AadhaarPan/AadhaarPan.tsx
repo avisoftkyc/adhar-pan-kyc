@@ -310,7 +310,7 @@ const AadhaarPan: React.FC = () => {
     try {
       setVerifying(true);
       setVerifyingRecords(new Set(Array.from(selectedRecords)));
-      const response = await api.post('/aadhaar-pan/verify', {
+      const response = await api.post('/aadhaar-pan/status', {
         recordIds: Array.from(selectedRecords)
       });
 
@@ -339,7 +339,7 @@ const AadhaarPan: React.FC = () => {
   const handleVerifySingle = async (recordId: string) => {
     try {
       setVerifyingRecords(new Set([recordId]));
-      const response = await api.post('/aadhaar-pan/verify', {
+      const response = await api.post('/aadhaar-pan/status', {
         recordIds: [recordId]
       });
 
