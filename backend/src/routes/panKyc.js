@@ -68,7 +68,13 @@ const upload = multer({
 router.get('/batches', protect, async (req, res) => {
   try {
     const batches = await PanKyc.aggregate([
-      { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
+      { 
+        $match: { 
+          userId: new mongoose.Types.ObjectId(req.user.id),
+          // Exclude single KYC verification records (they start with SINGLE_KYC_)
+          batchId: { $not: { $regex: /^SINGLE_KYC_/ } }
+        } 
+      },
       {
         $group: {
           _id: '$batchId',
@@ -781,6 +787,62 @@ router.get('/test-sandbox', async (req, res) => {
     res.status(500).json({
       error: 'Test failed',
       message: error.message
+    });
+  }
+});
+
+// Delete batch and all its records
+router.delete('/batch/:batchId', protect, async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    
+    // Prevent deletion of single KYC verification records
+    if (batchId.startsWith('SINGLE_KYC_')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete single KYC verification records'
+      });
+    }
+    
+    // Find all records for this batch that belong to the user
+    const records = await PanKyc.find({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      batchId: batchId
+    });
+
+    if (records.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Batch not found or access denied'
+      });
+    }
+
+    // Delete all records for this batch
+    const deleteResult = await PanKyc.deleteMany({
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      batchId: batchId
+    });
+
+    // Log deletion event
+    await logPanKycEvent('batch_deleted', req.user.id, {
+      batchId,
+      recordCount: records.length
+    }, req);
+
+    res.json({
+      success: true,
+      message: `Successfully deleted batch with ${deleteResult.deletedCount} records`,
+      data: {
+        batchId,
+        deletedRecords: deleteResult.deletedCount
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error deleting batch:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete batch'
     });
   }
 });
