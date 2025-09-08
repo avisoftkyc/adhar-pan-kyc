@@ -62,7 +62,7 @@ const PanKyc: React.FC = () => {
   const [verifying, setVerifying] = useState(false);
   const [verifyingRecords, setVerifyingRecords] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const documentsPerPage = 5;
+  const documentsPerPage = 3;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -698,26 +698,14 @@ const PanKyc: React.FC = () => {
             <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-200/20 rounded-full blur-3xl"></div>
             
             <div className="relative z-10">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <CloudArrowUpIcon className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                  Upload PAN KYC Data
-                </h2>
-                <p className="text-blue-600/80 text-lg">
-                  Upload Excel files and verify PAN details in bulk
-                </p>
-              </div>
 
               {/* File Input Area */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-blue-300/50 hover:border-blue-400/70 transition-all duration-300 mb-6">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <DocumentTextIcon className="h-10 w-10 text-blue-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-blue-800 mb-2">Select Excel File</h3>
+                  <h3 className="text-lg font-semibold text-blue-800 mb-2 flex items-center justify-center">
+                    <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-600" />
+                    Select Excel File
+                  </h3>
                   <p className="text-blue-600/70 mb-4">
                     Supports .xlsx and .xls formats
                   </p>
@@ -749,38 +737,6 @@ const PanKyc: React.FC = () => {
                 </div>
               </div>
 
-              {/* File Requirements Card */}
-              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-blue-200/30 mb-6">
-                <h4 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-                  <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  File Requirements
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                      <span className="text-white text-xs font-bold">1</span>
-                    </div>
-                    <p className="text-sm font-medium text-blue-800">Excel Format</p>
-                    <p className="text-xs text-blue-600/70">.xlsx or .xls files only</p>
-                  </div>
-                  <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                      <span className="text-white text-xs font-bold">2</span>
-                    </div>
-                    <p className="text-sm font-medium text-blue-800">Required Columns</p>
-                    <p className="text-xs text-blue-600/70">panNumber, name, dateOfBirth</p>
-                  </div>
-                  <div className="bg-white/60 rounded-xl p-3 text-center">
-                    <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                      <span className="text-white text-xs font-bold">3</span>
-                    </div>
-                    <p className="text-sm font-medium text-blue-800">Data Validation</p>
-                    <p className="text-xs text-blue-600/70">Automatic format checking</p>
-                  </div>
-                </div>
-              </div>
 
               {/* Selected File Display */}
               {selectedFile && (
@@ -858,29 +814,15 @@ const PanKyc: React.FC = () => {
               Uploaded Documents
             </h2>
             
-            {/* Enhanced Search and Filter Bar */}
-            <div className="mb-6 flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 relative">
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Search batches by ID, date, or records..."
                   className="w-full px-4 py-3 pl-10 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
                 />
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
-              </div>
-              <div className="flex gap-2">
-                <select className="px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300">
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="verified">Verified</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <select className="px-4 py-3 bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300">
-                  <option value="">Sort By</option>
-                  <option value="date">Date</option>
-                  <option value="records">Records</option>
-                  <option value="status">Status</option>
-                </select>
               </div>
             </div>
             
@@ -922,49 +864,51 @@ const PanKyc: React.FC = () => {
                       
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                              <DocumentTextIcon className="h-5 w-5 text-white" />
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                                <DocumentTextIcon className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                  {batch._id.split('_')[0]}
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                  Uploaded {new Date(batch.createdAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
-                                {batch._id.split('_')[0]}
-                              </h3>
-                              <p className="text-sm text-slate-500">
-                                Uploaded {new Date(batch.createdAt).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          {/* Enhanced Stats Display */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                            <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                              <div className="text-2xl font-bold text-blue-600">{batch.totalRecords}</div>
-                              <div className="text-xs text-blue-600 font-medium">Total Records</div>
-                            </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl">
-                              <div className="text-2xl font-bold text-yellow-600">{batch.pendingRecords}</div>
-                              <div className="text-xs text-yellow-600 font-medium">Pending</div>
-                            </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                              <div className="text-2xl font-bold text-green-600">{batch.verifiedRecords}</div>
-                              <div className="text-xs text-green-600 font-medium">Verified</div>
-                            </div>
-                            <div className="text-center p-3 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
-                              <div className="text-2xl font-bold text-red-600">{batch.rejectedRecords + batch.errorRecords}</div>
-                              <div className="text-xs text-red-600 font-medium">Issues</div>
+                            
+                            {/* Stats Display - Moved to the right side */}
+                            <div className="flex items-center gap-3">
+                              <div className="text-center p-2 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                                <div className="text-lg font-bold text-blue-600">{batch.totalRecords}</div>
+                                <div className="text-xs text-blue-600 font-medium">Total</div>
+                              </div>
+                              <div className="text-center p-2 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                                <div className="text-lg font-bold text-green-600">{batch.verifiedRecords}</div>
+                                <div className="text-xs text-green-600 font-medium">Verified</div>
+                              </div>
+                              <div className="text-center p-2 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg">
+                                <div className="text-lg font-bold text-yellow-600">{batch.pendingRecords}</div>
+                                <div className="text-xs text-yellow-600 font-medium">Pending</div>
+                              </div>
+                              <div className="text-center p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+                                <div className="text-lg font-bold text-red-600">{batch.rejectedRecords + batch.errorRecords}</div>
+                                <div className="text-xs text-red-600 font-medium">Issues</div>
+                              </div>
                             </div>
                           </div>
                         </div>
                         
                         {/* Quick Actions */}
-                        <div className="flex flex-col gap-2 ml-4">
+                        <div className="flex gap-2 ml-4">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1008,7 +952,11 @@ const PanKyc: React.FC = () => {
                 {batches.length > documentsPerPage && (
                   <div className="flex flex-col sm:flex-row items-center justify-between mt-8 p-6 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/30">
                     <div className="text-sm text-slate-600 mb-4 sm:mb-0">
-                      Showing <span className="font-semibold text-slate-800">{((currentPage - 1) * documentsPerPage) + 1}</span> to <span className="font-semibold text-slate-800">{Math.min(currentPage * documentsPerPage, batches.length)}</span> of <span className="font-semibold text-slate-800">{batches.length}</span> documents
+                      {currentPage === 1 ? (
+                        <>Showing latest <span className="font-semibold text-slate-800">{Math.min(documentsPerPage, batches.length)}</span> of <span className="font-semibold text-slate-800">{batches.length}</span> documents</>
+                      ) : (
+                        <>Showing <span className="font-semibold text-slate-800">{((currentPage - 1) * documentsPerPage) + 1}</span> to <span className="font-semibold text-slate-800">{Math.min(currentPage * documentsPerPage, batches.length)}</span> of <span className="font-semibold text-slate-800">{batches.length}</span> documents</>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
