@@ -418,19 +418,7 @@ const PanKycRecords: React.FC = () => {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span>File Info</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                         <span>Timestamps</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-blue-700 uppercase tracking-wider">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span>Actions</span>
                       </div>
                     </th>
                   </tr>
@@ -481,25 +469,6 @@ const PanKycRecords: React.FC = () => {
                         </div>
                       </td>
 
-                      {/* File Info */}
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <div className="text-sm text-gray-900">
-                            Batch: {record.batchId}
-                          </div>
-                          {record.fileUpload && (
-                            <>
-                              <div className="text-sm text-gray-500">
-                                File: {record.fileUpload.originalName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                Size: {(record.fileUpload.fileSize / 1024).toFixed(1)} KB
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </td>
-
                       {/* Timestamps */}
                       <td className="px-6 py-4">
                         <div className="space-y-1">
@@ -511,18 +480,6 @@ const PanKycRecords: React.FC = () => {
                               Processed: {formatDate(record.processedAt)}
                             </div>
                           )}
-                        </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-2">
-                          <button
-                            className="text-blue-600 hover:text-blue-900"
-                            title="View Details"
-                          >
-                            <EyeIcon className="h-5 w-5" />
-                          </button>
                         </div>
                       </td>
                     </tr>

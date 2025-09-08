@@ -97,6 +97,40 @@ router.get('/batches', protect, async (req, res) => {
   }
 });
 
+// Get all records for a user
+router.get('/records', protect, async (req, res) => {
+  try {
+    const records = await PanKyc.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Decrypt sensitive data for each record
+    const decryptedRecords = records.map(record => {
+      try {
+        // Create a temporary PanKyc instance to use the decryptData method
+        const tempRecord = new PanKyc(record);
+        return tempRecord.decryptData();
+      } catch (error) {
+        console.error('Decryption error for record:', record._id, error.message);
+        // Return original record if decryption fails
+        return record;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: decryptedRecords
+    });
+  } catch (error) {
+    logger.error('Error fetching PAN KYC records:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch records',
+      error: error.message
+    });
+  }
+});
+
 // Get batch details
 router.get('/batch/:batchId', protect, async (req, res) => {
   try {
