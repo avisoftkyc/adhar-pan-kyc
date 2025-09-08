@@ -135,8 +135,10 @@ PanKycSchema.pre('save', function(next) {
     
     fieldsToEncrypt.forEach(field => {
       if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
-        // Skip encryption if already encrypted (hex string)
-        if (!/^[0-9a-fA-F]+$/.test(this[field])) {
+        // Skip encryption if already encrypted (new format with IV or old hex format)
+        const isAlreadyEncrypted = this[field].includes(':') || /^[0-9a-fA-F]+$/.test(this[field]);
+        
+        if (!isAlreadyEncrypted) {
           try {
             const algorithm = 'aes-256-cbc';
             const key = crypto.scryptSync(encryptionKey, 'salt', 32);
@@ -158,17 +160,23 @@ PanKycSchema.pre('save', function(next) {
 
     // Handle nested objects like verificationDetails
     if (this.verificationDetails && typeof this.verificationDetails === 'object') {
-      try {
-        const algorithm = 'aes-256-cbc';
-        const key = crypto.scryptSync(encryptionKey, 'salt', 32);
-        const iv = crypto.randomBytes(16);
-        const cipher = crypto.createCipheriv(algorithm, key, iv);
-        let encrypted = cipher.update(JSON.stringify(this.verificationDetails), 'utf8', 'hex');
-        encrypted += cipher.final('hex');
-        this.verificationDetails = iv.toString('hex') + ':' + encrypted;
-      } catch (error) {
-        console.error('Error encrypting verificationDetails:', error);
-        // Don't fail the save if encryption fails
+      // Skip encryption if already encrypted
+      const isAlreadyEncrypted = typeof this.verificationDetails === 'string' && 
+                                 (this.verificationDetails.includes(':') || /^[0-9a-fA-F]+$/.test(this.verificationDetails));
+      
+      if (!isAlreadyEncrypted) {
+        try {
+          const algorithm = 'aes-256-cbc';
+          const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+          const iv = crypto.randomBytes(16);
+          const cipher = crypto.createCipheriv(algorithm, key, iv);
+          let encrypted = cipher.update(JSON.stringify(this.verificationDetails), 'utf8', 'hex');
+          encrypted += cipher.final('hex');
+          this.verificationDetails = iv.toString('hex') + ':' + encrypted;
+        } catch (error) {
+          console.error('Error encrypting verificationDetails:', error);
+          // Don't fail the save if encryption fails
+        }
       }
     }
   }
@@ -188,28 +196,50 @@ PanKycSchema.methods.decryptData = function() {
 
   fieldsToDecrypt.forEach(field => {
     if (decrypted[field] && typeof decrypted[field] === 'string') {
-      try {
-        // Check if it's the new format (iv:encrypted) or old format (just encrypted)
-        if (decrypted[field].includes(':')) {
-          // New format with IV
-          const algorithm = 'aes-256-cbc';
-          const key = crypto.scryptSync(encryptionKey, 'salt', 32);
-          const [ivHex, encrypted] = decrypted[field].split(':');
-          const iv = Buffer.from(ivHex, 'hex');
-          const decipher = crypto.createDecipheriv(algorithm, key, iv);
-          let decryptedField = decipher.update(encrypted, 'hex', 'utf8');
-          decryptedField += decipher.final('utf8');
-          decrypted[field] = decryptedField;
-        } else {
-          // Old format - try to decrypt with old method
-          const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-          let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
-          decryptedField += decipher.final('utf8');
-          decrypted[field] = decryptedField;
+      // Check if the field looks like encrypted data
+      const isEncrypted = decrypted[field].includes(':') || 
+                         (decrypted[field].length > 20 && /^[0-9a-fA-F]+$/.test(decrypted[field]));
+      
+      if (isEncrypted) {
+        try {
+          let currentValue = decrypted[field];
+          
+          // Keep decrypting until we get plain text (handle double encryption)
+          let attempts = 0;
+          const maxAttempts = 3; // Prevent infinite loops
+          
+          while (attempts < maxAttempts && currentValue.includes(':')) {
+            // New format with IV
+            const algorithm = 'aes-256-cbc';
+            const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+            const [ivHex, encrypted] = currentValue.split(':');
+            const iv = Buffer.from(ivHex, 'hex');
+            const decipher = crypto.createDecipheriv(algorithm, key, iv);
+            let decryptedField = decipher.update(encrypted, 'hex', 'utf8');
+            decryptedField += decipher.final('utf8');
+            currentValue = decryptedField;
+            attempts++;
+          }
+          
+          // If still encrypted (old format), try deprecated method
+          if (attempts < maxAttempts && /^[0-9a-fA-F]+$/.test(currentValue)) {
+            try {
+              const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+              let decryptedField = decipher.update(currentValue, 'hex', 'utf8');
+              decryptedField += decipher.final('utf8');
+              currentValue = decryptedField;
+            } catch (oldError) {
+              // If old method fails, mark as encrypted
+              currentValue = '[ENCRYPTED]';
+            }
+          }
+          
+          decrypted[field] = currentValue;
+        } catch (error) {
+          decrypted[field] = '[ENCRYPTED]';
         }
-      } catch (error) {
-        decrypted[field] = '[ENCRYPTED]';
       }
+      // If it doesn't look encrypted, leave it as is (it's already decrypted/plain text)
     } else if (decrypted[field] === null) {
       // Handle null values (empty fields)
       decrypted[field] = '';
@@ -218,28 +248,55 @@ PanKycSchema.methods.decryptData = function() {
 
   // Handle nested objects
   if (decrypted.verificationDetails && typeof decrypted.verificationDetails === 'string') {
-    try {
-      // Check if it's the new format (iv:encrypted) or old format (just encrypted)
-      if (decrypted.verificationDetails.includes(':')) {
-        // New format with IV
-        const algorithm = 'aes-256-cbc';
-        const key = crypto.scryptSync(encryptionKey, 'salt', 32);
-        const [ivHex, encrypted] = decrypted.verificationDetails.split(':');
-        const iv = Buffer.from(ivHex, 'hex');
-        const decipher = crypto.createDecipheriv(algorithm, key, iv);
-        let decryptedDetails = decipher.update(encrypted, 'hex', 'utf8');
-        decryptedDetails += decipher.final('utf8');
-        decrypted.verificationDetails = JSON.parse(decryptedDetails);
-      } else {
-        // Old format - try to decrypt with old method
-        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-        let decryptedDetails = decipher.update(decrypted.verificationDetails, 'hex', 'utf8');
-        decryptedDetails += decipher.final('utf8');
-        decrypted.verificationDetails = JSON.parse(decryptedDetails);
+    // Check if verificationDetails looks like encrypted data
+    const isEncrypted = decrypted.verificationDetails.includes(':') || 
+                       (decrypted.verificationDetails.length > 20 && /^[0-9a-fA-F]+$/.test(decrypted.verificationDetails));
+    
+    if (isEncrypted) {
+      try {
+        let currentValue = decrypted.verificationDetails;
+        
+        // Keep decrypting until we get plain text (handle double encryption)
+        let attempts = 0;
+        const maxAttempts = 3; // Prevent infinite loops
+        
+        while (attempts < maxAttempts && currentValue.includes(':')) {
+          // New format with IV
+          const algorithm = 'aes-256-cbc';
+          const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+          const [ivHex, encrypted] = currentValue.split(':');
+          const iv = Buffer.from(ivHex, 'hex');
+          const decipher = crypto.createDecipheriv(algorithm, key, iv);
+          let decryptedDetails = decipher.update(encrypted, 'hex', 'utf8');
+          decryptedDetails += decipher.final('utf8');
+          currentValue = decryptedDetails;
+          attempts++;
+        }
+        
+        // If still encrypted (old format), try deprecated method
+        if (attempts < maxAttempts && /^[0-9a-fA-F]+$/.test(currentValue)) {
+          try {
+            const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+            let decryptedDetails = decipher.update(currentValue, 'hex', 'utf8');
+            decryptedDetails += decipher.final('utf8');
+            currentValue = decryptedDetails;
+          } catch (oldError) {
+            // If old method fails, mark as encrypted
+            currentValue = '[ENCRYPTED]';
+          }
+        }
+        
+        // Try to parse as JSON if it looks like JSON
+        if (currentValue !== '[ENCRYPTED]' && (currentValue.startsWith('{') || currentValue.startsWith('['))) {
+          decrypted.verificationDetails = JSON.parse(currentValue);
+        } else {
+          decrypted.verificationDetails = currentValue;
+        }
+      } catch (error) {
+        decrypted.verificationDetails = '[ENCRYPTED]';
       }
-    } catch (error) {
-      decrypted.verificationDetails = '[ENCRYPTED]';
     }
+    // If it doesn't look encrypted, leave it as is (it's already decrypted/plain text)
   }
 
   return decrypted;
