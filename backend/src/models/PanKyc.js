@@ -138,25 +138,34 @@ PanKycSchema.pre('save', function(next) {
         // Skip encryption if already encrypted (hex string)
         if (!/^[0-9a-fA-F]+$/.test(this[field])) {
           try {
-            const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+            const algorithm = 'aes-256-cbc';
+            const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+            const iv = crypto.randomBytes(16);
+            const cipher = crypto.createCipheriv(algorithm, key, iv);
             let encrypted = cipher.update(this[field], 'utf8', 'hex');
             encrypted += cipher.final('hex');
-            this[field] = encrypted;
+            this[field] = iv.toString('hex') + ':' + encrypted;
           } catch (error) {
             console.error(`Error encrypting field ${field}:`, error);
             // Don't fail the save if encryption fails
           }
         }
+      } else if (this[field] === '') {
+        // Set empty strings to null to avoid encryption issues
+        this[field] = null;
       }
     });
 
     // Handle nested objects like verificationDetails
     if (this.verificationDetails && typeof this.verificationDetails === 'object') {
       try {
-        const cipher = crypto.createCipher('aes-256-cbc', encryptionKey);
+        const algorithm = 'aes-256-cbc';
+        const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+        const iv = crypto.randomBytes(16);
+        const cipher = crypto.createCipheriv(algorithm, key, iv);
         let encrypted = cipher.update(JSON.stringify(this.verificationDetails), 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        this.verificationDetails = encrypted;
+        this.verificationDetails = iv.toString('hex') + ':' + encrypted;
       } catch (error) {
         console.error('Error encrypting verificationDetails:', error);
         // Don't fail the save if encryption fails
@@ -180,23 +189,54 @@ PanKycSchema.methods.decryptData = function() {
   fieldsToDecrypt.forEach(field => {
     if (decrypted[field] && typeof decrypted[field] === 'string') {
       try {
-        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-        let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
-        decryptedField += decipher.final('utf8');
-        decrypted[field] = decryptedField;
+        // Check if it's the new format (iv:encrypted) or old format (just encrypted)
+        if (decrypted[field].includes(':')) {
+          // New format with IV
+          const algorithm = 'aes-256-cbc';
+          const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+          const [ivHex, encrypted] = decrypted[field].split(':');
+          const iv = Buffer.from(ivHex, 'hex');
+          const decipher = crypto.createDecipheriv(algorithm, key, iv);
+          let decryptedField = decipher.update(encrypted, 'hex', 'utf8');
+          decryptedField += decipher.final('utf8');
+          decrypted[field] = decryptedField;
+        } else {
+          // Old format - try to decrypt with old method
+          const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+          let decryptedField = decipher.update(decrypted[field], 'hex', 'utf8');
+          decryptedField += decipher.final('utf8');
+          decrypted[field] = decryptedField;
+        }
       } catch (error) {
         decrypted[field] = '[ENCRYPTED]';
       }
+    } else if (decrypted[field] === null) {
+      // Handle null values (empty fields)
+      decrypted[field] = '';
     }
   });
 
   // Handle nested objects
   if (decrypted.verificationDetails && typeof decrypted.verificationDetails === 'string') {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
-      let decryptedDetails = decipher.update(decrypted.verificationDetails, 'hex', 'utf8');
-      decryptedDetails += decipher.final('utf8');
-      decrypted.verificationDetails = JSON.parse(decryptedDetails);
+      // Check if it's the new format (iv:encrypted) or old format (just encrypted)
+      if (decrypted.verificationDetails.includes(':')) {
+        // New format with IV
+        const algorithm = 'aes-256-cbc';
+        const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+        const [ivHex, encrypted] = decrypted.verificationDetails.split(':');
+        const iv = Buffer.from(ivHex, 'hex');
+        const decipher = crypto.createDecipheriv(algorithm, key, iv);
+        let decryptedDetails = decipher.update(encrypted, 'hex', 'utf8');
+        decryptedDetails += decipher.final('utf8');
+        decrypted.verificationDetails = JSON.parse(decryptedDetails);
+      } else {
+        // Old format - try to decrypt with old method
+        const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+        let decryptedDetails = decipher.update(decrypted.verificationDetails, 'hex', 'utf8');
+        decryptedDetails += decipher.final('utf8');
+        decrypted.verificationDetails = JSON.parse(decryptedDetails);
+      }
     } catch (error) {
       decrypted.verificationDetails = '[ENCRYPTED]';
     }

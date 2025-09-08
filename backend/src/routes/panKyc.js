@@ -11,6 +11,27 @@ const { logPanKycEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 const { verifyPAN } = require('../services/panVerificationService');
 
+// Helper function to convert Excel serial number to date string
+function excelSerialToDate(serial) {
+  if (!serial || isNaN(serial)) return null;
+  
+  try {
+    // Use XLSX library's built-in date parsing
+    const date = XLSX.SSF.parse_date_code(serial);
+    if (date) {
+      // Format as DD/MM/YYYY
+      const day = String(date.d).padStart(2, '0');
+      const month = String(date.m).padStart(2, '0');
+      const year = date.y;
+      return `${day}/${month}/${year}`;
+    }
+  } catch (error) {
+    console.error('Error parsing Excel date:', error);
+  }
+  
+  return null;
+}
+
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -160,7 +181,7 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
     const firstRow = data[0];
     
     const columnMapping = {
-      'panNumber': ['panNumber', 'PAN No', 'PAN', 'pan', 'PANNumber', 'pan_number', 'PAN No.'],
+      'panNumber': ['panNumber', 'PAN No', 'PAN', 'pan', 'PANNumber', 'pan_number', 'PAN No.', 'PAN No'],
       'name': ['name', 'Name', 'NAME', 'fullName', 'Full Name', 'full_name', 'FULL NAME'],
       'dateOfBirth': ['dateOfBirth', 'DOB', 'dob', 'Date of Birth', 'dateOfBirth', 'birthDate', 'Birth Date', 'BIRTH DATE']
     };
@@ -198,12 +219,39 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
     // Process and save records
     const records = [];
     for (const row of data) {
+      // Validate that required fields are present and not empty
+      const panNumber = row[columnMap.panNumber];
+      const name = row[columnMap.name];
+      const dateOfBirthRaw = row[columnMap.dateOfBirth];
+      
+      // Skip rows with missing or empty required fields
+      if (!panNumber || !name || panNumber.toString().trim() === '' || name.toString().trim() === '') {
+        logger.warn(`Skipping row with missing required fields:`, { panNumber, name, dateOfBirth: dateOfBirthRaw });
+        continue;
+      }
+      
+      // Convert date of birth - handle both Excel serial numbers and date strings
+      let dateOfBirth = null;
+      if (dateOfBirthRaw !== undefined && dateOfBirthRaw !== null) {
+        if (typeof dateOfBirthRaw === 'number' && dateOfBirthRaw > 1000) { // Excel serial number (reasonable range)
+          dateOfBirth = excelSerialToDate(dateOfBirthRaw);
+        } else if (typeof dateOfBirthRaw === 'string' && dateOfBirthRaw.trim() !== '') {
+          dateOfBirth = dateOfBirthRaw.trim();
+        }
+      }
+      
+      // Skip rows with empty or missing date of birth
+      if (!dateOfBirth || dateOfBirth.trim() === '') {
+        logger.warn(`Skipping row with missing date of birth:`, { panNumber, name, dateOfBirth: dateOfBirthRaw });
+        continue;
+      }
+      
       const record = new PanKyc({
         userId: req.user.id,
         batchId: batchId,
-        panNumber: row[columnMap.panNumber],
-        name: row[columnMap.name],
-        dateOfBirth: row[columnMap.dateOfBirth],
+        panNumber: panNumber.toString().trim(),
+        name: name.toString().trim(),
+        dateOfBirth: dateOfBirth,
         status: 'pending'
       });
       
@@ -211,8 +259,32 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       records.push(record);
     }
 
+    // Check if any valid records were processed
+    if (records.length === 0) {
+      // Clean up uploaded file
+      fs.unlinkSync(req.file.path);
+      
+      return res.status(400).json({
+        success: false,
+        message: 'No valid records found in the file. Please check that all required columns (PAN Number, Name) have data.',
+        data: {
+          totalRows: data.length,
+          skippedRows: data.length
+        }
+      });
+    }
+
     // Clean up uploaded file
     fs.unlinkSync(req.file.path);
+
+    // Log successful upload
+    logger.info(`Successfully uploaded PAN KYC file: ${req.file.originalname}`, {
+      userId: req.user.id,
+      batchId,
+      totalRecords: records.length,
+      totalRows: data.length,
+      skippedRows: data.length - records.length
+    });
 
     res.json({
       success: true,
@@ -220,6 +292,8 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       data: {
         batchId,
         totalRecords: records.length,
+        totalRows: data.length,
+        skippedRows: data.length - records.length,
         batchName: req.file.originalname
       }
     });
