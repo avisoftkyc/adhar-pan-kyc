@@ -1280,141 +1280,190 @@ const PanKyc: React.FC = () => {
 
       {/* Single KYC Tab Content */}
       {activeTab === 'single' && (
-        <div className="card">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Single KYC Verification</h2>
+        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-3xl p-8 shadow-2xl border border-blue-100/50 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-200/20 rounded-full blur-3xl"></div>
           
-          <div className="max-w-2xl">
-            <form onSubmit={handleSingleKycSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  PAN Number *
-                </label>
-                <input
-                  type="text"
-                  id="panNumber"
-                  value={singleKycForm.panNumber}
-                  onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
-                  placeholder="e.g., ABCDE1234F"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  maxLength={10}
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter PAN number in format: ABCDE1234F
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={singleKycForm.name}
-                  onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
-                  placeholder="Enter full name as per PAN"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth *
-                </label>
-                <input
-                  type="text"
-                  id="dateOfBirth"
-                  value={singleKycForm.dateOfBirth}
-                  onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter date in DD/MM/YYYY format
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <button
-                  type="submit"
-                  disabled={singleKycVerifying}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {singleKycVerifying ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircleIcon className="h-4 w-4 mr-2" />
-                      Verify KYC
-                    </>
-                  )}
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={resetSingleKycForm}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                >
-                  Reset Form
-                </button>
-              </div>
-            </form>
-
-            {/* Single KYC Result */}
-            {singleKycResult && (
-              <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Verification Result</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative z-10">
+            
+            <div className="max-w-4xl mx-auto">
+              <form onSubmit={handleSingleKycSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/30 shadow-xl">
+                {/* Form Fields Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* PAN Number Field */}
                   <div>
-                    <p className="text-sm font-medium text-gray-500">PAN Number</p>
-                    <p className="text-sm text-gray-900">{singleKycResult.panNumber}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Name</p>
-                    <p className="text-sm text-gray-900">{singleKycResult.name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Date of Birth</p>
-                    <p className="text-sm text-gray-900">{singleKycResult.dateOfBirth}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <div className="flex items-center">
-                      {getStatusIcon(singleKycResult.status)}
-                      <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(singleKycResult.status)}`}>
-                        {singleKycResult.status}
+                    <label htmlFor="panNumber" className="block text-sm font-semibold text-gray-700 mb-3">
+                      <span className="flex items-center">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                        PAN Number *
                       </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="panNumber"
+                      value={singleKycForm.panNumber}
+                      onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
+                      placeholder="ABCDE1234F"
+                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center font-mono text-lg tracking-wider"
+                      maxLength={10}
+                      style={{ textTransform: 'uppercase' }}
+                    />
+                    <p className="mt-2 text-xs text-gray-500 text-center">
+                      Format: ABCDE1234F
+                    </p>
+                  </div>
+
+                  {/* Name Field */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-3">
+                      <span className="flex items-center">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                        Full Name *
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={singleKycForm.name}
+                      onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
+                      placeholder="Enter full name as per PAN"
+                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                    />
+                  </div>
+
+                  {/* Date of Birth Field */}
+                  <div>
+                    <label htmlFor="dateOfBirth" className="block text-sm font-semibold text-gray-700 mb-3">
+                      <span className="flex items-center">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
+                        Date of Birth *
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="dateOfBirth"
+                      value={singleKycForm.dateOfBirth}
+                      onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
+                      placeholder="DD/MM/YYYY"
+                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-center font-mono"
+                    />
+                    <p className="mt-2 text-xs text-gray-500 text-center">
+                      Format: DD/MM/YYYY
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons - Below Form */}
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button
+                    type="submit"
+                    disabled={singleKycVerifying}
+                    className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-w-[200px]"
+                  >
+                    {singleKycVerifying ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircleIcon className="h-5 w-5 mr-3" />
+                        Verify KYC
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={resetSingleKycForm}
+                    className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white/80 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 min-w-[120px]"
+                  >
+                    <ArrowPathIcon className="h-4 w-4 mr-2" />
+                    Reset Form
+                  </button>
+                </div>
+
+                {/* Form Validation Messages */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-start">
+                    <ExclamationTriangleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800 mb-1">Quick Verification</p>
+                      <p className="text-sm text-blue-700">
+                        Enter the PAN details exactly as they appear on the PAN card. The verification will be processed instantly.
+                      </p>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Processing Time</p>
-                    <p className="text-sm text-gray-900">{singleKycResult.processingTime}ms</p>
+                </div>
+              </form>
+            </div>
+          </div>
+            {/* Single KYC Result */}
+            {singleKycResult && (
+              <div className="mt-8 bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/30 shadow-xl">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-slate-800 mb-2 flex items-center justify-center">
+                    {getStatusIcon(singleKycResult.status)}
+                    <span className="ml-3">Verification Result</span>
+                  </h3>
+                  <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(singleKycResult.status)}`}>
+                    {singleKycResult.status.toUpperCase()}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Processed At</p>
-                    <p className="text-sm text-gray-900">
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <DocumentTextIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <p className="text-sm font-medium text-blue-600 mb-2">PAN Number</p>
+                      <p className="text-lg font-bold text-blue-900 font-mono tracking-wider">{singleKycResult.panNumber}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-purple-600 mb-2">Full Name</p>
+                      <p className="text-lg font-bold text-purple-900">{singleKycResult.name}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-6 border border-indigo-200">
+                    <div className="text-center">
+                      <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-indigo-600 mb-2">Date of Birth</p>
+                      <p className="text-lg font-bold text-indigo-900 font-mono">{singleKycResult.dateOfBirth}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Details */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Processing Time</p>
+                    <p className="text-lg font-semibold text-gray-900">{singleKycResult.processingTime}ms</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Processed At</p>
+                    <p className="text-lg font-semibold text-gray-900">
                       {singleKycResult.processedAt ? new Date(singleKycResult.processedAt).toLocaleString() : '-'}
                     </p>
                   </div>
                 </div>
 
-                {singleKycResult.verificationDetails && (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium text-gray-500 mb-2">Verification Details</p>
-                    <div className="bg-white p-4 rounded border">
-                      <pre className="text-sm text-gray-900 whitespace-pre-wrap">
-                        {JSON.stringify(singleKycResult.verificationDetails, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
-          </div>
         </div>
       )}
 

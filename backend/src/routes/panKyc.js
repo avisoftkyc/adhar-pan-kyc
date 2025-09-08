@@ -688,10 +688,25 @@ router.post('/verify-single', protect, async (req, res) => {
     
     await tempRecord.save();
 
+    // Decrypt the data before sending response
+    let decryptedRecord;
+    try {
+      decryptedRecord = tempRecord.decryptData();
+    } catch (error) {
+      console.error('❌ Decryption error:', error.message);
+      // Fallback to original input data if decryption fails
+      decryptedRecord = {
+        panNumber: panNumber.toUpperCase(), // Use original input
+        name: name.trim(),                  // Use original input
+        dateOfBirth: dateOfBirth.trim(),    // Use original input
+        verificationDetails: tempRecord.verificationDetails
+      };
+    }
+
     // Log verification event
     await logPanKycEvent('single_kyc_verified', req.user.id, {
-      panNumber: tempRecord.panNumber,
-      name: tempRecord.name,
+      panNumber: decryptedRecord.panNumber,
+      name: decryptedRecord.name,
       status: tempRecord.status
     }, req);
 
@@ -699,11 +714,11 @@ router.post('/verify-single', protect, async (req, res) => {
       success: true,
       message: 'KYC verification completed',
       data: {
-        panNumber: tempRecord.panNumber,
-        name: tempRecord.name,
-        dateOfBirth: tempRecord.dateOfBirth,
+        panNumber: decryptedRecord.panNumber,
+        name: decryptedRecord.name,
+        dateOfBirth: decryptedRecord.dateOfBirth,
         status: tempRecord.status,
-        verificationDetails: tempRecord.verificationDetails,
+        verificationDetails: decryptedRecord.verificationDetails,
         processedAt: tempRecord.processedAt,
         processingTime: tempRecord.processingTime
       }
