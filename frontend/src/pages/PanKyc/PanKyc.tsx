@@ -96,6 +96,13 @@ const PanKyc: React.FC = () => {
   const [singleKycVerifying, setSingleKycVerifying] = useState(false);
   const [singleKycResult, setSingleKycResult] = useState<any>(null);
 
+  // Verification popup state
+  const [showVerifyPopup, setShowVerifyPopup] = useState(false);
+  const [selectedRecordForVerification, setSelectedRecordForVerification] = useState<any>(null);
+  
+  // Verify selected popup state
+  const [showVerifySelectedPopup, setShowVerifySelectedPopup] = useState(false);
+
   useEffect(() => {
     fetchBatches();
   }, []);
@@ -334,7 +341,7 @@ const PanKyc: React.FC = () => {
     }
   };
 
-  const handleVerifySelected = async () => {
+  const handleVerifySelected = () => {
     if (selectedRecords.length === 0) {
       showToast({
         type: 'error',
@@ -342,6 +349,13 @@ const PanKyc: React.FC = () => {
       });
       return;
     }
+
+    // Open the verify selected popup
+    setShowVerifySelectedPopup(true);
+  };
+
+  const handleVerifySelectedFromPopup = async () => {
+    if (selectedRecords.length === 0) return;
 
     try {
       setVerifying(true);
@@ -355,6 +369,9 @@ const PanKyc: React.FC = () => {
         message: `Successfully verified ${selectedRecords.length} records`
       });
       setSelectedRecords([]);
+      
+      // Close popup
+      setShowVerifySelectedPopup(false);
       
       // Refresh batch details
       if (selectedBatch) {
@@ -375,31 +392,33 @@ const PanKyc: React.FC = () => {
     }
   };
 
-  const handleVerifySingle = async (recordId: string) => {
-    // Find the record to show confirmation details
+  const handleVerifySingle = (recordId: string) => {
+    // Find the record to show in popup
     const record = selectedBatch?.records.find(r => r._id === recordId);
     if (!record) return;
 
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      `Are you sure you want to verify this record?\n\n` +
-      `PAN: ${record.panNumber}\n` +
-      `Name: ${record.name}\n` +
-      `DOB: ${record.dateOfBirth || 'N/A'}`
-    );
+    // Set the selected record and open popup
+    setSelectedRecordForVerification(record);
+    setShowVerifyPopup(true);
+  };
 
-    if (!confirmed) return;
+  const handleVerifyFromPopup = async () => {
+    if (!selectedRecordForVerification) return;
 
     try {
-      setVerifyingRecords(new Set([recordId]));
+      setVerifyingRecords(new Set([selectedRecordForVerification._id]));
       const response = await api.post('/pan-kyc/verify', {
-        recordIds: [recordId]
+        recordIds: [selectedRecordForVerification._id]
       });
       
       showToast({
         type: 'success',
         message: 'Record verified successfully'
       });
+      
+      // Close popup
+      setShowVerifyPopup(false);
+      setSelectedRecordForVerification(null);
       
       // Refresh batch details
       if (selectedBatch) {
@@ -988,7 +1007,7 @@ const PanKyc: React.FC = () => {
             <div className="card" ref={batchDetailsRef}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Document Details: {selectedBatch.batchId}
+                  Document Details: {selectedBatch.batchId.split('_')[0]}
                 </h2>
                 {newlyUploadedBatchId === selectedBatch.batchId && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 animate-pulse">
@@ -1395,6 +1414,256 @@ const PanKyc: React.FC = () => {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Verification Popup Modal */}
+      {showVerifyPopup && selectedRecordForVerification && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold flex items-center">
+                  <CheckCircleIcon className="h-6 w-6 mr-2" />
+                  Verify PAN Record
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowVerifyPopup(false);
+                    setSelectedRecordForVerification(null);
+                  }}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <XCircleIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">
+                  Please review the record details before verification:
+                </p>
+                
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-500">PAN Number:</span>
+                    <span className="text-sm font-semibold text-gray-900 bg-white px-3 py-1 rounded-lg">
+                      {selectedRecordForVerification.panNumber}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-500">Name:</span>
+                    <span className="text-sm font-semibold text-gray-900 bg-white px-3 py-1 rounded-lg">
+                      {selectedRecordForVerification.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-500">Date of Birth:</span>
+                    <span className="text-sm font-semibold text-gray-900 bg-white px-3 py-1 rounded-lg">
+                      {selectedRecordForVerification.dateOfBirth || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-500">Current Status:</span>
+                    <span className={`text-sm font-semibold px-3 py-1 rounded-lg ${getStatusColor(selectedRecordForVerification.status)}`}>
+                      {selectedRecordForVerification.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <div className="flex items-start">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">Verification Process</p>
+                    <p className="text-sm text-blue-700">
+                      This will verify the PAN details against the official database. 
+                      The process may take a few seconds to complete.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex items-center justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowVerifyPopup(false);
+                  setSelectedRecordForVerification(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleVerifyFromPopup}
+                disabled={verifyingRecords.has(selectedRecordForVerification._id)}
+                className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {verifyingRecords.has(selectedRecordForVerification._id) ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="h-4 w-4 mr-2" />
+                    Verify Record
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Verify Selected Popup Modal */}
+      {showVerifySelectedPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold flex items-center">
+                  <CheckCircleIcon className="h-6 w-6 mr-2" />
+                  Verify Selected Records ({selectedRecords.length})
+                </h3>
+                <button
+                  onClick={() => setShowVerifySelectedPopup(false)}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <XCircleIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">
+                  Please review the selected records before verification:
+                </p>
+                
+                {/* Selected Records List */}
+                <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+                  <div className="space-y-3">
+                    {selectedRecords.map((recordId) => {
+                      const record = selectedBatch?.records.find(r => r._id === recordId);
+                      if (!record) return null;
+                      
+                      return (
+                        <div key={recordId} className="bg-white rounded-lg p-4 border border-gray-200">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <span className="text-xs font-medium text-gray-500 block">PAN Number</span>
+                              <span className="text-sm font-semibold text-gray-900">
+                                {record.panNumber}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-gray-500 block">Name</span>
+                              <span className="text-sm font-semibold text-gray-900">
+                                {record.name}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-gray-500 block">Status</span>
+                              <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${getStatusColor(record.status)}`}>
+                                {record.status}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <div className="flex items-start">
+                  <ExclamationTriangleIcon className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 mb-1">Batch Verification Process</p>
+                    <p className="text-sm text-blue-700">
+                      This will verify all {selectedRecords.length} selected records against the official database. 
+                      The process may take a few minutes to complete depending on the number of records.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6">
+                <h4 className="text-sm font-semibold text-gray-800 mb-3">Verification Summary</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">{selectedRecords.length}</div>
+                    <div className="text-xs text-gray-600">Total Records</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {selectedRecords.filter(id => {
+                        const record = selectedBatch?.records.find(r => r._id === id);
+                        return record?.status === 'pending';
+                      }).length}
+                    </div>
+                    <div className="text-xs text-gray-600">Pending</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {selectedRecords.filter(id => {
+                        const record = selectedBatch?.records.find(r => r._id === id);
+                        return record?.status === 'rejected';
+                      }).length}
+                    </div>
+                    <div className="text-xs text-gray-600">Rejected</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-red-600">
+                      {selectedRecords.filter(id => {
+                        const record = selectedBatch?.records.find(r => r._id === id);
+                        return record?.status === 'error';
+                      }).length}
+                    </div>
+                    <div className="text-xs text-gray-600">Error</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex items-center justify-end space-x-3">
+              <button
+                onClick={() => setShowVerifySelectedPopup(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleVerifySelectedFromPopup}
+                disabled={verifying}
+                className="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl shadow-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {verifying ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Verifying {selectedRecords.length} Records...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="h-4 w-4 mr-2" />
+                    Verify {selectedRecords.length} Records
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
