@@ -383,7 +383,7 @@ router.post('/batch/:batchId/process', protect, async (req, res) => {
         const processingTime = Date.now() - startTime;
         
         // Update record with real verification result
-        record.status = verificationResult.valid ? 'verified' : 'rejected';
+        record.status = verificationResult.valid && verificationResult.details.nameMatch && verificationResult.details.dobMatch ? 'verified' : 'rejected';
         record.isProcessed = true;
         record.processedAt = new Date();
         record.processingTime = processingTime;
@@ -513,7 +513,7 @@ router.post('/verify', protect, async (req, res) => {
           const processingTime = Date.now() - startTime;
           
           // Update record with real verification result
-          record.status = verificationResult.valid ? 'verified' : 'rejected';
+          record.status = verificationResult.valid && verificationResult.details.nameMatch && verificationResult.details.dobMatch ? 'verified' : 'rejected';
           record.isProcessed = true;
           record.processedAt = new Date();
           record.processingTime = processingTime;
@@ -618,7 +618,7 @@ router.post('/verify', protect, async (req, res) => {
     const verificationResult = await verifyPAN(panNumber, name, dateOfBirth);
     
     // Update record with real verification result
-    tempRecord.status = verificationResult.valid ? 'verified' : 'rejected';
+    tempRecord.status = verificationResult.valid && verificationResult.details.nameMatch && verificationResult.details.dobMatch ? 'verified' : 'rejected';
     tempRecord.verificationDetails = {
       apiResponse: verificationResult.details.apiResponse,
       verificationDate: new Date(),
@@ -703,7 +703,7 @@ router.post('/verify-single', protect, async (req, res) => {
     const verificationResult = await verifyPAN(panNumber, name, dateOfBirth);
     
     // Update record with real verification result
-    tempRecord.status = verificationResult.valid ? 'verified' : 'rejected';
+    tempRecord.status = verificationResult.valid && verificationResult.details.nameMatch && verificationResult.details.dobMatch ? 'verified' : 'rejected';
     tempRecord.verificationDetails = {
       apiResponse: verificationResult.details.apiResponse,
       verificationDate: new Date(),
@@ -744,9 +744,14 @@ router.post('/verify-single', protect, async (req, res) => {
       status: tempRecord.status
     }, req);
 
+    // Set appropriate message based on verification status
+    const statusMessage = tempRecord.status === 'verified' 
+      ? 'KYC verification completed successfully' 
+      : 'KYC verification failed - data mismatch detected';
+
     res.json({
       success: true,
-      message: 'KYC verification completed',
+      message: statusMessage,
       data: {
         panNumber: decryptedRecord.panNumber,
         name: decryptedRecord.name,

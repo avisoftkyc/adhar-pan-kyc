@@ -52,6 +52,23 @@ interface Record {
 const PanKyc: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+
+  // Add shimmer animation styles
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<BatchDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -364,10 +381,34 @@ const PanKyc: React.FC = () => {
         recordIds: selectedRecords
       });
       
+      // Show dynamic toast message based on verification results
+      if (response.data.success && response.data.results) {
+        const results = response.data.results;
+        const verifiedCount = results.filter((r: any) => r.status === 'verified').length;
+        const rejectedCount = results.filter((r: any) => r.status === 'rejected').length;
+        
+        if (verifiedCount === results.length) {
       showToast({
         type: 'success',
-        message: `Successfully verified ${selectedRecords.length} records`
-      });
+            message: `Successfully verified all ${results.length} records`
+          });
+        } else if (rejectedCount === results.length) {
+          showToast({
+            type: 'error',
+            message: `All ${results.length} records failed verification - data mismatch detected`
+          });
+        } else {
+          showToast({
+            type: 'warning',
+            message: `Verification completed: ${verifiedCount} verified, ${rejectedCount} rejected`
+          });
+        }
+      } else {
+        showToast({
+          type: 'error',
+          message: 'Batch verification failed'
+        });
+      }
       setSelectedRecords([]);
       
       // Close popup
@@ -411,10 +452,20 @@ const PanKyc: React.FC = () => {
         recordIds: [selectedRecordForVerification._id]
       });
       
+      // Show dynamic toast message based on verification results
+      if (response.data.success && response.data.results && response.data.results.length > 0) {
+        const result = response.data.results[0];
+        const isSuccess = result.status === 'verified';
       showToast({
-        type: 'success',
-        message: 'Record verified successfully'
-      });
+          type: isSuccess ? 'success' : 'error',
+          message: isSuccess ? 'Record verified successfully' : 'Record verification failed - data mismatch detected'
+        });
+      } else {
+        showToast({
+          type: 'error',
+          message: 'Verification failed'
+        });
+      }
       
       // Close popup
       setShowVerifyPopup(false);
@@ -583,9 +634,12 @@ const PanKyc: React.FC = () => {
       const response = await api.post('/pan-kyc/verify-single', tempRecord);
       
       setSingleKycResult(response.data.data);
+      
+      // Show dynamic toast message based on verification status
+      const isSuccess = response.data.data.status === 'verified';
       showToast({
-        type: 'success',
-        message: 'KYC verification completed successfully'
+        type: isSuccess ? 'success' : 'error',
+        message: response.data.message || (isSuccess ? 'KYC verification completed successfully' : 'KYC verification failed')
       });
       
       // Reset form
@@ -642,6 +696,83 @@ const PanKyc: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
+      {/* Full Page Loader for Verify Selected */}
+      {verifying && (
+        <div className="fixed inset-0 bg-gradient-to-br from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl flex items-center justify-center z-50">
+          <div className="text-center">
+            {/* Stunning wave loader */}
+            <div className="relative mb-8">
+              <div className="w-32 h-32 mx-auto relative">
+                {/* Outer wave rings */}
+                <div className="absolute inset-0 rounded-full border-4 border-cyan-400/20 animate-ping"></div>
+                <div className="absolute inset-2 rounded-full border-4 border-blue-400/30 animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                <div className="absolute inset-4 rounded-full border-4 border-purple-400/40 animate-ping" style={{ animationDelay: '1s' }}></div>
+                
+                {/* Main verification icon */}
+                <div className="absolute inset-6 rounded-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500 flex items-center justify-center animate-pulse">
+                  <svg className="w-8 h-8 text-white animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                
+                {/* Rotating verification dots */}
+                <div className="absolute inset-0 animate-spin" style={{ animationDuration: '4s' }}>
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                  <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-2 w-3 h-3 bg-pink-400 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Floating verification badges */}
+              <div className="absolute -top-6 -right-6 w-6 h-6 bg-green-400 rounded-full animate-bounce flex items-center justify-center" style={{ animationDelay: '0s' }}>
+                <span className="text-white text-xs font-bold">✓</span>
+              </div>
+              <div className="absolute -bottom-6 -left-6 w-5 h-5 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.8s' }}>
+                <div className="w-full h-full rounded-full bg-white/30 animate-ping"></div>
+              </div>
+              <div className="absolute -top-4 -left-8 w-4 h-4 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '1.6s' }}>
+                <div className="w-full h-full rounded-full bg-white/40 animate-pulse"></div>
+              </div>
+            </div>
+            
+            <h3 className="text-4xl font-bold bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4 animate-pulse">
+              Verifying Records
+            </h3>
+            <p className="text-gray-300 text-xl mb-8">Please wait while we verify {selectedRecords.length} selected records...</p>
+            
+            {/* Beautiful wave progress */}
+            <div className="w-80 mx-auto mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-400">Progress</span>
+                <span className="text-sm text-gray-400">75%</span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 rounded-full relative" style={{ width: '75%' }}>
+                  <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full animate-pulse" style={{ animationDuration: '2s' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Animated status steps */}
+            <div className="flex justify-center space-x-8">
+              <div className="flex flex-col items-center">
+                <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse mb-2"></div>
+                <span className="text-sm text-green-400 font-medium">Processing</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-4 h-4 bg-blue-400 rounded-full animate-pulse mb-2" style={{ animationDelay: '0.5s' }}></div>
+                <span className="text-sm text-blue-400 font-medium">Verifying</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <div className="w-4 h-4 bg-purple-400 rounded-full animate-pulse mb-2" style={{ animationDelay: '1s' }}></div>
+                <span className="text-sm text-purple-400 font-medium">Finalizing</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl animate-float"></div>
@@ -1292,97 +1423,97 @@ const PanKyc: React.FC = () => {
                 {/* Form Fields Layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* PAN Number Field */}
-                  <div>
+              <div>
                     <label htmlFor="panNumber" className="block text-sm font-semibold text-gray-700 mb-3">
                       <span className="flex items-center">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                        PAN Number *
+                  PAN Number *
                       </span>
-                    </label>
-                    <input
-                      type="text"
-                      id="panNumber"
-                      value={singleKycForm.panNumber}
-                      onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
+                </label>
+                <input
+                  type="text"
+                  id="panNumber"
+                  value={singleKycForm.panNumber}
+                  onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
                       placeholder="ABCDE1234F"
                       className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center font-mono text-lg tracking-wider"
-                      maxLength={10}
+                  maxLength={10}
                       style={{ textTransform: 'uppercase' }}
-                    />
+                />
                     <p className="mt-2 text-xs text-gray-500 text-center">
                       Format: ABCDE1234F
-                    </p>
-                  </div>
+                </p>
+              </div>
 
                   {/* Name Field */}
-                  <div>
+              <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-3">
                       <span className="flex items-center">
                         <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                        Full Name *
+                  Full Name *
                       </span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={singleKycForm.name}
-                      onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
-                      placeholder="Enter full name as per PAN"
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={singleKycForm.name}
+                  onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
+                  placeholder="Enter full name as per PAN"
                       className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
-                    />
-                  </div>
+                />
+              </div>
 
                   {/* Date of Birth Field */}
-                  <div>
+              <div>
                     <label htmlFor="dateOfBirth" className="block text-sm font-semibold text-gray-700 mb-3">
                       <span className="flex items-center">
                         <div className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
-                        Date of Birth *
+                  Date of Birth *
                       </span>
-                    </label>
-                    <input
-                      type="text"
-                      id="dateOfBirth"
-                      value={singleKycForm.dateOfBirth}
-                      onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
-                      placeholder="DD/MM/YYYY"
+                </label>
+                <input
+                  type="text"
+                  id="dateOfBirth"
+                  value={singleKycForm.dateOfBirth}
+                  onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
+                  placeholder="DD/MM/YYYY"
                       className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-center font-mono"
-                    />
+                />
                     <p className="mt-2 text-xs text-gray-500 text-center">
                       Format: DD/MM/YYYY
-                    </p>
+                </p>
                   </div>
-                </div>
+              </div>
 
                 {/* Action Buttons - Below Form */}
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <button
-                    type="submit"
-                    disabled={singleKycVerifying}
+                <button
+                  type="submit"
+                  disabled={singleKycVerifying}
                     className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-w-[200px]"
-                  >
-                    {singleKycVerifying ? (
-                      <>
+                >
+                  {singleKycVerifying ? (
+                    <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
                         <CheckCircleIcon className="h-5 w-5 mr-3" />
-                        Verify KYC
-                      </>
-                    )}
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={resetSingleKycForm}
+                      Verify KYC
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={resetSingleKycForm}
                     className="inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-sm font-medium rounded-xl text-gray-700 bg-white/80 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 min-w-[120px]"
-                  >
+                >
                     <ArrowPathIcon className="h-4 w-4 mr-2" />
-                    Reset Form
-                  </button>
-                </div>
+                  Reset Form
+                </button>
+              </div>
 
                 {/* Form Validation Messages */}
                 <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -1609,26 +1740,26 @@ const PanKyc: React.FC = () => {
                       return (
                         <div key={recordId} className="bg-white rounded-lg p-4 border border-gray-200">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div>
+                  <div>
                               <span className="text-xs font-medium text-gray-500 block">PAN Number</span>
                               <span className="text-sm font-semibold text-gray-900">
                                 {record.panNumber}
                               </span>
-                            </div>
-                            <div>
+                  </div>
+                  <div>
                               <span className="text-xs font-medium text-gray-500 block">Name</span>
                               <span className="text-sm font-semibold text-gray-900">
                                 {record.name}
                               </span>
-                            </div>
-                            <div>
+                  </div>
+                  <div>
                               <span className="text-xs font-medium text-gray-500 block">Status</span>
                               <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${getStatusColor(record.status)}`}>
                                 {record.status}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                      </span>
+                    </div>
+                  </div>
+                  </div>
                       );
                     })}
                   </div>
@@ -1645,8 +1776,8 @@ const PanKyc: React.FC = () => {
                       The process may take a few minutes to complete depending on the number of records.
                     </p>
                   </div>
+                  </div>
                 </div>
-              </div>
 
               {/* Summary Stats */}
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6">
@@ -1655,16 +1786,16 @@ const PanKyc: React.FC = () => {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600">{selectedRecords.length}</div>
                     <div className="text-xs text-gray-600">Total Records</div>
-                  </div>
+                    </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-600">
                       {selectedRecords.filter(id => {
                         const record = selectedBatch?.records.find(r => r._id === id);
                         return record?.status === 'pending';
                       }).length}
-                    </div>
-                    <div className="text-xs text-gray-600">Pending</div>
                   </div>
+                    <div className="text-xs text-gray-600">Pending</div>
+              </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-600">
                       {selectedRecords.filter(id => {

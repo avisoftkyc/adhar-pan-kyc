@@ -45,6 +45,23 @@ interface RecordsStats {
 const PanKycRecords: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { showToast } = useToast();
+
+  // Add shimmer animation styles
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
   const [records, setRecords] = useState<PanKycRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<RecordsStats>({
@@ -387,9 +404,54 @@ const PanKycRecords: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-lg text-blue-700">Loading records...</p>
+          <div className="fixed inset-0 bg-gradient-to-br from-slate-900/95 via-blue-900/95 to-purple-900/95 backdrop-blur-lg flex items-center justify-center z-50">
+            <div className="text-center">
+              {/* Beautiful morphing loader */}
+              <div className="relative mb-8">
+                <div className="w-24 h-24 mx-auto relative">
+                  {/* Outer pulsing ring */}
+                  <div className="absolute inset-0 rounded-full border-2 border-blue-400/30 animate-ping"></div>
+                  
+                  {/* Main morphing shape */}
+                  <div className="absolute inset-2 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-spin" style={{ animationDuration: '3s' }}>
+                    <div className="absolute inset-1 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 animate-pulse"></div>
+                  </div>
+                  
+                  {/* Inner rotating dots */}
+                  <div className="absolute inset-4 rounded-full border-2 border-white/20 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2s' }}>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 w-2 h-2 bg-white rounded-full"></div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1 w-2 h-2 bg-white rounded-full"></div>
+                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-white rounded-full"></div>
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1 w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                  
+                  {/* Center pulsing dot */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+                
+                {/* Floating particles */}
+                <div className="absolute -top-4 -right-4 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }}></div>
+                <div className="absolute -bottom-4 -left-4 w-3 h-3 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.7s', animationDuration: '2.5s' }}></div>
+                <div className="absolute -top-2 -left-6 w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '1.4s', animationDuration: '1.8s' }}></div>
+                <div className="absolute -bottom-2 -right-6 w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '2.1s', animationDuration: '2.2s' }}></div>
+              </div>
+              
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4 animate-pulse">
+                Loading Records
+              </h3>
+              <p className="text-gray-300 text-lg mb-8">Please wait while we fetch your PAN KYC records...</p>
+              
+              {/* Animated progress dots */}
+              <div className="flex justify-center space-x-2">
+                <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.6s' }}></div>
+                <div className="w-3 h-3 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.8s' }}></div>
+              </div>
+            </div>
           </div>
         ) : (
           <>
