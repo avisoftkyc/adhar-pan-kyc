@@ -837,7 +837,8 @@ const AadhaarPan: React.FC = () => {
                               <DocumentTextIcon className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">{batch._id}</h3>
+                              <h3 className="font-semibold text-gray-900 text-lg">                                  {batch._id.split('_')[0]}
+                              </h3>
                               <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                                 <span className="flex items-center space-x-1">
                                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -918,7 +919,7 @@ const AadhaarPan: React.FC = () => {
             <div className="card" ref={batchDetailsRef}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Batch Details: {selectedBatch.batchId}
+                  Document Details: {selectedBatch.batchId.split('_')[0]}
                 </h2>
                 <div className="flex items-center space-x-3">
                   <button
