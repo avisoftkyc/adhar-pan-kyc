@@ -326,6 +326,13 @@ router.post('/upload', protect, upload.single('file'), async (req, res) => {
       skippedRows: data.length - records.length
     });
 
+    // Log the upload event for admin stats
+    await logPanKycEvent('pan_kyc_upload', req.user.id, {
+      batchId,
+      recordCount: records.length,
+      fileName: req.file.originalname
+    }, req);
+
     res.json({
       success: true,
       message: `Successfully uploaded ${records.length} records`,
@@ -902,3 +909,4 @@ router.delete('/batch/:batchId', protect, async (req, res) => {
 });
 
 module.exports = router;
+

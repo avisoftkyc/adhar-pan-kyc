@@ -84,10 +84,45 @@ interface SystemStats {
     totalHits: number;
     uniqueUsers: number;
     topApiEndpoints: Array<{ endpoint: string; hits: number; users: number }>;
-    userApiHits: Array<{ userId: string; name: string; email: string; totalHits: number; endpoints: Array<{ endpoint: string; hits: number; lastUsed: string }>; modules: Array<{ module: string; hits: number }>; hourlyDistribution: Array<{ hour: number; hits: number }>; dailyDistribution: Array<{ date: string; hits: number }> }>;
+    userApiHits: Array<{ 
+      userId: string; 
+      name: string; 
+      email: string; 
+      totalHits: number; 
+      sandboxApiCalls: number;
+      successfulApiCalls: number;
+      failedApiCalls: number;
+      successRate: number;
+      endpoints: Array<{ endpoint: string; hits: number; lastUsed: string }>; 
+      modules: Array<{ module: string; hits: number }>; 
+      hourlyDistribution: Array<{ hour: number; hits: number }>; 
+      dailyDistribution: Array<{ date: string; hits: number }> 
+    }>;
     moduleUsage: Array<{ module: string; totalHits: number; uniqueUsers: number; avgHitsPerUser: number }>;
     peakUsageHours: Array<{ hour: number; hits: number; users: number }>;
     apiPerformance: Array<{ endpoint: string; avgResponseTime: number; successRate: number; errorRate: number }>;
+    panKycUserWise: Array<{
+      userId: string;
+      name: string;
+      email: string;
+      totalActivities: number;
+      uploads: number;
+      apiCalls: number;
+      successfulApiCalls: number;
+      failedApiCalls: number;
+      successRate: number;
+    }>;
+    aadhaarPanUserWise: Array<{
+      userId: string;
+      name: string;
+      email: string;
+      totalActivities: number;
+      uploads: number;
+      apiCalls: number;
+      successfulApiCalls: number;
+      failedApiCalls: number;
+      successRate: number;
+    }>;
   };
 }
 
@@ -106,6 +141,20 @@ const Admin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [statsTimeRange, setStatsTimeRange] = useState('30');
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [userFilterRole, setUserFilterRole] = useState('all');
+  const [userFilterStatus, setUserFilterStatus] = useState('all');
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditSearchTerm, setAuditSearchTerm] = useState('');
+  const [auditFilterAction, setAuditFilterAction] = useState('all');
+  const [auditFilterModule, setAuditFilterModule] = useState('all');
+  const [auditPage, setAuditPage] = useState(1);
+  const [auditPageSize] = useState(10);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsTimeRange, setAnalyticsTimeRange] = useState('30');
+  const [apiLoading, setApiLoading] = useState(false);
+  const [apiTimeRange, setApiTimeRange] = useState('30');
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModuleAccess, setShowModuleAccess] = useState(false);
@@ -144,6 +193,7 @@ const Admin: React.FC = () => {
 
     // User is admin, stay on /admin and fetch data
     fetchUsers();
+    fetchAuditLogs();
     fetchSystemStats();
     fetchUserStats();
     fetchApiUsageStats();
@@ -152,29 +202,64 @@ const Admin: React.FC = () => {
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
+      setUsersLoading(true);
       const response = await api.get('/admin/users');
       setUsers(response.data.data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
       setError('Failed to fetch users');
     } finally {
-      setLoading(false);
+      setUsersLoading(false);
     }
   };
 
+  const refreshUsers = () => {
+    fetchUsers();
+  };
+
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(userSearchTerm.toLowerCase());
+    const matchesRole = userFilterRole === 'all' || user.role === userFilterRole;
+    const matchesStatus = userFilterStatus === 'all' || user.status === userFilterStatus;
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
   const fetchAuditLogs = async () => {
     try {
-      setLoading(true);
+      setAuditLoading(true);
       const response = await api.get('/admin/audit-logs');
       setAuditLogs(response.data.data.logs);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
       setError('Failed to fetch audit logs');
     } finally {
-      setLoading(false);
+      setAuditLoading(false);
     }
   };
+
+  const refreshAuditLogs = () => {
+    fetchAuditLogs();
+  };
+
+  const filteredAuditLogs = auditLogs.filter(log => {
+    const matchesSearch = log.userId?.name?.toLowerCase().includes(auditSearchTerm.toLowerCase()) ||
+                         log.action.toLowerCase().includes(auditSearchTerm.toLowerCase()) ||
+                         log.module.toLowerCase().includes(auditSearchTerm.toLowerCase()) ||
+                         log.resource.toLowerCase().includes(auditSearchTerm.toLowerCase());
+    const matchesAction = auditFilterAction === 'all' || log.action === auditFilterAction;
+    const matchesModule = auditFilterModule === 'all' || log.module === auditFilterModule;
+    
+    return matchesSearch && matchesAction && matchesModule;
+  });
+
+  const paginatedAuditLogs = filteredAuditLogs.slice(
+    (auditPage - 1) * auditPageSize,
+    auditPage * auditPageSize
+  );
+
+  const totalAuditPages = Math.ceil(filteredAuditLogs.length / auditPageSize);
 
   const fetchSystemStats = async (days: string = statsTimeRange) => {
     try {
@@ -218,6 +303,53 @@ const Admin: React.FC = () => {
     fetchSystemStats();
     fetchUserStats();
     fetchApiUsageStats();
+  };
+
+  const fetchAnalyticsData = async (days: string = analyticsTimeRange) => {
+    try {
+      setAnalyticsLoading(true);
+      // Fetch all analytics data in parallel
+      await Promise.all([
+        fetchSystemStats(days),
+        fetchUserStats(days),
+        fetchApiUsageStats(days)
+      ]);
+    } catch (error) {
+      console.error('Error fetching analytics data:', error);
+      setError('Failed to fetch analytics data');
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const handleAnalyticsTimeRangeChange = (days: string) => {
+    setAnalyticsTimeRange(days);
+    fetchAnalyticsData(days);
+  };
+
+  const refreshAnalytics = () => {
+    fetchAnalyticsData();
+  };
+
+  const fetchApiAnalyticsData = async (days: string = apiTimeRange) => {
+    try {
+      setApiLoading(true);
+      await fetchApiUsageStats(days);
+    } catch (error) {
+      console.error('Error fetching API analytics data:', error);
+      setError('Failed to fetch API analytics data');
+    } finally {
+      setApiLoading(false);
+    }
+  };
+
+  const handleApiTimeRangeChange = (days: string) => {
+    setApiTimeRange(days);
+    fetchApiAnalyticsData(days);
+  };
+
+  const refreshApiAnalytics = () => {
+    fetchApiAnalyticsData();
   };
 
   // Mock data for user API hit counts
@@ -591,7 +723,20 @@ const Admin: React.FC = () => {
       {/* Enhanced Tab Navigation */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
         <nav className="flex space-x-2">
-        
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'dashboard'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+            </svg>
+            Dashboard
+          </button>
           <button
             onClick={() => setActiveTab('users')}
             className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
@@ -657,20 +802,210 @@ const Admin: React.FC = () => {
         </nav>
       </div>
 
+      {/* Dashboard Tab */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-6">
+          {/* Dashboard Header */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z" />
+                </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Admin Dashboard Overview</h2>
+                <p className="text-sm text-gray-600">System overview and quick access to key metrics</p>
+              </div>
+              </div>
+            </div>
+
+          {/* Quick Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('users')}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Total Users</p>
+                  <p className="text-3xl font-bold text-blue-900">{systemStats?.users.total || 0}</p>
+                  <p className="text-xs text-blue-600 mt-1">+{systemStats?.users.new || 0} new this month</p>
+                  </div>
+                <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <UserGroupIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('audit')}>
+                <div className="flex items-center justify-between">
+                  <div>
+                  <p className="text-sm font-medium text-emerald-600">Recent Activity</p>
+                  <p className="text-3xl font-bold text-emerald-900">{auditLogs.length}</p>
+                  <p className="text-xs text-emerald-600 mt-1">audit logs</p>
+                  </div>
+                <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <DocumentTextIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('analytics')}>
+                <div className="flex items-center justify-between">
+                  <div>
+                  <p className="text-sm font-medium text-purple-600">Active Users</p>
+                  <p className="text-3xl font-bold text-purple-900">{systemStats?.users.active || 0}</p>
+                  <p className="text-xs text-purple-600 mt-1">
+                    {systemStats?.users.total ? Math.round((systemStats.users.active / systemStats.users.total) * 100) : 0}% of total
+                  </p>
+                  </div>
+                <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <CheckCircleIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 hover:shadow-lg transition-all duration-300 cursor-pointer group" onClick={() => setActiveTab('api')}>
+                <div className="flex items-center justify-between">
+                  <div>
+                  <p className="text-sm font-medium text-orange-600">API Hits</p>
+                  <p className="text-3xl font-bold text-orange-900">{systemStats?.apiUsage?.totalHits || 0}</p>
+                  <p className="text-xs text-orange-600 mt-1">total requests</p>
+                  </div>
+                <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowCreateUser(true)}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                      <PlusIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">Create New User</p>
+                      <p className="text-sm text-gray-600">Add a new user to the system</p>
+                    </div>
+                  </div>
+                  <svg className="h-5 w-5 text-gray-400 group-hover:text-purple-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('audit')}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                      <DocumentTextIcon className="h-5 w-5 text-white" />
+              </div>
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">View Audit Logs</p>
+                      <p className="text-sm text-gray-600">Monitor system activities</p>
+                    </div>
+                  </div>
+                  <svg className="h-5 w-5 text-gray-400 group-hover:text-emerald-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('stats')}
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-200 group"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-300">
+                      <ChartBarIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">View Statistics</p>
+                      <p className="text-sm text-gray-600">Detailed system metrics</p>
+                    </div>
+                  </div>
+                  <svg className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <div className="space-y-3">
+                {auditLogs.slice(0, 5).map((log) => (
+                  <div key={log._id} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                      <EyeIcon className="h-4 w-4 text-gray-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {log.userId?.name || 'System'} - {log.action}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {log.module} • {new Date(log.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {auditLogs.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <DocumentTextIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No recent activity</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Users Tab */}
       {activeTab === 'users' && (
         <div className="space-y-6">
+          {/* Users Header with Controls */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <UserGroupIcon className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
                   <div className="absolute -inset-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+              <div>
+                  <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+                  <p className="text-sm text-gray-600">Manage users, roles, and permissions</p>
               </div>
+            </div>
+
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={refreshUsers}
+                  disabled={usersLoading}
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+                >
+                  {usersLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                  ) : (
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                  {usersLoading ? 'Loading...' : 'Refresh'}
+                </button>
               <button
                 onClick={() => setShowCreateUser(true)}
                 className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium rounded-xl shadow-lg hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 hover:shadow-xl active:scale-95 transition-all duration-300 ring-2 ring-purple-200/50 hover:ring-purple-300/50"
@@ -678,17 +1013,99 @@ const Admin: React.FC = () => {
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Add User
               </button>
+                  </div>
             </div>
           </div>
 
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          {/* Search and Filter Controls */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Search */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
             </div>
-          ) : (
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  />
+                </div>
+              </div>
+
+              {/* Role Filter */}
+                  <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Role</label>
+                <select
+                  value={userFilterRole}
+                  onChange={(e) => setUserFilterRole(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                </select>
+              </div>
+
+              {/* Status Filter */}
+                  <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+                <select
+                  value={userFilterStatus}
+                  onChange={(e) => setUserFilterStatus(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                  </div>
+                  </div>
+
+            {/* Results Summary */}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {filteredUsers.length} of {users.length} users
+                {userSearchTerm && (
+                  <span className="ml-2 text-purple-600">
+                    for "{userSearchTerm}"
+                  </span>
+                )}
+                </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <span>Active: {users.filter(u => u.status === 'active').length}</span>
+                <span>•</span>
+                <span>Admins: {users.filter(u => u.role === 'admin').length}</span>
+                <span>•</span>
+                <span>Users: {users.filter(u => u.role === 'user').length}</span>
+              </div>
+            </div>
+              </div>
+              
+          {/* Loading State */}
+          {usersLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                <p className="text-lg font-medium text-gray-600">Loading users...</p>
+                <p className="text-sm text-gray-500">Please wait while we fetch the user data</p>
+          </div>
+        </div>
+      )}
+
+          {/* Users List */}
+          {!usersLoading && (
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              {filteredUsers.length > 0 ? (
               <div className="divide-y divide-gray-100">
-                {users.map((user) => (
+                  {filteredUsers.map((user) => (
                   <div key={user._id} className="p-6 hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-indigo-50/50 transition-all duration-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -772,6 +1189,27 @@ const Admin: React.FC = () => {
                   </div>
                 ))}
               </div>
+              ) : (
+                <div className="text-center py-16">
+                  <UserGroupIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                  <p className="text-gray-600 mb-4">
+                    {userSearchTerm || userFilterRole !== 'all' || userFilterStatus !== 'all'
+                      ? 'Try adjusting your search or filter criteria.'
+                      : 'Get started by creating your first user.'
+                    }
+                  </p>
+                  {(!userSearchTerm && userFilterRole === 'all' && userFilterStatus === 'all') && (
+                    <button
+                      onClick={() => setShowCreateUser(true)}
+                      className="inline-flex items-center px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                    >
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      Create First User
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -780,47 +1218,256 @@ const Admin: React.FC = () => {
       {/* Audit Logs Tab */}
       {activeTab === 'audit' && (
         <div className="space-y-6">
-          <h2 className="text-lg font-medium text-gray-900">Audit Logs</h2>
-          
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          {/* Audit Logs Header with Controls */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <DocumentTextIcon className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
             </div>
-          ) : (
-            <div className="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul className="divide-y divide-gray-200">
-                {auditLogs.map((log) => (
-                  <li key={log._id} className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                            <EyeIcon className="h-4 w-4 text-gray-600" />
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Audit Logs</h2>
+                  <p className="text-sm text-gray-600">Track system activities and user actions</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={refreshAuditLogs}
+                  disabled={auditLoading}
+                  className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+                >
+                  {auditLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                  ) : (
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                  {auditLoading ? 'Loading...' : 'Refresh'}
+                </button>
                           </div>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {log.userId?.name || 'System'} - {log.action}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {log.module} • {log.resource} • {new Date(log.createdAt).toLocaleString()}
+
+          {/* Search and Filter Controls */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* Search */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Search Logs</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                           </div>
-                          <div className="flex items-center mt-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActionColor(log.action)}`}>
+                  <input
+                    type="text"
+                    placeholder="Search by user, action, module..."
+                    value={auditSearchTerm}
+                    onChange={(e) => setAuditSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              {/* Action Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Action</label>
+                <select
+                  value={auditFilterAction}
+                  onChange={(e) => setAuditFilterAction(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                >
+                  <option value="all">All Actions</option>
+                  <option value="create">Create</option>
+                  <option value="update">Update</option>
+                  <option value="delete">Delete</option>
+                  <option value="login">Login</option>
+                  <option value="logout">Logout</option>
+                  <option value="upload">Upload</option>
+                  <option value="download">Download</option>
+                </select>
+              </div>
+
+              {/* Module Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Module</label>
+                <select
+                  value={auditFilterModule}
+                  onChange={(e) => setAuditFilterModule(e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                >
+                  <option value="all">All Modules</option>
+                  <option value="auth">Authentication</option>
+                  <option value="pan-kyc">PAN KYC</option>
+                  <option value="aadhaar-pan">Aadhaar-PAN</option>
+                  <option value="user_management">User Management</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Results Summary */}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {paginatedAuditLogs.length} of {filteredAuditLogs.length} logs
+                {auditSearchTerm && (
+                  <span className="ml-2 text-emerald-600">
+                    for "{auditSearchTerm}"
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <span>Page {auditPage} of {totalAuditPages}</span>
+                <span>•</span>
+                <span>Total: {auditLogs.length} logs</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {auditLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+                <p className="text-lg font-medium text-gray-600">Loading audit logs...</p>
+                <p className="text-sm text-gray-500">Please wait while we fetch the activity data</p>
+              </div>
+            </div>
+          )}
+
+          {/* Audit Logs List */}
+          {!auditLoading && (
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              {paginatedAuditLogs.length > 0 ? (
+                <>
+                  <div className="divide-y divide-gray-100">
+                    {paginatedAuditLogs.map((log) => (
+                      <div key={log._id} className="p-6 hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 transition-all duration-200">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg relative overflow-hidden group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <EyeIcon className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                              </div>
+                            </div>
+                            <div className="ml-4 flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                  {log.userId?.name || 'System'}
+                                </h3>
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getActionColor(log.action)}`}>
                               {log.action}
                             </span>
+                              </div>
+                              <div className="text-sm text-gray-600 mb-2">
+                                <span className="font-medium">{log.module}</span> • 
+                                <span className="ml-1">{log.resource}</span>
+                                {log.resourceId && (
+                                  <span className="ml-1 text-gray-500">(ID: {log.resourceId})</span>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-4 text-xs text-gray-500">
+                                <span className="flex items-center">
+                                  <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {new Date(log.createdAt).toLocaleString()}
+                            </span>
                             {log.ipAddress && (
-                              <span className="ml-2 text-xs text-gray-500">
-                                IP: {log.ipAddress}
+                                  <span className="flex items-center">
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                                    </svg>
+                                    {log.ipAddress}
                               </span>
                             )}
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  log.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                }`}>
+                                  {log.status}
+                                </span>
                           </div>
+                              {log.details && Object.keys(log.details).length > 0 && (
+                                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                                  <details className="text-sm">
+                                    <summary className="cursor-pointer text-gray-700 font-medium">View Details</summary>
+                                    <pre className="mt-2 text-xs text-gray-600 whitespace-pre-wrap">
+                                      {JSON.stringify(log.details, null, 2)}
+                                    </pre>
+                                  </details>
                         </div>
+                              )}
                       </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalAuditPages > 1 && (
+                    <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-200">
+                      <div className="flex items-center text-sm text-gray-700">
+                        <span>
+                          Showing {((auditPage - 1) * auditPageSize) + 1} to {Math.min(auditPage * auditPageSize, filteredAuditLogs.length)} of {filteredAuditLogs.length} results
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setAuditPage(Math.max(1, auditPage - 1))}
+                          disabled={auditPage === 1}
+                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Previous
+                        </button>
+                        <div className="flex items-center space-x-1">
+                          {Array.from({ length: Math.min(5, totalAuditPages) }, (_, i) => {
+                            const pageNum = i + 1;
+                            return (
+                              <button
+                                key={pageNum}
+                                onClick={() => setAuditPage(pageNum)}
+                                className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                                  auditPage === pageNum
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                                }`}
+                              >
+                                {pageNum}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <button
+                          onClick={() => setAuditPage(Math.min(totalAuditPages, auditPage + 1))}
+                          disabled={auditPage === totalAuditPages}
+                          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <DocumentTextIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No audit logs found</h3>
+                  <p className="text-gray-600 mb-4">
+                    {auditSearchTerm || auditFilterAction !== 'all' || auditFilterModule !== 'all'
+                      ? 'Try adjusting your search or filter criteria.'
+                      : 'No activity has been recorded yet.'
+                    }
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1132,8 +1779,10 @@ const Admin: React.FC = () => {
       {/* User Analytics Tab */}
       {activeTab === 'analytics' && (
         <div className="space-y-6">
+          {/* Analytics Header with Controls */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-center mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center">
               <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1141,8 +1790,61 @@ const Admin: React.FC = () => {
                 </svg>
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
+                <div>
               <h2 className="text-2xl font-bold text-gray-900">User Analytics Dashboard</h2>
+                  <p className="text-sm text-gray-600">Comprehensive user behavior and performance insights</p>
+                </div>
             </div>
+              
+              <div className="flex items-center space-x-3">
+                {/* Time Range Selector */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Time Range:</label>
+                  <select
+                    value={analyticsTimeRange}
+                    onChange={(e) => handleAnalyticsTimeRangeChange(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    disabled={analyticsLoading}
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                </div>
+                
+                {/* Refresh Button */}
+                <button
+                  onClick={refreshAnalytics}
+                  disabled={analyticsLoading}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-medium rounded-lg shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 hover:shadow-xl active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {analyticsLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                  {analyticsLoading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {analyticsLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+                <p className="text-lg font-medium text-gray-600">Loading analytics data...</p>
+                <p className="text-sm text-gray-500">Please wait while we fetch the latest insights</p>
+              </div>
+            </div>
+          )}
+
+          {/* Analytics Content */}
+          {!analyticsLoading && systemStats && (
+            <div className="space-y-6">
 
             {/* Enhanced User Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -1311,263 +2013,286 @@ const Admin: React.FC = () => {
               </div>
             </div>
           </div>
+          )}
+
+          {/* Error State */}
+          {!analyticsLoading && !systemStats && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Analytics</h3>
+                <p className="text-gray-600 mb-4">There was an error loading the analytics data.</p>
+                <button
+                  onClick={refreshAnalytics}
+                  className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors duration-200"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* API Analytics Tab */}
       {activeTab === 'api' && (
         <div className="space-y-6">
+          {/* Sandbox API Analytics Header */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-            <div className="flex items-center mb-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <svg className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">API Usage Analytics Dashboard</h2>
-            </div>
-
-            {/* API Overview Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-2xl p-6 border border-indigo-200 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-indigo-600">Total API Hits</p>
-                    <p className="text-2xl font-bold text-indigo-900">{systemStats?.apiUsage?.totalHits || 0}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Sandbox API Analytics Dashboard</h2>
+                  <p className="text-sm text-gray-600">Monitor sandbox API usage and performance</p>
                 </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-purple-600">Unique Users</p>
-                    <p className="text-2xl font-bold text-purple-900">{systemStats?.apiUsage?.uniqueUsers || 0}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                    <UserGroupIcon className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-emerald-600">Avg Hits/User</p>
-                    <p className="text-2xl font-bold text-emerald-900">
-                      {systemStats?.apiUsage?.totalHits && systemStats?.apiUsage?.uniqueUsers 
-                        ? Math.round(systemStats.apiUsage.totalHits / systemStats.apiUsage.uniqueUsers) 
-                        : 0}
-                    </p>
-                  </div>
-                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2zm0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Top API Endpoints */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="h-5 w-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-                Top API Endpoints
-              </h3>
-              <div className="space-y-3">
-                {systemStats?.apiUsage?.topApiEndpoints?.slice(0, 8).map((endpoint, index) => (
-                  <div key={endpoint.endpoint} className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900 font-mono text-sm">{endpoint.endpoint}</p>
-                        <p className="text-sm text-gray-600">{endpoint.users} users</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-indigo-600">{endpoint.hits.toLocaleString()}</p>
-                      <p className="text-xs text-gray-500">hits</p>
-                    </div>
+              <div className="flex items-center space-x-3">
+                {/* Time Range Selector */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Time Range:</label>
+                  <select
+                    value={apiTimeRange}
+                    onChange={(e) => handleApiTimeRangeChange(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    disabled={apiLoading}
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
                   </div>
-                )) || (
-                  <div className="text-center py-8 text-gray-500">
-                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                
+                {/* Refresh Button */}
+                <button
+                  onClick={refreshApiAnalytics}
+                  disabled={apiLoading}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium rounded-lg shadow-lg hover:from-orange-600 hover:to-red-700 transform hover:scale-105 hover:shadow-xl active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {apiLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    <p>No API usage data available</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* User API Usage Ranking */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                User API Usage Ranking
-              </h3>
-              <div className="space-y-3">
-                {systemStats?.apiUsage?.userApiHits?.slice(0, 10).map((user, index) => (
-                  <div key={user.userId} className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-200 hover:shadow-md transition-all duration-200">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-lg font-bold mr-4">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{user.name}</p>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                        <div className="flex items-center mt-1 space-x-2">
-                          {user.modules.slice(0, 3).map((module, idx) => (
-                            <span key={idx} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              {module.module}: {module.hits}
-                            </span>
-                          ))}
-                          {user.modules.length > 3 && (
-                            <span className="text-xs text-gray-500">+{user.modules.length - 3} more</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-purple-600">{user.totalHits.toLocaleString()}</p>
-                      <p className="text-sm text-gray-500">total hits</p>
-                      <p className="text-xs text-gray-400">{user.endpoints.length} endpoints</p>
-                    </div>
-                  </div>
-                )) || (
-                  <div className="text-center py-8 text-gray-500">
-                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <p>No user API usage data available</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Module Usage Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <svg className="h-5 w-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
-                  </svg>
-                  Module Usage Analytics
-                </h3>
-                <div className="space-y-3">
-                  {systemStats?.apiUsage?.moduleUsage?.map((module) => (
-                    <div key={module.module} className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
-                      <div>
-                        <p className="font-medium text-gray-900 capitalize">{module.module}</p>
-                        <p className="text-sm text-gray-600">{module.uniqueUsers} users</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-600">{module.totalHits.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">hits</p>
-                        <p className="text-xs text-emerald-500">{Math.round(module.avgHitsPerUser)} avg/user</p>
-                      </div>
-                    </div>
-                  )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v2m14 0V5a2 2 0 00-2-2H5a2 2 0 00-2 2v2" />
-                      </svg>
-                      <p>No module usage data available</p>
-                    </div>
                   )}
+                  {apiLoading ? 'Loading...' : 'Refresh'}
+                </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <svg className="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Peak Usage Hours
-                </h3>
-                <div className="space-y-3">
-                  {systemStats?.apiUsage?.peakUsageHours?.slice(0, 6).map((hour) => (
-                    <div key={hour.hour} className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold mr-3">
-                          {hour.hour}:00
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{hour.users} users</p>
-                          <p className="text-sm text-gray-600">active</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-blue-600">{hour.hits.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">hits</p>
-                      </div>
-                    </div>
-                  )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p>No peak usage data available</p>
-                    </div>
-                  )}
-                </div>
+          {/* Loading State */}
+          {apiLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-600 mx-auto mb-4"></div>
+                <p className="text-lg font-medium text-gray-600">Loading sandbox API analytics...</p>
+                <p className="text-sm text-gray-500">Please wait while we fetch the latest sandbox API data</p>
               </div>
             </div>
+          )}
 
-            {/* API Performance Metrics */}
+          {/* Sandbox API Analytics Content */}
+          {!apiLoading && systemStats && (
+            <div className="space-y-6">
+
+
+
+
+            {/* Consolidated User API Activity */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <svg className="h-5 w-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                <svg className="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                API Performance Metrics
+                User API Activity Summary
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {systemStats?.apiUsage?.apiPerformance?.slice(0, 6).map((api) => (
-                  <div key={api.endpoint} className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
-                    <div className="mb-3">
-                      <p className="font-medium text-gray-900 font-mono text-sm truncate">{api.endpoint}</p>
+              
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-4 p-4 bg-gray-50 rounded-lg font-semibold text-sm text-gray-700 mb-4">
+                <div className="col-span-3">User</div>
+                <div className="col-span-2 text-center">PAN KYC API</div>
+                <div className="col-span-2 text-center">Aadhaar PAN API</div>
+                <div className="col-span-2 text-center">Total API</div>
+                <div className="col-span-2 text-center">Success Rate</div>
+                <div className="col-span-1 text-center">Status</div>
+              </div>
+
+              {/* Table Content */}
+              <div className="space-y-3">
+                {(() => {
+                  // Combine PAN KYC and Aadhaar PAN data
+                  const panKycData = systemStats?.apiUsage?.panKycUserWise || [];
+                  const aadhaarPanData = systemStats?.apiUsage?.aadhaarPanUserWise || [];
+                  
+                  // Create a map to combine user data
+                  const userMap = new Map();
+                  
+                  // Add PAN KYC data
+                  panKycData.forEach(user => {
+                    userMap.set(user.userId, {
+                      userId: user.userId,
+                      name: user.name,
+                      email: user.email,
+                      panKycApiCalls: user.apiCalls,
+                      panKycUploads: user.uploads,
+                      panKycTotal: user.totalActivities,
+                      panKycSuccess: user.successfulApiCalls,
+                      panKycFailed: user.failedApiCalls,
+                      panKycSuccessRate: user.successRate
+                    });
+                  });
+                  
+                  // Add Aadhaar PAN data
+                  aadhaarPanData.forEach(user => {
+                    const existing = userMap.get(user.userId);
+                    if (existing) {
+                      existing.aadhaarPanApiCalls = user.apiCalls;
+                      existing.aadhaarPanUploads = user.uploads;
+                      existing.aadhaarPanTotal = user.totalActivities;
+                      existing.aadhaarPanSuccess = user.successfulApiCalls;
+                      existing.aadhaarPanFailed = user.failedApiCalls;
+                      existing.aadhaarPanSuccessRate = user.successRate;
+                    } else {
+                      userMap.set(user.userId, {
+                        userId: user.userId,
+                        name: user.name,
+                        email: user.email,
+                        panKycApiCalls: 0,
+                        panKycUploads: 0,
+                        panKycTotal: 0,
+                        panKycSuccess: 0,
+                        panKycFailed: 0,
+                        panKycSuccessRate: 0,
+                        aadhaarPanApiCalls: user.apiCalls,
+                        aadhaarPanUploads: user.uploads,
+                        aadhaarPanTotal: user.totalActivities,
+                        aadhaarPanSuccess: user.successfulApiCalls,
+                        aadhaarPanFailed: user.failedApiCalls,
+                        aadhaarPanSuccessRate: user.successRate
+                      });
+                    }
+                  });
+                  
+                  const combinedUsers = Array.from(userMap.values());
+                  
+                  return combinedUsers.length > 0 ? (
+                    combinedUsers.map((user, index) => {
+                      const totalApiCalls = (user.panKycApiCalls || 0) + (user.aadhaarPanApiCalls || 0);
+                      const totalSuccess = (user.panKycSuccess || 0) + (user.aadhaarPanSuccess || 0);
+                      const totalFailed = (user.panKycFailed || 0) + (user.aadhaarPanFailed || 0);
+                      const overallSuccessRate = totalApiCalls > 0 ? (totalSuccess / totalApiCalls) * 100 : 0;
+                      
+                      return (
+                        <div key={user.userId} className="grid grid-cols-12 gap-4 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 hover:shadow-md transition-all duration-200">
+                          {/* User Info */}
+                          <div className="col-span-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">{user.name}</p>
+                                <p className="text-xs text-gray-600">{user.email}</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* PAN KYC API */}
+                          <div className="col-span-2 text-center">
+                            <div className="space-y-1">
+                              <p className="text-lg font-bold text-blue-600">{user.panKycApiCalls || 0}</p>
+                              <div className="text-xs text-gray-500">
+                                <p>📤 {user.panKycUploads || 0} uploads</p>
+                                <p>✓ {user.panKycSuccess || 0} ✓</p>
+                                <p>✗ {user.panKycFailed || 0} ✗</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Aadhaar PAN API */}
+                          <div className="col-span-2 text-center">
+                            <div className="space-y-1">
+                              <p className="text-lg font-bold text-green-600">{user.aadhaarPanApiCalls || 0}</p>
+                              <div className="text-xs text-gray-500">
+                                <p>📤 {user.aadhaarPanUploads || 0} uploads</p>
+                                <p>✓ {user.aadhaarPanSuccess || 0} ✓</p>
+                                <p>✗ {user.aadhaarPanFailed || 0} ✗</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Total API */}
+                          <div className="col-span-2 text-center">
+                            <p className="text-xl font-bold text-purple-600">{totalApiCalls}</p>
+                            <p className="text-xs text-gray-500">total calls</p>
+                          </div>
+                          
+                          {/* Success Rate */}
+                          <div className="col-span-2 text-center">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                              overallSuccessRate >= 90 ? 'bg-green-100 text-green-800' :
+                              overallSuccessRate >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {Math.round(overallSuccessRate)}%
+                            </span>
+                          </div>
+                          
+                          {/* Status */}
+                          <div className="col-span-1 text-center">
+                            <div className={`w-3 h-3 rounded-full mx-auto ${
+                              totalApiCalls > 0 ? 'bg-green-400' : 'bg-gray-300'
+                            }`}></div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <p>No API activity data available</p>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Response Time:</span>
-                        <span className="text-sm font-medium text-gray-900">{api.avgResponseTime}ms</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Success Rate:</span>
-                        <span className="text-sm font-medium text-emerald-600">{api.successRate}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Error Rate:</span>
-                        <span className="text-sm font-medium text-red-600">{api.errorRate}%</span>
-                      </div>
-                    </div>
-                  </div>
-                )) || (
-                  <div className="col-span-full text-center py-8 text-gray-500">
-                    <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <p>No API performance data available</p>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
-          </div>
+
+                  </div>
+          )}
+
+          {/* Error State */}
+          {!apiLoading && !systemStats && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Sandbox API Analytics</h3>
+                <p className="text-gray-600 mb-4">There was an error loading the sandbox API analytics data.</p>
+                <button
+                  onClick={refreshApiAnalytics}
+                  className="inline-flex items-center px-4 py-2 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors duration-200"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Try Again
+                </button>
+              </div>
+                              </div>
+                            )}
         </div>
       )}
 

@@ -360,6 +360,74 @@ router.get('/audit-logs', protect, adminAuth, async (req, res) => {
   }
 });
 
+// Debug endpoint for user performance
+router.get('/debug-user-performance', protect, adminAuth, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    // Test the topPerformers query
+    const topPerformers = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          userId: { $ne: null },
+          action: { $in: ['pan_kyc_upload', 'aadhaar_pan_upload', 'file_uploaded'] }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          count: { $sum: 1 },
+          module: { $first: '$module' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          count: 1,
+          module: 1
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        topPerformers,
+        debug: {
+          startDate,
+          days,
+          totalAuditLogs: await Audit.countDocuments(),
+          auditLogsWithUsers: await Audit.countDocuments({ userId: { $ne: null } })
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error in debug endpoint:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch debug data',
+      error: error.message
+    });
+  }
+});
+
 // Get system statistics (admin only)
 router.get('/stats', protect, adminAuth, async (req, res) => {
   try {
@@ -427,18 +495,638 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
       { $sort: { _id: 1 } }
     ]);
 
+    // User performance data
+    const topPerformers = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          userId: { $ne: null },
+          action: { $in: ['pan_kyc_upload', 'aadhaar_pan_upload', 'file_uploaded'] }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          count: { $sum: 1 },
+          module: { $first: '$module' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          count: 1,
+          module: 1
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Recent user activity
+    const recentActivity = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          userId: { $ne: null }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$userId',
+          name: '$user.name',
+          action: 1,
+          timestamp: '$createdAt'
+        }
+      },
+      { $sort: { timestamp: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // User engagement data
+    const userEngagement = await Audit.aggregate([
+      {
+        $match: {
+          action: 'login',
+          userId: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          loginCount: { $sum: 1 },
+          lastLogin: { $max: '$createdAt' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          loginCount: 1,
+          lastLogin: 1
+        }
+      },
+      { $sort: { loginCount: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // API usage data
+    const apiUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalHits: { $sum: 1 },
+          uniqueUsers: { $addToSet: '$userId' }
+        }
+      },
+      {
+        $project: {
+          totalHits: 1,
+          uniqueUsers: { $size: '$uniqueUsers' }
+        }
+      }
+    ]);
+
+    const topApiEndpoints = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$module',
+          hits: { $sum: 1 },
+          users: { $addToSet: '$userId' }
+        }
+      },
+      {
+        $project: {
+          endpoint: '$_id',
+          hits: 1,
+          users: { $size: '$users' }
+        }
+      },
+      { $sort: { hits: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const userApiHits = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          userId: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          totalHits: { $sum: 1 },
+          endpoints: {
+            $push: {
+              endpoint: '$module',
+              hits: 1,
+              lastUsed: '$createdAt'
+            }
+          },
+          modules: {
+            $push: {
+              module: '$module',
+              hits: 1
+            }
+          },
+          sandboxApiCalls: {
+            $sum: {
+              $cond: [
+                { $in: ['$action', ['pan_kyc_api_call', 'aadhaar_pan_api_call']] },
+                1,
+                0
+              ]
+            }
+          },
+          successfulApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $in: ['$action', ['pan_kyc_api_call', 'aadhaar_pan_api_call']] },
+                  { $eq: ['$status', 'success'] }
+                ]},
+                1,
+                0
+              ]
+            }
+          },
+          failedApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $in: ['$action', ['pan_kyc_api_call', 'aadhaar_pan_api_call']] },
+                  { $eq: ['$status', 'failed'] }
+                ]},
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          email: '$user.email',
+          totalHits: 1,
+          sandboxApiCalls: 1,
+          successfulApiCalls: 1,
+          failedApiCalls: 1,
+          successRate: {
+            $cond: [
+              { $gt: ['$sandboxApiCalls', 0] },
+              { $multiply: [{ $divide: ['$successfulApiCalls', '$sandboxApiCalls'] }, 100] },
+              0
+            ]
+          },
+          endpoints: 1,
+          modules: 1,
+          hourlyDistribution: [],
+          dailyDistribution: []
+        }
+      },
+      { $sort: { sandboxApiCalls: -1, totalHits: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const moduleUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$module',
+          totalHits: { $sum: 1 },
+          uniqueUsers: { $addToSet: '$userId' }
+        }
+      },
+      {
+        $project: {
+          module: '$_id',
+          totalHits: 1,
+          uniqueUsers: { $size: '$uniqueUsers' },
+          avgHitsPerUser: {
+            $divide: ['$totalHits', { $size: '$uniqueUsers' }]
+          }
+        }
+      },
+      { $sort: { totalHits: -1 } }
+    ]);
+
+    const peakUsageHours = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            hour: { $hour: '$createdAt' }
+          },
+          hits: { $sum: 1 },
+          users: { $addToSet: '$userId' }
+        }
+      },
+      {
+        $project: {
+          hour: '$_id.hour',
+          hits: 1,
+          users: { $size: '$users' }
+        }
+      },
+      { $sort: { hits: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const apiPerformance = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: '$module',
+          totalRequests: { $sum: 1 },
+          successfulRequests: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'success'] }, 1, 0]
+            }
+          },
+          failedRequests: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'failed'] }, 1, 0]
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          endpoint: '$_id',
+          avgResponseTime: 1000, // Mock response time
+          successRate: {
+            $multiply: [
+              { $divide: ['$successfulRequests', '$totalRequests'] },
+              100
+            ]
+          },
+          errorRate: {
+            $multiply: [
+              { $divide: ['$failedRequests', '$totalRequests'] },
+              100
+            ]
+          }
+        }
+      },
+      { $limit: 10 }
+    ]);
+
+    // PAN KYC user-wise data
+    const panKycUserWise = await Audit.aggregate([
+      {
+        $match: {
+          $or: [
+            { action: 'pan_kyc_upload' },
+            { action: 'pan_kyc_api_call' },
+            { action: 'pan_kyc_verification' },
+            { $and: [{ action: 'record_verified' }, { module: 'pan_kyc' }] },
+            { $and: [{ action: 'record_rejected' }, { module: 'pan_kyc' }] }
+          ],
+          userId: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          totalActivities: { $sum: 1 },
+          uploads: {
+            $sum: { $cond: [{ $eq: ['$action', 'pan_kyc_upload'] }, 1, 0] }
+          },
+          apiCalls: {
+            $sum: { 
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'pan_kyc_api_call'] },
+                    { $eq: ['$action', 'pan_kyc_verification'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'pan_kyc'] }
+                    ]},
+                    { $and: [
+                      { $eq: ['$action', 'record_rejected'] },
+                      { $eq: ['$module', 'pan_kyc'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'pan_kyc_upload'] }
+                ]}, 
+                1, 
+                0
+              ]
+            }
+          },
+          successfulApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'pan_kyc_api_call'] },
+                    { $eq: ['$action', 'pan_kyc_verification'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'pan_kyc'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'pan_kyc_upload'] },
+                  { $eq: ['$status', 'success'] }
+                ]},
+                1,
+                0
+              ]
+            }
+          },
+          failedApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'pan_kyc_api_call'] },
+                    { $eq: ['$action', 'pan_kyc_verification'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'pan_kyc'] }
+                    ]},
+                    { $and: [
+                      { $eq: ['$action', 'record_rejected'] },
+                      { $eq: ['$module', 'pan_kyc'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'pan_kyc_upload'] },
+                  { $or: [
+                    { $eq: ['$status', 'failed'] },
+                    { $eq: ['$action', 'record_rejected'] }
+                  ]}
+                ]},
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          email: '$user.email',
+          totalActivities: 1,
+          uploads: 1,
+          apiCalls: 1,
+          successfulApiCalls: 1,
+          failedApiCalls: 1,
+          successRate: {
+            $cond: [
+              { $gt: ['$apiCalls', 0] },
+              { $multiply: [{ $divide: ['$successfulApiCalls', '$apiCalls'] }, 100] },
+              0
+            ]
+          }
+        }
+      },
+      { $sort: { totalActivities: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Aadhaar PAN user-wise data
+    const aadhaarPanUserWise = await Audit.aggregate([
+      {
+        $match: {
+          $or: [
+            { action: 'aadhaar_pan_upload' },
+            { action: 'aadhaar_pan_api_call' },
+            { $and: [{ action: 'record_verified' }, { module: 'aadhaar_pan' }] },
+            { $and: [{ action: 'record_rejected' }, { module: 'aadhaar_pan' }] }
+          ],
+          userId: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          totalActivities: { $sum: 1 },
+          uploads: {
+            $sum: { $cond: [{ $eq: ['$action', 'aadhaar_pan_upload'] }, 1, 0] }
+          },
+          apiCalls: {
+            $sum: { 
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'aadhaar_pan_api_call'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'aadhaar_pan'] }
+                    ]},
+                    { $and: [
+                      { $eq: ['$action', 'record_rejected'] },
+                      { $eq: ['$module', 'aadhaar_pan'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'aadhaar_pan_upload'] }
+                ]}, 
+                1, 
+                0
+              ]
+            }
+          },
+          successfulApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'aadhaar_pan_api_call'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'aadhaar_pan'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'aadhaar_pan_upload'] },
+                  { $eq: ['$status', 'success'] }
+                ]},
+                1,
+                0
+              ]
+            }
+          },
+          failedApiCalls: {
+            $sum: {
+              $cond: [
+                { $and: [
+                  { $or: [
+                    { $eq: ['$action', 'aadhaar_pan_api_call'] },
+                    { $and: [
+                      { $eq: ['$action', 'record_verified'] },
+                      { $eq: ['$module', 'aadhaar_pan'] }
+                    ]},
+                    { $and: [
+                      { $eq: ['$action', 'record_rejected'] },
+                      { $eq: ['$module', 'aadhaar_pan'] }
+                    ]}
+                  ]},
+                  { $ne: ['$action', 'aadhaar_pan_upload'] },
+                  { $or: [
+                    { $eq: ['$status', 'failed'] },
+                    { $eq: ['$action', 'record_rejected'] }
+                  ]}
+                ]},
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          name: '$user.name',
+          email: '$user.email',
+          totalActivities: 1,
+          uploads: 1,
+          apiCalls: 1,
+          successfulApiCalls: 1,
+          failedApiCalls: 1,
+          successRate: {
+            $cond: [
+              { $gt: ['$apiCalls', 0] },
+              { $multiply: [{ $divide: ['$successfulApiCalls', '$apiCalls'] }, 100] },
+              0
+            ]
+          }
+        }
+      },
+      { $sort: { totalActivities: -1 } },
+      { $limit: 10 }
+    ]);
+
     res.json({
       success: true,
       data: {
         users: {
           total: totalUsers,
           active: activeUsers,
-          new: newUsers
+          new: newUsers,
+          inactive: totalUsers - activeUsers,
+          suspended: await User.countDocuments({ status: 'suspended' }),
+          premium: 0, // Mock data
+          basic: totalUsers,
+          lastActive: [],
+          roleDistribution: await User.aggregate([
+            { $group: { _id: '$role', count: { $sum: 1 } } }
+          ]),
+          moduleAccessStats: []
         },
         panKyc: panKycStats,
         aadhaarPan: aadhaarPanStats,
         activity: activityStats,
-        dailyActivity
+        dailyActivity,
+        userPerformance: {
+          topPerformers,
+          recentActivity,
+          userEngagement
+        },
+        apiUsage: {
+          totalHits: apiUsage[0]?.totalHits || 0,
+          uniqueUsers: apiUsage[0]?.uniqueUsers || 0,
+          topApiEndpoints,
+          userApiHits,
+          moduleUsage,
+          peakUsageHours,
+          apiPerformance,
+          panKycUserWise,
+          aadhaarPanUserWise
+        }
       }
     });
   } catch (error) {
