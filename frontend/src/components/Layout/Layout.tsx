@@ -344,17 +344,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       }}
                     >
                       <div className="py-1">
-                        {/* Profile link */}
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                          onClick={() => setProfileDropdownOpen(false)}
-                        >
-                          <div className="flex items-center">
-                            <UserCircleIcon className="mr-3 h-5 w-5 text-gray-400" />
-                            Profile
-                          </div>
-                        </Link>
+                        {/* Profile link - only show for non-admin users */}
+                        {user?.role !== 'admin' && (
+                          <Link
+                            to="/profile"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                            onClick={() => setProfileDropdownOpen(false)}
+                          >
+                            <div className="flex items-center">
+                              <UserCircleIcon className="mr-3 h-5 w-5 text-gray-400" />
+                              Profile
+                            </div>
+                          </Link>
+                        )}
                         
                         {/* Logout button */}
                         <button

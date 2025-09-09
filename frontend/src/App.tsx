@@ -16,7 +16,7 @@ import PanKyc from './pages/PanKyc/PanKyc';
 import PanKycRecords from './pages/PanKyc/PanKycRecords';
 import AadhaarPan from './pages/AadhaarPan/AadhaarPan';
 import AadhaarPanRecords from './pages/AadhaarPan/AadhaarPanRecords';
-import Profile from './pages/Profile/Profile';
+import ProfileWrapper from './pages/Profile/ProfileWrapper';
 import Admin from './pages/Admin/Admin';
 
 import NotFound from './pages/NotFound/NotFound';
@@ -152,7 +152,7 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Layout>
-                <Profile />
+                <ProfileWrapper />
               </Layout>
             </ProtectedRoute>
           } />

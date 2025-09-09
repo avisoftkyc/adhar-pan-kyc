@@ -314,7 +314,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await api.post('/auth/refresh');
       const { token } = response.data;
       
-      localStorage.setItem('token', token);
+      // Update token in the same storage where it was originally stored
+      const rememberMe = localStorage.getItem('rememberMe') === 'true';
+      if (rememberMe) {
+        localStorage.setItem('token', token);
+      } else {
+        sessionStorage.setItem('token', token);
+      }
+      
       dispatch({
         type: 'AUTH_SUCCESS',
         payload: { user: state.user!, token },

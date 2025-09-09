@@ -11,10 +11,15 @@ const api = axios.create({
   },
 });
 
+// Helper function to get token from storage (same as AuthContext)
+const getStoredToken = (): string | null => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,31 +30,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      // Token expired or invalid - let AuthContext handle this
-      // Don't automatically redirect here, let the calling code decide
-      console.log('401 Unauthorized - letting AuthContext handle');
-    }
-    
-    if (error.response?.status === 403) {
-      // Access denied
-      console.error('Access denied:', error.response.data);
-    }
-    
-    if (error.response?.status === 429) {
-      // Rate limit exceeded
-      console.error('Rate limit exceeded');
-    }
-    
-    return Promise.reject(error);
-  }
-);
+// Note: Response interceptor for 401 handling is managed in AuthContext.tsx
+// to avoid conflicts and ensure proper token refresh flow
 
 export default api;

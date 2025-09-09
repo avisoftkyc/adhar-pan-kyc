@@ -384,4 +384,24 @@ router.post('/resend-verification', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/refresh
+// @desc    Refresh JWT token
+// @access  Private
+router.post('/refresh', protect, async (req, res) => {
+  try {
+    // Generate new token
+    const token = req.user.getSignedJwtToken();
+    
+    res.json({
+      success: true,
+      token,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 module.exports = router;
