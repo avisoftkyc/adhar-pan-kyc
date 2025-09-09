@@ -116,10 +116,12 @@ const AadhaarPanRecords: React.FC = () => {
 
   // Calculate statistics
   const calculateStats = (data: AadhaarPanRecord[]) => {
+    const linked = data.filter(r => r.status === 'linked').length;
+    const notLinked = data.filter(r => r.status === 'not-linked').length;
     const stats = {
-      total: data.length,
-      linked: data.filter(r => r.status === 'linked').length,
-      'not-linked': data.filter(r => r.status === 'not-linked').length
+      total: linked + notLinked,
+      linked: linked,
+      'not-linked': notLinked
     };
     setStats(stats);
   };
