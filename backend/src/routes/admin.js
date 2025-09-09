@@ -450,6 +450,210 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
   }
 });
 
+// Get user statistics (admin only)
+router.get('/user-stats', protect, adminAuth, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    // User registration stats
+    const userRegistrationStats = await User.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // User role distribution
+    const roleDistribution = await User.aggregate([
+      {
+        $group: {
+          _id: '$role',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // User status distribution
+    const statusDistribution = await User.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Recent user activity
+    const recentUserActivity = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          module: { $in: ['auth', 'user_management'] }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            action: '$action',
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.date': -1, count: -1 } },
+      { $limit: 20 }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        userRegistration: userRegistrationStats,
+        roleDistribution,
+        statusDistribution,
+        recentActivity: recentUserActivity
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching user stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user statistics'
+    });
+  }
+});
+
+// Get API usage statistics (admin only)
+router.get('/api-usage-stats', protect, adminAuth, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    // API endpoint usage
+    const apiUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          module: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            module: '$module',
+            action: '$action'
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Daily API usage
+    const dailyApiUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Hourly API usage for today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const hourlyApiUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: today }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%H:00", date: "$createdAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Top users by API usage
+    const topUsersByUsage = await Audit.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate },
+          userId: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$userId',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          userId: '$_id',
+          email: '$user.email',
+          name: '$user.name',
+          count: 1
+        }
+      }
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        apiUsage,
+        dailyUsage: dailyApiUsage,
+        hourlyUsage: hourlyApiUsage,
+        topUsers: topUsersByUsage
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching API usage stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch API usage statistics'
+    });
+  }
+});
+
 // Get system health (admin only)
 router.get('/health', protect, adminAuth, async (req, res) => {
   try {
