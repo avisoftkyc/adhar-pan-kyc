@@ -23,7 +23,7 @@ interface AadhaarPanRecord {
   fatherName?: string;
   dateOfBirth?: string;
   gender?: string;
-  status: 'pending' | 'linked' | 'not-linked' | 'invalid' | 'error';
+  status: 'linked' | 'not-linked';
   linkingDetails?: {
     apiResponse?: any;
     linkingDate?: string;
@@ -55,11 +55,8 @@ interface AadhaarPanRecord {
 
 interface RecordsStats {
   total: number;
-  pending: number;
   linked: number;
   'not-linked': number;
-  invalid: number;
-  error: number;
 }
 
 const AadhaarPanRecords: React.FC = () => {
@@ -69,11 +66,8 @@ const AadhaarPanRecords: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<RecordsStats>({
     total: 0,
-    pending: 0,
     linked: 0,
-    'not-linked': 0,
-    invalid: 0,
-    error: 0
+    'not-linked': 0
   });
 
   // Pagination and search
@@ -124,11 +118,8 @@ const AadhaarPanRecords: React.FC = () => {
   const calculateStats = (data: AadhaarPanRecord[]) => {
     const stats = {
       total: data.length,
-      pending: data.filter(r => r.status === 'pending').length,
       linked: data.filter(r => r.status === 'linked').length,
-      'not-linked': data.filter(r => r.status === 'not-linked').length,
-      invalid: data.filter(r => r.status === 'invalid').length,
-      error: data.filter(r => r.status === 'error').length
+      'not-linked': data.filter(r => r.status === 'not-linked').length
     };
     setStats(stats);
   };
@@ -229,10 +220,6 @@ const AadhaarPanRecords: React.FC = () => {
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
       case 'not-linked':
         return <XCircleIcon className="h-5 w-5 text-red-500" />;
-      case 'invalid':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />;
-      case 'error':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />;
       default:
         return <ClockIcon className="h-5 w-5 text-gray-500" />;
     }
@@ -244,10 +231,6 @@ const AadhaarPanRecords: React.FC = () => {
         return 'bg-green-100 text-green-800';
       case 'not-linked':
         return 'bg-red-100 text-red-800';
-      case 'invalid':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'error':
-        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -303,7 +286,7 @@ const AadhaarPanRecords: React.FC = () => {
       </div>
 
       {/* Enhanced Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
@@ -312,18 +295,6 @@ const AadhaarPanRecords: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Total Records</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
-              <ClockIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
             </div>
           </div>
         </div>
@@ -348,30 +319,6 @@ const AadhaarPanRecords: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Not Linked</p>
               <p className="text-2xl font-bold text-red-600">{stats['not-linked']}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-              <ExclamationTriangleIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Invalid</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.invalid}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center mr-4">
-              <ExclamationTriangleIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Error</p>
-              <p className="text-2xl font-bold text-gray-600">{stats.error}</p>
             </div>
           </div>
         </div>
@@ -402,11 +349,8 @@ const AadhaarPanRecords: React.FC = () => {
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
             >
               <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
               <option value="linked">Linked</option>
               <option value="not-linked">Not Linked</option>
-              <option value="invalid">Invalid</option>
-              <option value="error">Error</option>
             </select>
           </div>
 
@@ -599,14 +543,6 @@ const AadhaarPanRecords: React.FC = () => {
                           >
                             <EyeIcon className="h-5 w-5" />
                           </button>
-                          {record.status === 'pending' && (
-                            <button
-                              className="text-blue-600 hover:text-blue-900"
-                              title="Verify Now"
-                            >
-                              <LinkIcon className="h-5 w-5" />
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
