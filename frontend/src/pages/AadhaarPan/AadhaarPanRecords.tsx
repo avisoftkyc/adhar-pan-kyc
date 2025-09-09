@@ -9,8 +9,6 @@ import {
   XCircleIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-  LinkIcon,
-  EyeIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
@@ -128,6 +126,9 @@ const AadhaarPanRecords: React.FC = () => {
 
   // Filter records based on search and filters
   const filteredRecords = records.filter(record => {
+    // Only show records with valid statuses (linked or not-linked)
+    const hasValidStatus = record.status === 'linked' || record.status === 'not-linked';
+    
     const matchesSearch = 
       record.aadhaarNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.panNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -155,7 +156,7 @@ const AadhaarPanRecords: React.FC = () => {
       }
     }
     
-    return matchesSearch && matchesStatus && matchesDate;
+    return hasValidStatus && matchesSearch && matchesStatus && matchesDate;
   });
 
   // Pagination
@@ -406,25 +407,7 @@ const AadhaarPanRecords: React.FC = () => {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                        <span>Processing</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                        <span>File Info</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
                         <span>Timestamps</span>
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-emerald-700 uppercase tracking-wider">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-                        <span>Actions</span>
                       </div>
                     </th>
                   </tr>
@@ -477,46 +460,6 @@ const AadhaarPanRecords: React.FC = () => {
                         )}
                       </td>
 
-                      {/* Processing */}
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          {record.processingTime && (
-                            <div className="text-sm text-gray-900">
-                              {record.processingTime}ms
-                            </div>
-                          )}
-                          {record.retryCount !== undefined && (
-                            <div className="text-sm text-gray-500">
-                              Retries: {record.retryCount}
-                            </div>
-                          )}
-                          {record.lastRetryAt && (
-                            <div className="text-sm text-gray-500">
-                              Last retry: {formatDate(record.lastRetryAt)}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* File Info */}
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <div className="text-sm text-gray-900">
-                            Batch: {record.batchId}
-                          </div>
-                          {record.fileUpload && (
-                            <>
-                              <div className="text-sm text-gray-500">
-                                File: {record.fileUpload.originalName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                Size: {(record.fileUpload.fileSize / 1024).toFixed(1)} KB
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </td>
-
                       {/* Timestamps */}
                       <td className="px-6 py-4">
                         <div className="space-y-1">
@@ -533,18 +476,6 @@ const AadhaarPanRecords: React.FC = () => {
                               Last checked: {formatDate(record.linkingDetails.lastChecked)}
                             </div>
                           )}
-                        </div>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="px-6 py-4">
-                        <div className="flex space-x-2">
-                          <button
-                            className="text-green-600 hover:text-green-900"
-                            title="View Details"
-                          >
-                            <EyeIcon className="h-5 w-5" />
-                          </button>
                         </div>
                       </td>
                     </tr>
