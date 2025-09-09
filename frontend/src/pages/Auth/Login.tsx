@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import { useAuth } from '../../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 interface LoginFormData {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
-const schema = yup.object({
-  email: yup.string().email('Please enter a valid email').required('Email is required'),
-  password: yup.string().required('Password is required'),
-}).required();
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,15 +24,19 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, user]);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
-    resolver: yupResolver(schema)
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
 
   const onSubmit = async (data: LoginFormData) => {
+    // Basic validation
+    if (!data.email || !data.password) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
     setIsLoading(true);
     setError(''); // Clear any previous errors
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, data.rememberMe || false);
     } catch (error: any) {
       console.error('Login error:', error);
       // Set user-friendly error message
@@ -159,8 +158,8 @@ const Login: React.FC = () => {
                 <div className="flex items-center group">
                   <input
                     id="remember-me"
-                    name="remember-me"
                     type="checkbox"
+                    {...register('rememberMe')}
                     className="h-5 w-5 text-purple-600 focus:ring-4 focus:ring-purple-500/20 border-2 border-gray-300 rounded-xl transition-all duration-300 hover:border-purple-400"
                   />
                   <label htmlFor="remember-me" className="ml-3 block text-sm text-gray-700 font-medium group-hover:text-gray-900 transition-colors duration-300">

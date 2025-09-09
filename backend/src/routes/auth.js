@@ -215,6 +215,25 @@ router.post('/forgot-password', validatePasswordReset, async (req, res) => {
   }
 });
 
+// @route   GET /api/auth/validate-reset-token/:token
+// @desc    Validate reset token
+// @access  Public
+router.get('/validate-reset-token/:token', async (req, res) => {
+  try {
+    await authController.validateResetToken(req.params.token);
+    
+    res.json({
+      success: true,
+      message: 'Token is valid',
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
 // @route   POST /api/auth/reset-password/:token
 // @desc    Reset password
 // @access  Public

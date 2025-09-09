@@ -62,7 +62,7 @@ const register = async (userData) => {
 // @route   POST /api/auth/login
 // @access  Public
 const login = async (loginData) => {
-  const { email, password } = loginData;
+  const { email, password, rememberMe } = loginData;
 
   // Check if user exists
   const user = await User.findOne({ email }).select('+password');
@@ -91,8 +91,8 @@ const login = async (loginData) => {
   // Reset login attempts on successful login
   await user.resetLoginAttempts();
 
-  // Generate JWT token
-  const token = user.getSignedJwtToken();
+  // Generate JWT token with appropriate expiration
+  const token = user.getSignedJwtToken(rememberMe ? '30d' : '24h');
 
   return {
     success: true,
@@ -160,6 +160,28 @@ const forgotPassword = async (email) => {
     logger.error('Failed to send password reset email:', error);
     throw new Error('Failed to send password reset email');
   }
+};
+
+// @desc    Validate reset token
+// @route   GET /api/auth/validate-reset-token/:token
+// @access  Public
+const validateResetToken = async (token) => {
+  // Get hashed token
+  const resetPasswordToken = require('crypto')
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new Error('Invalid or expired reset token');
+  }
+
+  return { success: true };
 };
 
 // @desc    Reset password
@@ -349,6 +371,7 @@ module.exports = {
   login,
   getCurrentUser,
   forgotPassword,
+  validateResetToken,
   resetPassword,
   changePassword,
   verifyEmail,

@@ -50,7 +50,7 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
@@ -65,12 +65,17 @@ interface RegisterData {
   confirmPassword: string;
 }
 
+// Helper function to get token from storage
+const getStoredToken = (): string | null => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
+
 // Initial state
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
+  token: getStoredToken(),
   loading: true,
-  isAuthenticated: !!localStorage.getItem('token'), // Start as true if token exists
+  isAuthenticated: !!getStoredToken(), // Start as true if token exists
 };
 
 // Action types
@@ -140,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = getStoredToken();
       console.log('🔍 Initializing auth with token:', token ? 'exists' : 'none');
       
       if (token) {
@@ -169,6 +174,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error) {
           console.error('❌ Token validation failed:', error);
           localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          localStorage.removeItem('rememberMe');
           dispatch({ type: 'AUTH_FAILURE' });
         }
       } else {
@@ -200,14 +207,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [state.user, state.token, state.loading, state.isAuthenticated]);
 
   // Login function
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
       dispatch({ type: 'AUTH_START' });
       
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password, rememberMe });
       const { user, token } = response.data;
 
-      localStorage.setItem('token', token);
+      // Store token based on rememberMe preference
+      if (rememberMe) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        // Use sessionStorage for temporary sessions
+        sessionStorage.setItem('token', token);
+        localStorage.removeItem('rememberMe');
+      }
+      
       dispatch({
         type: 'AUTH_SUCCESS',
         payload: { user, token },
@@ -258,6 +274,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Logout function
   const logout = () => {
     localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('rememberMe');
     dispatch({ type: 'LOGOUT' });
     toast.success('Logged out successfully');
     navigate('/login');
