@@ -102,8 +102,10 @@ const Admin: React.FC = () => {
   const [apiUsageStats, setApiUsageStats] = useState<any>(null);
   const [userApiHitCounts, setUserApiHitCounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [statsTimeRange, setStatsTimeRange] = useState('30');
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showModuleAccess, setShowModuleAccess] = useState(false);
@@ -174,31 +176,48 @@ const Admin: React.FC = () => {
     }
   };
 
-  const fetchSystemStats = async () => {
+  const fetchSystemStats = async (days: string = statsTimeRange) => {
     try {
-      const response = await api.get('/admin/stats');
+      setStatsLoading(true);
+      const response = await api.get(`/admin/stats?days=${days}`);
       setSystemStats(response.data.data);
     } catch (error) {
       console.error('Error fetching system stats:', error);
+      setError('Failed to fetch system statistics');
+    } finally {
+      setStatsLoading(false);
     }
   };
 
-  const fetchUserStats = async () => {
+  const fetchUserStats = async (days: string = statsTimeRange) => {
     try {
-      const response = await api.get('/admin/user-stats');
+      const response = await api.get(`/admin/user-stats?days=${days}`);
       setUserStats(response.data.data);
     } catch (error) {
       console.error('Error fetching user stats:', error);
     }
   };
 
-  const fetchApiUsageStats = async () => {
+  const fetchApiUsageStats = async (days: string = statsTimeRange) => {
     try {
-      const response = await api.get('/admin/api-usage-stats');
+      const response = await api.get(`/admin/api-usage-stats?days=${days}`);
       setApiUsageStats(response.data.data);
     } catch (error) {
       console.error('Error fetching API usage stats:', error);
     }
+  };
+
+  const handleTimeRangeChange = (days: string) => {
+    setStatsTimeRange(days);
+    fetchSystemStats(days);
+    fetchUserStats(days);
+    fetchApiUsageStats(days);
+  };
+
+  const refreshStats = () => {
+    fetchSystemStats();
+    fetchUserStats();
+    fetchApiUsageStats();
   };
 
   // Mock data for user API hit counts
@@ -808,50 +827,305 @@ const Admin: React.FC = () => {
       )}
 
       {/* Statistics Tab */}
-      {activeTab === 'stats' && systemStats && (
+      {activeTab === 'stats' && (
         <div className="space-y-6">
-          <h2 className="text-lg font-medium text-gray-900">System Statistics</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* PAN KYC Statistics */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">PAN KYC Statistics</h3>
-              <div className="space-y-2">
-                {systemStats.panKyc.map((stat) => (
-                  <div key={stat._id} className="flex justify-between">
-                    <span className="text-sm text-gray-600 capitalize">{stat._id}</span>
-                    <span className="text-sm font-medium text-gray-900">{stat.count}</span>
+          {/* Statistics Header with Controls */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <ChartBarIcon className="h-6 w-6 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-2xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">System Statistics</h2>
+                  <p className="text-sm text-gray-600">Real-time system performance and usage metrics</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                {/* Time Range Selector */}
+                <div className="flex items-center space-x-2">
+                  <label className="text-sm font-medium text-gray-700">Time Range:</label>
+                  <select
+                    value={statsTimeRange}
+                    onChange={(e) => handleTimeRangeChange(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    disabled={statsLoading}
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+                </div>
+                
+                {/* Refresh Button */}
+                <button
+                  onClick={refreshStats}
+                  disabled={statsLoading}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg shadow-lg hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 hover:shadow-xl active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {statsLoading ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  ) : (
+                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  )}
+                  {statsLoading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading State */}
+          {statsLoading && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-lg font-medium text-gray-600">Loading statistics...</p>
+                <p className="text-sm text-gray-500">Please wait while we fetch the latest data</p>
+              </div>
+            </div>
+          )}
+
+          {/* Statistics Content */}
+          {!statsLoading && systemStats && (
+            <div className="space-y-6">
+              {/* Overview Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600">Total Users</p>
+                      <p className="text-3xl font-bold text-blue-900">{systemStats.users.total}</p>
+                      <p className="text-xs text-blue-600 mt-1">+{systemStats.users.new} new this period</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+                      <UserGroupIcon className="h-6 w-6 text-white" />
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl p-6 border border-emerald-200 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-emerald-600">Active Users</p>
+                      <p className="text-3xl font-bold text-emerald-900">{systemStats.users.active}</p>
+                      <p className="text-xs text-emerald-600 mt-1">
+                        {Math.round((systemStats.users.active / systemStats.users.total) * 100)}% of total
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+                      <CheckCircleIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600">Total Activity</p>
+                      <p className="text-3xl font-bold text-purple-900">
+                        {systemStats.activity.reduce((sum, item) => sum + item.count, 0)}
+                      </p>
+                      <p className="text-xs text-purple-600 mt-1">Actions performed</p>
+                    </div>
+                    <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
+                      <ChartBarIcon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200 hover:shadow-lg transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-orange-600">Daily Activity</p>
+                      <p className="text-3xl font-bold text-orange-900">
+                        {systemStats.dailyActivity.length > 0 
+                          ? Math.round(systemStats.dailyActivity.reduce((sum, item) => sum + item.count, 0) / systemStats.dailyActivity.length)
+                          : 0
+                        }
+                      </p>
+                      <p className="text-xs text-orange-600 mt-1">Average per day</p>
+                    </div>
+                    <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
+                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Statistics */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* PAN KYC Statistics */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                  </div>
+                    <h3 className="text-lg font-semibold text-gray-900">PAN KYC Statistics</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {systemStats.panKyc.length > 0 ? (
+                      systemStats.panKyc.map((stat) => (
+                        <div key={stat._id} className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white text-sm font-bold mr-3">
+                              {stat._id.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 capitalize">{stat._id}</span>
+                          </div>
+                          <span className="text-lg font-bold text-indigo-600">{stat.count}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>No PAN KYC data available</p>
+                      </div>
+                    )}
               </div>
             </div>
 
             {/* Aadhaar-PAN Statistics */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Aadhaar-PAN Statistics</h3>
-              <div className="space-y-2">
-                {systemStats.aadhaarPan.map((stat) => (
-                  <div key={stat._id} className="flex justify-between">
-                    <span className="text-sm text-gray-600 capitalize">{stat._id}</span>
-                    <span className="text-sm font-medium text-gray-900">{stat.count}</span>
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                      </svg>
                   </div>
-                ))}
+                    <h3 className="text-lg font-semibold text-gray-900">Aadhaar-PAN Statistics</h3>
               </div>
+                  <div className="space-y-3">
+                    {systemStats.aadhaarPan.length > 0 ? (
+                      systemStats.aadhaarPan.map((stat) => (
+                        <div key={stat._id} className="flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white text-sm font-bold mr-3">
+                              {stat._id.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 capitalize">{stat._id}</span>
+                          </div>
+                          <span className="text-lg font-bold text-emerald-600">{stat.count}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                        </svg>
+                        <p>No Aadhaar-PAN data available</p>
+                      </div>
+                    )}
+                  </div>
             </div>
           </div>
 
           {/* Activity Statistics */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-2">
-              {systemStats.activity.slice(0, 10).map((stat) => (
-                <div key={stat._id} className="flex justify-between">
-                  <span className="text-sm text-gray-600 capitalize">{stat._id.replace(/_/g, ' ')}</span>
-                  <span className="text-sm font-medium text-gray-900">{stat.count}</span>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                <div className="flex items-center mb-6">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mr-3">
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
                 </div>
-              ))}
+                  <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
             </div>
+                <div className="space-y-3">
+                  {systemStats.activity.length > 0 ? (
+                    systemStats.activity.slice(0, 10).map((stat, index) => (
+                      <div key={stat._id} className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white text-sm font-bold mr-3">
+                            {index + 1}
           </div>
+                          <span className="text-sm font-medium text-gray-700 capitalize">
+                            {stat._id.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <span className="text-lg font-bold text-orange-600">{stat.count}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <svg className="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <p>No activity data available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Daily Activity Chart */}
+              {systemStats.dailyActivity.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2zm0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">Daily Activity Trend</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {systemStats.dailyActivity.map((day, index) => {
+                      const maxCount = Math.max(...systemStats.dailyActivity.map(d => d.count));
+                      const percentage = maxCount > 0 ? (day.count / maxCount) * 100 : 0;
+                      
+                      return (
+                        <div key={day._id} className="flex items-center">
+                          <div className="w-20 text-sm text-gray-600 font-medium">
+                            {new Date(day._id).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
+                          <div className="flex-1 mx-4">
+                            <div className="w-full bg-gray-200 rounded-full h-6 relative overflow-hidden">
+                              <div 
+                                className="h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000 ease-out"
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          <div className="w-16 text-sm font-bold text-gray-900 text-right">
+                            {day.count}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Error State */}
+          {!statsLoading && !systemStats && (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Statistics</h3>
+                <p className="text-gray-600 mb-4">There was an error loading the system statistics.</p>
+                <button
+                  onClick={refreshStats}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
