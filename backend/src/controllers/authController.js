@@ -121,6 +121,8 @@ const getCurrentUser = async (userId) => {
     throw new Error('User not found');
   }
 
+  console.log('🔍 getCurrentUser - user.branding:', JSON.stringify(user.branding, null, 2));
+
   return {
     _id: user._id,
     name: user.name,

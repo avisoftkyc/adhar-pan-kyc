@@ -94,6 +94,16 @@ const UserSchema = new mongoose.Schema({
       trim: true,
       maxlength: [50, 'Display name cannot be more than 50 characters'],
     },
+    address: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Address cannot be more than 500 characters'],
+    },
+    gstNumber: {
+      type: String,
+      trim: true,
+      maxlength: [15, 'GST number cannot be more than 15 characters']
+    },
   },
   preferences: {
     notifications: {

@@ -28,6 +28,8 @@ interface User {
     };
     companyName?: string;
     displayName?: string;
+    address?: string;
+    gstNumber?: string;
   };
   preferences?: {
     notifications: {

@@ -382,8 +382,8 @@ const PanKyc: React.FC = () => {
       });
       
       // Show dynamic toast message based on verification results
-      if (response.data.success && response.data.results) {
-        const results = response.data.results;
+      if (response.data.success && response.data.data && response.data.data.results) {
+        const results = response.data.data.results;
         const verifiedCount = results.filter((r: any) => r.status === 'verified').length;
         const rejectedCount = results.filter((r: any) => r.status === 'rejected').length;
         
@@ -453,8 +453,8 @@ const PanKyc: React.FC = () => {
       });
       
       // Show dynamic toast message based on verification results
-      if (response.data.success && response.data.results && response.data.results.length > 0) {
-        const result = response.data.results[0];
+      if (response.data.success && response.data.data && response.data.data.results && response.data.data.results.length > 0) {
+        const result = response.data.data.results[0];
         const isSuccess = result.status === 'verified';
       showToast({
           type: isSuccess ? 'success' : 'error',

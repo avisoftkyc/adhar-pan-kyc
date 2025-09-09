@@ -33,6 +33,8 @@ interface User {
     };
     companyName?: string;
     displayName?: string;
+    address?: string;
+    gstNumber?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -90,7 +92,7 @@ interface SystemStats {
 }
 
 const Admin: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUserData } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [users, setUsers] = useState<User[]>([]);
@@ -111,6 +113,8 @@ const Admin: React.FC = () => {
   const [brandingForm, setBrandingForm] = useState({
     companyName: '',
     displayName: '',
+    address: '',
+    gstNumber: '',
     logoFile: null as File | null
   });
   const [brandingLoading, setBrandingLoading] = useState(false);
@@ -349,6 +353,8 @@ const Admin: React.FC = () => {
     setBrandingForm({
       companyName: user.branding?.companyName || '',
       displayName: user.branding?.displayName || '',
+      address: user.branding?.address || '',
+      gstNumber: user.branding?.gstNumber || '',
       logoFile: null
     });
     setShowBranding(true);
@@ -359,10 +365,12 @@ const Admin: React.FC = () => {
       setBrandingLoading(true);
       
       // Update branding text fields
-      if (brandingForm.companyName || brandingForm.displayName) {
+      if (brandingForm.companyName || brandingForm.displayName || brandingForm.address || brandingForm.gstNumber) {
         await api.patch(`/admin/users/${userId}/branding`, {
           companyName: brandingForm.companyName,
-          displayName: brandingForm.displayName
+          displayName: brandingForm.displayName,
+          address: brandingForm.address,
+          gstNumber: brandingForm.gstNumber
         });
       }
 
@@ -380,8 +388,15 @@ const Admin: React.FC = () => {
       setSuccess('User branding updated successfully');
       setShowBranding(false);
       setSelectedUserForModules(null);
-      setBrandingForm({ companyName: '', displayName: '', logoFile: null });
+      setBrandingForm({ companyName: '', displayName: '', address: '', gstNumber: '', logoFile: null });
       fetchUsers();
+      
+      // If admin is updating their own branding, refresh the auth context
+      if (userId === user?._id) {
+        console.log('🔄 Refreshing user data for admin...');
+        const refreshedUser = await refreshUserData();
+        console.log('🔄 Refreshed user data:', refreshedUser);
+      }
     } catch (error: any) {
       console.error('Error updating branding:', error);
       setError(error.response?.data?.message || 'Failed to update branding');
@@ -1786,6 +1801,29 @@ const Admin: React.FC = () => {
                 </div>
 
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                  <textarea
+                    value={brandingForm.address || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, address: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Enter company address"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">GST Number</label>
+                  <input
+                    type="text"
+                    value={brandingForm.gstNumber || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, gstNumber: e.target.value.toUpperCase() })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Enter GST number (e.g., 22ABCDE1234F1Z5)"
+                    maxLength={15}
+                  />
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Logo</label>
                   <div className="flex items-center space-x-3">
                     {selectedUserForBranding.branding?.logo && (
@@ -1815,7 +1853,7 @@ const Admin: React.FC = () => {
                     onClick={() => {
                       setShowBranding(false);
                       setSelectedUserForBranding(null);
-                      setBrandingForm({ companyName: '', displayName: '', logoFile: null });
+                      setBrandingForm({ companyName: '', displayName: '', address: '', gstNumber: '', logoFile: null });
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                   >

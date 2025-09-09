@@ -638,9 +638,9 @@ router.get('/modules', protect, adminAuth, async (req, res) => {
 // Update user branding (admin only)
 router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
   try {
-    const { companyName, displayName } = req.body;
+    const { companyName, displayName, address, gstNumber } = req.body;
 
-    if (!companyName && !displayName) {
+    if (!companyName && !displayName && !address && !gstNumber) {
       return res.status(400).json({
         success: false,
         message: 'At least one branding field must be provided'
@@ -658,15 +658,31 @@ router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
     // Store old branding for audit
     const oldBranding = {
       companyName: user.branding?.companyName || '',
-      displayName: user.branding?.displayName || ''
+      displayName: user.branding?.displayName || '',
+      address: user.branding?.address || '',
+      gstNumber: user.branding?.gstNumber || ''
     };
 
-    // Update branding fields
-    if (!user.branding) user.branding = {};
-    if (companyName !== undefined) user.branding.companyName = companyName;
-    if (displayName !== undefined) user.branding.displayName = displayName;
+    console.log('🔍 DEBUG: Request body:', JSON.stringify(req.body, null, 2));
+    console.log('🔍 DEBUG: Original user.branding:', JSON.stringify(user.branding, null, 2));
 
-    await user.save();
+    // Build update object
+    const updateData = {};
+    if (companyName !== undefined) updateData['branding.companyName'] = companyName;
+    if (displayName !== undefined) updateData['branding.displayName'] = displayName;
+    if (address !== undefined) updateData['branding.address'] = address;
+    if (gstNumber !== undefined) updateData['branding.gstNumber'] = gstNumber;
+
+    console.log('🔍 DEBUG: Update data:', JSON.stringify(updateData, null, 2));
+
+    // Use findByIdAndUpdate for more reliable updates
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    console.log('🔍 DEBUG: Updated user.branding:', JSON.stringify(updatedUser.branding, null, 2));
 
     // Log the event
     await logEvent({
@@ -679,21 +695,25 @@ router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
         targetUserEmail: user.email,
         oldBranding,
         newBranding: {
-          companyName: user.branding.companyName,
-          displayName: user.branding.displayName
+          companyName: updatedUser.branding.companyName,
+          displayName: updatedUser.branding.displayName,
+          address: updatedUser.branding.address,
+          gstNumber: updatedUser.branding.gstNumber
         }
       },
       ipAddress: req.ip,
       userAgent: req.get('User-Agent')
     });
 
+    console.log('🔍 DEBUG: Response branding:', JSON.stringify(updatedUser.branding, null, 2));
+    
     res.json({
       success: true,
       message: 'User branding updated successfully',
       data: {
-        id: user._id,
-        email: user.email,
-        branding: user.branding
+        id: updatedUser._id,
+        email: updatedUser.email,
+        branding: updatedUser.branding
       }
     });
   } catch (error) {
@@ -769,6 +789,51 @@ router.post('/users/:id/logo', protect, adminAuth, upload.single('logo'), async 
       success: false,
       message: 'Failed to update user logo'
       });
+  }
+});
+
+// Test endpoint to check if branding fields can be saved
+router.post('/test-branding/:id', protect, adminAuth, async (req, res) => {
+  try {
+    console.log('🧪 TEST: Testing branding save...');
+    
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    console.log('🧪 TEST: Original branding:', JSON.stringify(user.branding, null, 2));
+
+    // Try to save a simple test value
+    const testResult = await User.findByIdAndUpdate(
+      req.params.id,
+      { 
+        $set: { 
+          'branding.testField': 'test-value',
+          'branding.address': 'test address',
+          'branding.gstNumber': 'test-gst'
+        } 
+      },
+      { new: true, runValidators: true }
+    );
+
+    console.log('🧪 TEST: After update:', JSON.stringify(testResult.branding, null, 2));
+
+    res.json({
+      success: true,
+      message: 'Test completed',
+      data: {
+        original: user.branding,
+        updated: testResult.branding
+      }
+    });
+  } catch (error) {
+    console.error('🧪 TEST: Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Test failed',
+      error: error.message
+    });
   }
 });
 

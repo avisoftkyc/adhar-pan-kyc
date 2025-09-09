@@ -1,16 +1,12 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import {
   Bars3Icon,
   XMarkIcon,
   DocumentTextIcon,
   IdentificationIcon,
   Cog6ToothIcon,
-  SunIcon,
-  MoonIcon,
-  BellIcon,
   ChevronDownIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -23,7 +19,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -239,9 +234,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-400/20 to-teal-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                 )}
-                <span className="text-sm font-semibold bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-600 bg-clip-text text-transparent text-center">
-                  {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
-                </span>
+                <div className="text-center">
+                  <span className="text-sm font-semibold bg-gradient-to-r from-emerald-800 via-teal-700 to-cyan-600 bg-clip-text text-transparent">
+                    {user?.branding?.displayName || user?.branding?.companyName || 'KYC System'}
+                  </span>
+                  {(() => {
+                    console.log('🎨 Layout - user.branding:', user?.branding);
+                    console.log('🎨 Layout - address:', (user?.branding as any)?.address);
+                    console.log('🎨 Layout - gstNumber:', (user?.branding as any)?.gstNumber);
+                    return ((user?.branding as any)?.address || (user?.branding as any)?.gstNumber);
+                  })() && (
+                    <div className="mt-2 space-y-1">
+                      {(user?.branding as any)?.address && (
+                        <p className="text-xs text-emerald-700/80 leading-tight">
+                          {(user?.branding as any).address}
+                        </p>
+                      )}
+                      {(user?.branding as any)?.gstNumber && (
+                        <p className="text-xs text-emerald-700/80 font-mono">
+                          GST: {(user?.branding as any).gstNumber}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -293,23 +309,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <div className="flex flex-1"></div>
               <div className="flex items-center gap-x-4 lg:gap-x-6">
-                {/* Enhanced Theme toggle */}
-                <button
-                  onClick={toggleTheme}
-                  className="p-2.5 text-slate-500 hover:text-slate-700 hover:bg-white/60 rounded-2xl transition-all duration-300 hover:shadow-lg"
-                >
-                  {theme === 'dark' ? (
-                    <SunIcon className="h-5 w-5" />
-                  ) : (
-                    <MoonIcon className="h-5 w-5" />
-                  )}
-                </button>
-
-                {/* Enhanced Notifications */}
-                <button className="p-2.5 text-slate-500 hover:text-slate-700 hover:bg-white/60 rounded-2xl transition-all duration-300 relative hover:shadow-lg">
-                  <BellIcon className="h-5 w-5" />
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse shadow-lg"></div>
-                </button>
 
                 {/* Enhanced Profile dropdown */}
                 <div className="relative overflow-visible" ref={profileDropdownRef}>
