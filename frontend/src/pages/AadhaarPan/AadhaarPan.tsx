@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
@@ -23,8 +24,6 @@ interface Batch {
   pendingRecords: number;
   linkedRecords: number;
   notLinkedRecords: number;
-  invalidRecords: number;
-  errorRecords: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,8 +36,6 @@ interface BatchDetail {
     pending: number;
     linked: number;
     'not-linked': number;
-    invalid: number;
-    error: number;
   };
 }
 
@@ -63,7 +60,7 @@ const AadhaarPan: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const documentsPerPage = 5;
+  const documentsPerPage = 3;
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +95,42 @@ const AadhaarPan: React.FC = () => {
   });
   const [singleVerificationVerifying, setSingleVerificationVerifying] = useState(false);
   const [singleVerificationResult, setSingleVerificationResult] = useState<any>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [showFullScreenLoader, setShowFullScreenLoader] = useState(false);
+  const [loaderMessage, setLoaderMessage] = useState('');
+
+  const showConfirmation = (message: string, action: () => void) => {
+    setConfirmMessage(message);
+    setConfirmAction(() => action);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    if (confirmAction) {
+      confirmAction();
+    }
+    setShowConfirmModal(false);
+    setConfirmAction(null);
+    setConfirmMessage('');
+  };
+
+  const handleCancel = () => {
+    setShowConfirmModal(false);
+    setConfirmAction(null);
+    setConfirmMessage('');
+  };
+
+  const showLoader = (message: string) => {
+    setLoaderMessage(message);
+    setShowFullScreenLoader(true);
+  };
+
+  const hideLoader = () => {
+    setShowFullScreenLoader(false);
+    setLoaderMessage('');
+  };
 
   useEffect(() => {
     fetchBatches();
@@ -111,7 +144,14 @@ const AadhaarPan: React.FC = () => {
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/aadhaar-pan/batches');
+      showLoader('Loading Aadhaar-PAN records...');
+      
+      // Ensure minimum loading time for better UX
+      const [response] = await Promise.all([
+        api.get('/aadhaar-pan/batches'),
+        new Promise(resolve => setTimeout(resolve, 800)) // Minimum 800ms loading time
+      ]);
+      
       console.log('Aadhaar-PAN batches response:', response.data);
       setBatches(response.data.data || []);
     } catch (error) {
@@ -122,6 +162,7 @@ const AadhaarPan: React.FC = () => {
       });
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 
@@ -306,61 +347,73 @@ const AadhaarPan: React.FC = () => {
       });
       return;
     }
+    
+    showConfirmation(
+      `Are you sure you want to verify ${selectedRecords.size} selected record(s)?`,
+      async () => {
+        try {
+          setVerifying(true);
+          setVerifyingRecords(new Set(Array.from(selectedRecords)));
+          showLoader(`Verifying ${selectedRecords.size} selected records...`);
+          const response = await api.post('/aadhaar-pan/status', {
+            recordIds: Array.from(selectedRecords)
+          });
 
-    try {
-      setVerifying(true);
-      setVerifyingRecords(new Set(Array.from(selectedRecords)));
-      const response = await api.post('/aadhaar-pan/status', {
-        recordIds: Array.from(selectedRecords)
-      });
-
-      showToast({
-        type: 'success',
-        message: `Successfully verified ${response.data.data.length} records`
-      });
-      setSelectedRecords(new Set());
-      
-      // Refresh batch details
-      if (selectedBatch) {
-        await fetchBatchDetails(selectedBatch.batchId);
+          showToast({
+            type: 'success',
+            message: `Successfully verified ${response.data.data.length} records`
+          });
+          setSelectedRecords(new Set());
+          
+          // Refresh batch details
+          if (selectedBatch) {
+            await fetchBatchDetails(selectedBatch.batchId);
+          }
+        } catch (error: any) {
+          console.error('Error verifying records:', error);
+          showToast({
+            type: 'error',
+            message: error.response?.data?.message || 'Failed to verify records'
+          });
+        } finally {
+          setVerifying(false);
+          setVerifyingRecords(new Set());
+          hideLoader();
+        }
       }
-    } catch (error: any) {
-      console.error('Error verifying records:', error);
-      showToast({
-        type: 'error',
-        message: error.response?.data?.message || 'Failed to verify records'
-      });
-    } finally {
-      setVerifying(false);
-      setVerifyingRecords(new Set());
-    }
+    );
   };
 
   const handleVerifySingle = async (recordId: string) => {
-    try {
-      setVerifyingRecords(new Set([recordId]));
-      const response = await api.post('/aadhaar-pan/status', {
-        recordIds: [recordId]
-      });
+    showConfirmation(
+      'Are you sure you want to verify this record?',
+      async () => {
+        try {
+          setVerifyingRecords(new Set([recordId]));
+          const response = await api.post('/aadhaar-pan/status', {
+            recordIds: [recordId]
+          });
 
-      showToast({
-        type: 'success',
-        message: 'Record verified successfully'
-      });
-      
-      // Refresh batch details
-      if (selectedBatch) {
-        await fetchBatchDetails(selectedBatch.batchId);
+          showToast({
+            type: 'success',
+            message: 'Record verified successfully'
+          });
+          
+          // Refresh batch details
+          if (selectedBatch) {
+            await fetchBatchDetails(selectedBatch.batchId);
+          }
+        } catch (error: any) {
+          console.error('Error verifying record:', error);
+          showToast({
+            type: 'error',
+            message: error.response?.data?.message || 'Failed to verify record'
+          });
+        } finally {
+          setVerifyingRecords(new Set());
+        }
       }
-    } catch (error: any) {
-      console.error('Error verifying record:', error);
-      showToast({
-        type: 'error',
-        message: error.response?.data?.message || 'Failed to verify record'
-      });
-    } finally {
-      setVerifyingRecords(new Set());
-    }
+    );
   };
 
   // Single verification form functions
@@ -470,10 +523,8 @@ const AadhaarPan: React.FC = () => {
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
       case 'not-linked':
         return <XCircleIcon className="h-5 w-5 text-red-500" />;
-      case 'invalid':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500" />;
-      case 'error':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />;
+      case 'pending':
+        return <ClockIcon className="h-5 w-5 text-blue-500" />;
       default:
         return <ClockIcon className="h-5 w-5 text-gray-500" />;
     }
@@ -485,10 +536,8 @@ const AadhaarPan: React.FC = () => {
         return 'bg-green-100 text-green-800';
       case 'not-linked':
         return 'bg-red-100 text-red-800';
-      case 'invalid':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'error':
-        return 'bg-orange-100 text-orange-800';
+      case 'pending':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -603,17 +652,6 @@ const AadhaarPan: React.FC = () => {
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-200/30 rounded-full blur-2xl"></div>
             
             <div className="relative z-10">
-              {/* Header */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl mb-4 shadow-lg">
-                  <CloudArrowUpIcon className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Aadhaar-PAN Linking File</h2>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  Upload your Excel file to verify Aadhaar-PAN linking in bulk. 
-                  The system will process and verify each record automatically.
-                </p>
-              </div>
 
               {/* File Upload Area */}
               <div className="space-y-6">
@@ -655,19 +693,13 @@ const AadhaarPan: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-blue-900 mb-2">File Requirements</h3>
-                      <div className="space-y-2 text-sm text-blue-800">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">aadhaarNumber</code></span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">panNumber</code></span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span>Must contain columns: <code className="bg-blue-100 px-2 py-1 rounded">name</code></span>
-                        </div>
+                      <div className="text-sm text-blue-800">
+                        <span>Must contain columns: </span>
+                        <code className="bg-blue-100 px-2 py-1 rounded">aadhaarNumber</code>
+                        <span>, </span>
+                        <code className="bg-blue-100 px-2 py-1 rounded">panNumber</code>
+                        <span>, </span>
+                        <code className="bg-blue-100 px-2 py-1 rounded">name</code>
                       </div>
                     </div>
                   </div>
@@ -759,15 +791,11 @@ const AadhaarPan: React.FC = () => {
             
             <div className="relative z-10">
               {/* Header */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-slate-500 to-gray-600 rounded-2xl mb-4 shadow-lg">
-                  <DocumentTextIcon className="h-8 w-8 text-white" />
+              <div className="flex items-center justify-center mb-8">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl mr-3 shadow-lg">
+                  <DocumentTextIcon className="h-6 w-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Uploaded Documents</h2>
-                <p className="text-gray-600 max-w-md mx-auto">
-                  View and manage your uploaded Aadhaar-PAN linking batches. 
-                  Click on any batch to see detailed records and verification status.
-                </p>
+                <h2 className="text-2xl font-bold text-gray-900">Uploaded Documents</h2>
               </div>
             
               {loading ? (
@@ -908,10 +936,14 @@ const AadhaarPan: React.FC = () => {
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">{selectedBatch.stats.total}</div>
                   <div className="text-sm text-gray-500">Total</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{selectedBatch.stats.pending}</div>
+                  <div className="text-sm text-gray-500">Pending</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">{selectedBatch.stats.linked}</div>
@@ -920,18 +952,6 @@ const AadhaarPan: React.FC = () => {
                 <div className="text-center">
                   <div className="text-2xl font-bold text-red-600">{selectedBatch.stats['not-linked']}</div>
                   <div className="text-sm text-gray-500">Not Linked</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">{selectedBatch.stats.invalid}</div>
-                  <div className="text-sm text-gray-500">Invalid</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-orange-600">{selectedBatch.stats.error}</div>
-                  <div className="text-sm text-gray-500">Error</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-600">{selectedBatch.stats.pending}</div>
-                  <div className="text-sm text-gray-500">Pending</div>
                 </div>
               </div>
 
@@ -1029,7 +1049,7 @@ const AadhaarPan: React.FC = () => {
                       {paginatedRecords.map((record) => (
                         <tr key={record._id} className={`hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200 ${record.status === 'linked' ? 'opacity-60' : ''}`}>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {(record.status === 'pending' || record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error') && (
+                            {(record.status === 'pending' || record.status === 'not-linked') && (
                               <div className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
                                 <input
                                   type="checkbox"
@@ -1071,7 +1091,7 @@ const AadhaarPan: React.FC = () => {
                                   'Verify'
                                 )}
                               </button>
-                            ) : record.status === 'not-linked' || record.status === 'invalid' || record.status === 'error' ? (
+                            ) : record.status === 'not-linked' ? (
                               <button
                                 onClick={() => handleVerifySingle(record._id)}
                                 disabled={verifyingRecords.has(record._id)}
@@ -1275,6 +1295,77 @@ const AadhaarPan: React.FC = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Beautiful Confirmation Modal */}
+      {showConfirmModal && createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-100">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-t-2xl p-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white">Confirm Action</h3>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-gray-700 text-center leading-relaxed">
+                {confirmMessage}
+              </p>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-gray-50 rounded-b-2xl p-6 flex space-x-3">
+              <button
+                onClick={handleCancel}
+                className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 transform hover:scale-105"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Beautiful Full-Screen Loader */}
+      {showFullScreenLoader && createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}>
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all duration-300 scale-100">
+            {/* Loader Content */}
+            <div className="text-center">
+              {/* Animated Spinner */}
+              <div className="relative mb-6">
+                <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600 mx-auto"></div>
+                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent rounded-full animate-ping border-t-purple-400 mx-auto"></div>
+              </div>
+              
+              {/* Loading Message */}
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Processing...</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {loaderMessage}
+              </p>
+              
+              {/* Progress Dots */}
+              <div className="flex justify-center space-x-2 mt-6">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
       </div>
     </div>
