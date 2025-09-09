@@ -118,18 +118,24 @@ const PanKycRecords: React.FC = () => {
 
   // Calculate statistics
   const calculateStats = (data: PanKycRecord[]) => {
+    const verified = data.filter(r => r.status === 'verified').length;
+    const rejected = data.filter(r => r.status === 'rejected').length;
+    
     const stats = {
-      total: data.length,
-      pending: data.filter(r => r.status === 'pending').length,
-      verified: data.filter(r => r.status === 'verified').length,
-      rejected: data.filter(r => r.status === 'rejected').length,
-      error: data.filter(r => r.status === 'error').length
+      total: verified + rejected, // Only count verified + rejected
+      pending: 0, // Removed pending count
+      verified: verified,
+      rejected: rejected,
+      error: 0 // Removed error count
     };
     setStats(stats);
   };
 
-  // Filter records based on search and filters
+  // Filter records based on search and filters - only show verified and rejected records
   const filteredRecords = records.filter(record => {
+    // Only show verified and rejected records
+    const isProcessed = record.status === 'verified' || record.status === 'rejected';
+    
     const matchesSearch = 
       record.panNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -156,7 +162,7 @@ const PanKycRecords: React.FC = () => {
       }
     }
     
-    return matchesSearch && matchesStatus && matchesDate;
+    return isProcessed && matchesSearch && matchesStatus && matchesDate;
   });
 
   // Pagination
@@ -215,8 +221,6 @@ const PanKycRecords: React.FC = () => {
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
       case 'rejected':
         return <XCircleIcon className="h-5 w-5 text-red-500" />;
-      case 'error':
-        return <ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />;
       default:
         return <ClockIcon className="h-5 w-5 text-gray-500" />;
     }
@@ -228,8 +232,6 @@ const PanKycRecords: React.FC = () => {
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
-      case 'error':
-        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -300,18 +302,6 @@ const PanKycRecords: React.FC = () => {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-4">
-              <ClockIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <div className="flex items-center">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-4">
               <CheckCircleIcon className="h-6 w-6 text-white" />
             </div>
@@ -330,18 +320,6 @@ const PanKycRecords: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Rejected</p>
               <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mr-4">
-              <ExclamationTriangleIcon className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Error</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.error}</p>
             </div>
           </div>
         </div>
@@ -372,10 +350,8 @@ const PanKycRecords: React.FC = () => {
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             >
               <option value="all">All Statuses</option>
-              <option value="pending">Pending</option>
               <option value="verified">Verified</option>
               <option value="rejected">Rejected</option>
-              <option value="error">Error</option>
             </select>
           </div>
 
