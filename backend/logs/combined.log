@@ -47602,3 +47602,9 @@
   message: 'Audit event logged: record_verified in aadhaar_pan',
   timestamp: '2025-09-04 13:25:23'
 }
+{
+  message: 'Mock password reset email sent to test@example.com',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-09 15:06:32'
+}
