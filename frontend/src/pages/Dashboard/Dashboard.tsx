@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import api from '../../services/api';
 import {
   DocumentTextIcon,
   UserGroupIcon,
@@ -19,15 +21,49 @@ interface Stats {
   panKycRecords: number;
   aadhaarPanRecords: number;
   verifiedRecords: number;
+  panKyc: {
+    total: number;
+    verified: number;
+    pending: number;
+    failed: number;
+  };
+  aadhaarPan: {
+    total: number;
+    linked: number;
+    notLinked: number;
+    pending: number;
+  };
+  recentActivity: Array<{
+    _id: string;
+    batchId: string;
+    status: string;
+    module: string;
+    type: string;
+    createdAt: string;
+  }>;
 }
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [stats, setStats] = useState<Stats>({
     totalRecords: 0,
     panKycRecords: 0,
     aadhaarPanRecords: 0,
-    verifiedRecords: 0
+    verifiedRecords: 0,
+    panKyc: {
+      total: 0,
+      verified: 0,
+      pending: 0,
+      failed: 0
+    },
+    aadhaarPan: {
+      total: 0,
+      linked: 0,
+      notLinked: 0,
+      pending: 0
+    },
+    recentActivity: []
   });
   const [loading, setLoading] = useState(true);
   const [animateStats, setAnimateStats] = useState(false);
@@ -35,30 +71,61 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        setLoading(true);
         
-        // Use dummy data for demonstration
-        const newStats = {
-          totalRecords: 1250,
-          panKycRecords: 750,
-          aadhaarPanRecords: 500,
-          verifiedRecords: 980
-        };
-
-        setStats(newStats);
+        // Fetch real stats from API
+        const response = await api.get('/dashboard/stats');
         
-        // Trigger animation after data loads
-        setTimeout(() => setAnimateStats(true), 300);
-      } catch (error) {
+        if (response.data.success) {
+          setStats(response.data.data);
+          
+          // Trigger animation after data loads
+          setTimeout(() => setAnimateStats(true), 300);
+        } else {
+          throw new Error('Failed to fetch stats');
+        }
+      } catch (error: any) {
         console.error('Error fetching stats:', error);
+        
+        // Show error toast
+        showToast({
+          message: 'Failed to load dashboard statistics',
+          type: 'error'
+        });
+        
+        // Fallback to dummy data for demonstration
+        const panKycRecords = 0;
+        const aadhaarPanRecords = 0;
+        const fallbackStats = {
+          totalRecords: panKycRecords + aadhaarPanRecords,
+          panKycRecords: panKycRecords,
+          aadhaarPanRecords: aadhaarPanRecords,
+          verifiedRecords: 0,
+          panKyc: {
+            total: 0,
+            verified: 0,
+            pending: 0,
+            failed: 0
+          },
+          aadhaarPan: {
+            total: 0,
+            linked: 0,
+            notLinked: 0,
+            pending: 0
+          },
+          recentActivity: []
+        };
+        
+        setStats(fallbackStats);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
-  }, []);
+    if (user) {
+      fetchStats();
+    }
+  }, [user, showToast]);
 
   const AnimatedNumber = ({ value, className }: { value: number; className?: string }) => (
     <span className={`transition-all duration-1000 ease-out ${className}`}>
@@ -303,38 +370,143 @@ const Dashboard: React.FC = () => {
               <h2 className="text-xl font-semibold text-slate-800">Recent Activity</h2>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl hover:bg-gradient-to-r hover:from-blue-100 hover:to-purple-100 transition-all duration-200 ease-out cursor-pointer group">
-                <div className="p-2 bg-blue-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
-                  <DocumentTextIcon className="h-4 w-4 text-white" />
+              {stats.recentActivity.length > 0 ? (
+                stats.recentActivity.slice(0, 5).map((activity, index) => {
+                  const getStatusColor = (status: string, module: string) => {
+                    if (module === 'PAN KYC') {
+                      switch (status) {
+                        case 'verified':
+                        case 'valid':
+                          return 'from-green-50 to-emerald-50';
+                        case 'pending':
+                          return 'from-yellow-50 to-orange-50';
+                        case 'failed':
+                        case 'invalid':
+                        case 'error':
+                          return 'from-red-50 to-pink-50';
+                        default:
+                          return 'from-blue-50 to-purple-50';
+                      }
+                    } else {
+                      switch (status) {
+                        case 'linked':
+                          return 'from-green-50 to-emerald-50';
+                        case 'not-linked':
+                          return 'from-red-50 to-pink-50';
+                        case 'pending':
+                          return 'from-yellow-50 to-orange-50';
+                        default:
+                          return 'from-blue-50 to-purple-50';
+                      }
+                    }
+                  };
+
+                  const getIconColor = (status: string, module: string) => {
+                    if (module === 'PAN KYC') {
+                      switch (status) {
+                        case 'verified':
+                        case 'valid':
+                          return 'bg-green-500';
+                        case 'pending':
+                          return 'bg-yellow-500';
+                        case 'failed':
+                        case 'invalid':
+                        case 'error':
+                          return 'bg-red-500';
+                        default:
+                          return 'bg-blue-500';
+                      }
+                    } else {
+                      switch (status) {
+                        case 'linked':
+                          return 'bg-green-500';
+                        case 'not-linked':
+                          return 'bg-red-500';
+                        case 'pending':
+                          return 'bg-yellow-500';
+                        default:
+                          return 'bg-blue-500';
+                      }
+                    }
+                  };
+
+                  const getStatusText = (status: string, module: string) => {
+                    if (module === 'PAN KYC') {
+                      switch (status) {
+                        case 'verified':
+                        case 'valid':
+                          return 'PAN KYC verified successfully';
+                        case 'pending':
+                          return 'PAN KYC verification pending';
+                        case 'failed':
+                        case 'invalid':
+                        case 'error':
+                          return 'PAN KYC verification failed';
+                        default:
+                          return 'PAN KYC document uploaded';
+                      }
+                    } else {
+                      switch (status) {
+                        case 'linked':
+                          return 'Aadhaar-PAN linked successfully';
+                        case 'not-linked':
+                          return 'Aadhaar-PAN linking failed';
+                        case 'pending':
+                          return 'Aadhaar-PAN linking pending';
+                        default:
+                          return 'Aadhaar-PAN document uploaded';
+                      }
+                    }
+                  };
+
+                  const formatTimeAgo = (dateString: string) => {
+                    const now = new Date();
+                    const date = new Date(dateString);
+                    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+                    
+                    if (diffInMinutes < 1) return 'Just now';
+                    if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+                    
+                    const diffInHours = Math.floor(diffInMinutes / 60);
+                    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+                    
+                    const diffInDays = Math.floor(diffInHours / 24);
+                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                  };
+
+                  return (
+                    <div 
+                      key={activity._id}
+                      className={`flex items-center p-3 bg-gradient-to-r ${getStatusColor(activity.status, activity.module)} rounded-2xl hover:bg-gradient-to-r hover:from-opacity-80 hover:to-opacity-80 transition-all duration-200 ease-out cursor-pointer group`}
+                    >
+                      <div className={`p-2 ${getIconColor(activity.status, activity.module)} rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200`}>
+                        {activity.module === 'PAN KYC' ? (
+                          <DocumentTextIcon className="h-4 w-4 text-white" />
+                        ) : (
+                          <UserIcon className="h-4 w-4 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-slate-800">
+                          {getStatusText(activity.status, activity.module)}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {formatTimeAgo(activity.createdAt)}
+                        </p>
+                      </div>
+                      <div className={`w-2 h-2 ${getIconColor(activity.status, activity.module)} rounded-full animate-pulse`}></div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <div className="p-3 bg-gray-100 rounded-2xl inline-block mb-3">
+                    <ClockIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-500">No recent activity</p>
+                  <p className="text-xs text-gray-400 mt-1">Upload documents to see activity here</p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-800">New PAN KYC document uploaded</p>
-                  <p className="text-xs text-slate-500">2 minutes ago</p>
-                </div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-              </div>
-              
-              <div className="flex items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 transition-all duration-200 ease-out cursor-pointer group">
-                <div className="p-2 bg-green-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
-                  <CheckCircleIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-800">5 records verified successfully</p>
-                  <p className="text-xs text-slate-500">15 minutes ago</p>
-                </div>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              </div>
-              
-              <div className="flex items-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl hover:bg-gradient-to-r hover:from-orange-100 hover:to-red-100 transition-all duration-200 ease-out cursor-pointer group">
-                <div className="p-2 bg-orange-500 rounded-2xl mr-3 group-hover:scale-110 transition-transform duration-200">
-                  <UserIcon className="h-4 w-4 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-800">Aadhaar-PAN linking completed</p>
-                  <p className="text-xs text-slate-500">1 hour ago</p>
-                </div>
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              </div>
+              )}
             </div>
           </div>
         </div>

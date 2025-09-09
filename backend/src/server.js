@@ -17,6 +17,7 @@ const panKycRoutes = require('./routes/panKyc');
 const aadhaarPanRoutes = require('./routes/aadhaarPan');
 const adminRoutes = require('./routes/admin');
 const auditRoutes = require('./routes/audit');
+const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -129,6 +130,7 @@ app.use('/api/pan-kyc', panKycRoutes);
 app.use('/api/aadhaar-pan', aadhaarPanRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
