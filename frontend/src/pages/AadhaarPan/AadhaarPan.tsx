@@ -361,7 +361,7 @@ const AadhaarPan: React.FC = () => {
 
           showToast({
             type: 'success',
-            message: `Successfully verified ${response.data.data.length} records`
+            message: `Successfully verified ${selectedRecords.size} records`
           });
           setSelectedRecords(new Set());
           
@@ -1338,32 +1338,102 @@ const AadhaarPan: React.FC = () => {
         document.body
       )}
 
-      {/* Beautiful Full-Screen Loader */}
+      {/* Eye-Catching Full-Page Loader */}
       {showFullScreenLoader && createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}>
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all duration-300 scale-100">
-            {/* Loader Content */}
+        <div className="fixed inset-0 z-[9999] overflow-hidden" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}>
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
+            {/* Floating Particles */}
+            <div className="absolute inset-0">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Gradient Orbs */}
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+          </div>
+          
+          {/* Main Content */}
+          <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
             <div className="text-center">
-              {/* Animated Spinner */}
-              <div className="relative mb-6">
-                <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin border-t-blue-600 mx-auto"></div>
-                <div className="absolute inset-0 w-16 h-16 border-4 border-transparent rounded-full animate-ping border-t-purple-400 mx-auto"></div>
+              {/* Massive Spinner */}
+              <div className="relative mb-12">
+                {/* Outer Ring */}
+                <div className="w-32 h-32 border-4 border-white/10 rounded-full animate-spin border-t-blue-400 mx-auto"></div>
+                {/* Middle Ring */}
+                <div className="absolute inset-4 w-24 h-24 border-4 border-white/10 rounded-full animate-spin border-t-purple-400 mx-auto" style={{ animationDirection: 'reverse', animationDuration: '2s' }}></div>
+                {/* Inner Ring */}
+                <div className="absolute inset-8 w-16 h-16 border-4 border-white/10 rounded-full animate-spin border-t-pink-400 mx-auto" style={{ animationDuration: '1.5s' }}></div>
+                {/* Center Glow */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full animate-pulse shadow-2xl shadow-blue-400/50"></div>
+                </div>
               </div>
               
-              {/* Loading Message */}
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Processing...</h3>
-              <p className="text-gray-600 leading-relaxed">
+              {/* Title */}
+              <h1 className="text-5xl font-bold text-white mb-4 animate-pulse">
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Verifying Records
+                </span>
+              </h1>
+              
+              {/* Subtitle */}
+              <p className="text-xl text-white/80 mb-8 max-w-md mx-auto leading-relaxed">
                 {loaderMessage}
               </p>
               
-              {/* Progress Dots */}
-              <div className="flex justify-center space-x-2 mt-6">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              {/* Progress Section */}
+              <div className="max-w-md mx-auto">
+                {/* Progress Bar */}
+                <div className="w-full bg-white/10 rounded-full h-3 mb-6 overflow-hidden backdrop-blur-sm">
+                  <div 
+                    className="h-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 rounded-full animate-pulse shadow-lg"
+                    style={{ 
+                      width: '75%',
+                      boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)'
+                    }}
+                  ></div>
+                </div>
+                
+                {/* Animated Dots */}
+                <div className="flex justify-center space-x-4 mb-6">
+                  {[...Array(5)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-bounce shadow-lg"
+                      style={{ 
+                        animationDelay: `${i * 0.1}s`,
+                        boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)'
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                {/* Status Text */}
+                <p className="text-white/60 text-sm font-medium">
+                  Processing your verification request...
+                </p>
               </div>
             </div>
           </div>
+          
+          {/* Corner Decorations */}
+          <div className="absolute top-8 left-8 w-16 h-16 border-2 border-white/20 rounded-full animate-spin"></div>
+          <div className="absolute top-8 right-8 w-12 h-12 border-2 border-white/20 rounded-full animate-spin" style={{ animationDirection: 'reverse' }}></div>
+          <div className="absolute bottom-8 left-8 w-20 h-20 border-2 border-white/20 rounded-full animate-spin" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute bottom-8 right-8 w-14 h-14 border-2 border-white/20 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2.5s' }}></div>
         </div>,
         document.body
       )}
