@@ -3,6 +3,36 @@ const AadhaarPan = require('../models/AadhaarPan');
 const User = require('../models/User');
 const logger = require('../utils/logger');
 
+// Helper function to determine activity type based on status and module
+const getActivityType = (status, module) => {
+  if (module === 'pan-kyc') {
+    switch (status) {
+      case 'verified':
+      case 'valid':
+        return 'verification_success';
+      case 'pending':
+        return 'verification_pending';
+      case 'failed':
+      case 'invalid':
+      case 'error':
+        return 'verification_failed';
+      default:
+        return 'document_uploaded';
+    }
+  } else {
+    switch (status) {
+      case 'linked':
+        return 'linking_success';
+      case 'not-linked':
+        return 'linking_failed';
+      case 'pending':
+        return 'linking_pending';
+      default:
+        return 'document_uploaded';
+    }
+  }
+};
+
 // @desc    Get dashboard statistics
 // @route   GET /api/dashboard/stats
 // @access  Private
@@ -86,34 +116,42 @@ const getDashboardStats = async (req, res) => {
       }
     ]);
 
-    // Get recent activity (last 10 records from both modules)
+    // Get recent activity with more dynamic data (last 15 records from both modules)
     const recentPanKyc = await PanKyc.find({ userId: userId })
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('batchId status createdAt')
+      .sort({ updatedAt: -1 }) // Sort by updatedAt for more dynamic results
+      .limit(8)
+      .select('batchId status createdAt updatedAt processedAt name panNumber')
       .lean();
 
     const recentAadhaarPan = await AadhaarPan.find({ userId: userId })
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .select('batchId status createdAt')
+      .sort({ updatedAt: -1 }) // Sort by updatedAt for more dynamic results
+      .limit(8)
+      .select('batchId status createdAt updatedAt processedAt name aadhaarNumber panNumber')
       .lean();
 
-    // Combine recent activity
+    // Combine and enhance recent activity with more dynamic information
     const recentActivity = [
       ...recentPanKyc.map(record => ({
         ...record,
         module: 'PAN KYC',
-        type: 'pan-kyc'
+        type: 'pan-kyc',
+        displayName: record.name || 'Unknown',
+        identifier: record.panNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'pan-kyc')
       })),
       ...recentAadhaarPan.map(record => ({
         ...record,
         module: 'Aadhaar-PAN',
-        type: 'aadhaar-pan'
+        type: 'aadhaar-pan',
+        displayName: record.name || 'Unknown',
+        identifier: record.aadhaarNumber || record.panNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'aadhaar-pan')
       }))
     ]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 10);
+    .sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity))
+    .slice(0, 12); // Show more recent activities
 
     // Format response
     const panKycData = panKycStats[0] || {
@@ -295,7 +333,66 @@ const getModuleStats = async (req, res) => {
   }
 };
 
+// @desc    Get recent activity only
+// @route   GET /api/dashboard/recent-activity
+// @access  Private
+const getRecentActivity = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get recent activity with more dynamic data
+    const recentPanKyc = await PanKyc.find({ userId: userId })
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .select('batchId status createdAt updatedAt processedAt name panNumber')
+      .lean();
+
+    const recentAadhaarPan = await AadhaarPan.find({ userId: userId })
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .select('batchId status createdAt updatedAt processedAt name aadhaarNumber panNumber')
+      .lean();
+
+    // Combine and enhance recent activity
+    const recentActivity = [
+      ...recentPanKyc.map(record => ({
+        ...record,
+        module: 'PAN KYC',
+        type: 'pan-kyc',
+        displayName: record.name || 'Unknown',
+        identifier: record.panNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'pan-kyc')
+      })),
+      ...recentAadhaarPan.map(record => ({
+        ...record,
+        module: 'Aadhaar-PAN',
+        type: 'aadhaar-pan',
+        displayName: record.name || 'Unknown',
+        identifier: record.aadhaarNumber || record.panNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'aadhaar-pan')
+      }))
+    ]
+    .sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity))
+    .slice(0, 15);
+
+    res.json({
+      success: true,
+      data: recentActivity
+    });
+
+  } catch (error) {
+    logger.error('Error fetching recent activity:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch recent activity'
+    });
+  }
+};
+
 module.exports = {
   getDashboardStats,
-  getModuleStats
+  getModuleStats,
+  getRecentActivity
 };

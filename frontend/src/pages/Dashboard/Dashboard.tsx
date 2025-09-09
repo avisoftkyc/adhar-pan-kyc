@@ -40,6 +40,10 @@ interface Stats {
     module: string;
     type: string;
     createdAt: string;
+    displayName?: string;
+    identifier?: string;
+    lastActivity?: string;
+    activityType?: string;
   }>;
 }
 
@@ -67,6 +71,7 @@ const Dashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [animateStats, setAnimateStats] = useState(false);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -126,6 +131,40 @@ const Dashboard: React.FC = () => {
       fetchStats();
     }
   }, [user, showToast]);
+
+  // Function to fetch recent activity separately
+  const fetchRecentActivity = async () => {
+    try {
+      setActivityLoading(true);
+      const response = await api.get('/dashboard/recent-activity');
+      
+      if (response.data.success) {
+        setStats(prevStats => ({
+          ...prevStats,
+          recentActivity: response.data.data
+        }));
+      }
+    } catch (error: any) {
+      console.error('Error fetching recent activity:', error);
+    } finally {
+      setActivityLoading(false);
+    }
+  };
+
+  // Auto-refresh recent activity every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    // Initial fetch
+    fetchRecentActivity();
+
+    // Set up interval for auto-refresh
+    const interval = setInterval(() => {
+      fetchRecentActivity();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const AnimatedNumber = ({ value, className }: { value: number; className?: string }) => (
     <span className={`transition-all duration-1000 ease-out ${className}`}>
@@ -346,14 +385,33 @@ const Dashboard: React.FC = () => {
               <h2 className="text-xl font-semibold text-slate-800">Quick Actions</h2>
             </div>
             <div className="space-y-3">
-              <button className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
+              <button 
+                onClick={() => window.location.href = '/pan-kyc'}
+                className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
                 Upload PAN KYC Document
               </button>
-              <button className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
+              <button 
+                onClick={() => window.location.href = '/aadhaar-pan'}
+                className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
+                <UserIcon className="h-5 w-5 mr-2" />
                 Upload Aadhaar-PAN Document
               </button>
-              <button className="w-full p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl hover:from-orange-600 hover:to-red-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl">
-                View All Records
+              <button 
+                onClick={() => window.location.href = '/pan-kyc'}
+                className="w-full p-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-2xl hover:from-indigo-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
+                <DocumentMagnifyingGlassIcon className="h-5 w-5 mr-2" />
+                View PAN KYC Records
+              </button>
+              <button 
+                onClick={() => window.location.href = '/aadhaar-pan'}
+                className="w-full p-3 bg-gradient-to-r from-cyan-500 to-emerald-600 text-white rounded-2xl hover:from-cyan-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+              >
+                <UserIcon className="h-5 w-5 mr-2" />
+                View Aadhaar-PAN Records
               </button>
             </div>
           </div>
@@ -363,11 +421,28 @@ const Dashboard: React.FC = () => {
             className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 animate-fade-in-up"
             style={{ animationDelay: '0.6s' }}
           >
-            <div className="flex items-center mb-6">
-              <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl mr-3">
-                <ClockIcon className="h-5 w-5 text-white" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl mr-3">
+                  <ClockIcon className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-slate-800">Recent Activity</h2>
               </div>
-              <h2 className="text-xl font-semibold text-slate-800">Recent Activity</h2>
+              <button
+                onClick={fetchRecentActivity}
+                disabled={activityLoading}
+                className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh activity"
+              >
+                <svg 
+                  className={`h-4 w-4 text-slate-600 ${activityLoading ? 'animate-spin' : ''}`} 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
             </div>
             <div className="space-y-4">
               {stats.recentActivity.length > 0 ? (
@@ -430,31 +505,32 @@ const Dashboard: React.FC = () => {
                     }
                   };
 
-                  const getStatusText = (status: string, module: string) => {
+                  const getStatusText = (activity: any) => {
+                    const { status, module, displayName, identifier, activityType } = activity;
+                    
                     if (module === 'PAN KYC') {
-                      switch (status) {
-                        case 'verified':
-                        case 'valid':
-                          return 'PAN KYC verified successfully';
-                        case 'pending':
-                          return 'PAN KYC verification pending';
-                        case 'failed':
-                        case 'invalid':
-                        case 'error':
-                          return 'PAN KYC verification failed';
+                      switch (activityType) {
+                        case 'verification_success':
+                          return `${displayName} - PAN KYC verified successfully`;
+                        case 'verification_pending':
+                          return `${displayName} - PAN KYC verification pending`;
+                        case 'verification_failed':
+                          return `${displayName} - PAN KYC verification failed`;
+                        case 'document_uploaded':
                         default:
-                          return 'PAN KYC document uploaded';
+                          return `${displayName} - PAN KYC document uploaded`;
                       }
                     } else {
-                      switch (status) {
-                        case 'linked':
-                          return 'Aadhaar-PAN linked successfully';
-                        case 'not-linked':
-                          return 'Aadhaar-PAN linking failed';
-                        case 'pending':
-                          return 'Aadhaar-PAN linking pending';
+                      switch (activityType) {
+                        case 'linking_success':
+                          return `${displayName} - Aadhaar-PAN linked successfully`;
+                        case 'linking_failed':
+                          return `${displayName} - Aadhaar-PAN linking failed`;
+                        case 'linking_pending':
+                          return `${displayName} - Aadhaar-PAN linking pending`;
+                        case 'document_uploaded':
                         default:
-                          return 'Aadhaar-PAN document uploaded';
+                          return `${displayName} - Aadhaar-PAN document uploaded`;
                       }
                     }
                   };
@@ -462,16 +538,21 @@ const Dashboard: React.FC = () => {
                   const formatTimeAgo = (dateString: string) => {
                     const now = new Date();
                     const date = new Date(dateString);
-                    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+                    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
                     
-                    if (diffInMinutes < 1) return 'Just now';
+                    if (diffInSeconds < 60) return 'Just now';
+                    
+                    const diffInMinutes = Math.floor(diffInSeconds / 60);
                     if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
                     
                     const diffInHours = Math.floor(diffInMinutes / 60);
                     if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
                     
                     const diffInDays = Math.floor(diffInHours / 24);
-                    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+                    
+                    const diffInWeeks = Math.floor(diffInDays / 7);
+                    return `${diffInWeeks} week${diffInWeeks > 1 ? 's' : ''} ago`;
                   };
 
                   return (
@@ -488,11 +569,16 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-slate-800">
-                          {getStatusText(activity.status, activity.module)}
+                          {getStatusText(activity)}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {formatTimeAgo(activity.createdAt)}
+                          {formatTimeAgo(activity.lastActivity || activity.createdAt)}
                         </p>
+                        {activity.identifier && (
+                          <p className="text-xs text-slate-400 mt-1">
+                            ID: {activity.identifier}
+                          </p>
+                        )}
                       </div>
                       <div className={`w-2 h-2 ${getIconColor(activity.status, activity.module)} rounded-full animate-pulse`}></div>
                     </div>

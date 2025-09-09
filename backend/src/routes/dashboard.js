@@ -14,4 +14,9 @@ router.get('/stats', protect, dashboardController.getDashboardStats);
 // @access  Private
 router.get('/stats/:module', protect, dashboardController.getModuleStats);
 
+// @route   GET /api/dashboard/recent-activity
+// @desc    Get recent activity only
+// @access  Private
+router.get('/recent-activity', protect, dashboardController.getRecentActivity);
+
 module.exports = router;
