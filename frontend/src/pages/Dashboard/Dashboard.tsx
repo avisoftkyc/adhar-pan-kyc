@@ -221,154 +221,183 @@ const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats Cards with staggered animations */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Total Records */}
-          <div 
-            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
-            style={{ animationDelay: '0.2s' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <DocumentTextIcon className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-600">Total Records</p>
-                <AnimatedNumber 
-                  value={stats.totalRecords} 
-                  className="text-2xl font-bold text-slate-900"
-                />
-              </div>
-            </div>
-            {/* Pie Chart */}
-            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={totalRecordsData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={20}
-                    outerRadius={40}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {totalRecordsData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="mt-3 space-y-1">
-              {totalRecordsData.map((item) => (
-                <div key={item.name} className="flex items-center text-xs">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-slate-600">{item.name}: {item.value}</span>
+        {/* Stats Cards with staggered animations - Module-wise */}
+        <div className={`grid gap-6 mb-8 ${
+          // Dynamic grid based on number of accessible modules
+          user?.moduleAccess?.length === 2 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+          user?.moduleAccess?.length === 1 ? 'grid-cols-1 md:grid-cols-2' :
+          user?.role === 'admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+          'grid-cols-1'
+        }`}>
+          {/* Total Records - Show only if user has access to any module or is admin */}
+          {((user?.moduleAccess && user.moduleAccess.length > 0) || user?.role === 'admin') && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+              style={{ animationDelay: '0.2s' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <DocumentTextIcon className="h-6 w-6 text-white" />
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-600">Total Records</p>
+                  <AnimatedNumber 
+                    value={stats.totalRecords} 
+                    className="text-2xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+              {/* Pie Chart */}
+              <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={totalRecordsData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={40}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {totalRecordsData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="mt-3 space-y-1">
+                {totalRecordsData.map((item) => (
+                  <div key={item.name} className="flex items-center text-xs">
+                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-slate-600">{item.name}: {item.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* PAN KYC Records */}
-          <div 
-            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
-            style={{ animationDelay: '0.3s' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <DocumentMagnifyingGlassIcon className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-600">PAN KYC Records</p>
-                <AnimatedNumber 
-                  value={stats.panKycRecords} 
-                  className="text-2xl font-bold text-slate-900"
-                />
-              </div>
-            </div>
-            {/* Pie Chart */}
-            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={panKycData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={20}
-                    outerRadius={40}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {panKycData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="mt-3 space-y-1">
-              {panKycData.map((item) => (
-                <div key={item.name} className="flex items-center text-xs">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-slate-600">{item.name}: {item.value}</span>
+          {/* PAN KYC Records - Show only for users with pan-kyc access */}
+          {user?.moduleAccess?.includes('pan-kyc') && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+              style={{ animationDelay: '0.3s' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <DocumentMagnifyingGlassIcon className="h-6 w-6 text-white" />
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-600">PAN KYC Records</p>
+                  <AnimatedNumber 
+                    value={stats.panKycRecords} 
+                    className="text-2xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+              {/* Pie Chart */}
+              <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={panKycData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={40}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {panKycData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="mt-3 space-y-1">
+                {panKycData.map((item) => (
+                  <div key={item.name} className="flex items-center text-xs">
+                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-slate-600">{item.name}: {item.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Aadhaar-PAN Records */}
-          <div 
-            className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
-            style={{ animationDelay: '0.4s' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                <UserIcon className="h-6 w-6 text-white" />
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-600">Aadhaar-PAN Records</p>
-                <AnimatedNumber 
-                  value={stats.aadhaarPanRecords} 
-                  className="text-2xl font-bold text-slate-900"
-                />
-              </div>
-            </div>
-            {/* Pie Chart */}
-            <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={aadhaarPanData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={20}
-                    outerRadius={40}
-                    paddingAngle={2}
-                    dataKey="value"
-                  >
-                    {aadhaarPanData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            {/* Legend */}
-            <div className="mt-3 space-y-1">
-              {aadhaarPanData.map((item) => (
-                <div key={item.name} className="flex items-center text-xs">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-slate-600">{item.name}: {item.value}</span>
+          {/* Aadhaar-PAN Records - Show only for users with aadhaar-pan access */}
+          {user?.moduleAccess?.includes('aadhaar-pan') && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+              style={{ animationDelay: '0.4s' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <UserIcon className="h-6 w-6 text-white" />
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-600">Aadhaar-PAN Records</p>
+                  <AnimatedNumber 
+                    value={stats.aadhaarPanRecords} 
+                    className="text-2xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+              {/* Pie Chart */}
+              <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={aadhaarPanData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={40}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {aadhaarPanData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="mt-3 space-y-1">
+                {aadhaarPanData.map((item) => (
+                  <div key={item.name} className="flex items-center text-xs">
+                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-slate-600">{item.name}: {item.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* No Module Access Message */}
+          {(!user?.moduleAccess || user.moduleAccess.length === 0) && user?.role !== 'admin' && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-white/30 animate-fade-in-up col-span-full"
+              style={{ animationDelay: '0.2s' }}
+            >
+              <div className="text-center">
+                <div className="text-gray-400 mb-4">
+                  <ChartBarIcon className="h-16 w-16 mx-auto mb-3 opacity-50" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">No Module Access</h3>
+                <p className="text-gray-600 mb-4">You don't have access to any modules yet.</p>
+                <p className="text-sm text-gray-500">Contact your administrator to get module permissions and start using the system.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Quick Actions and Recent Activity with staggered animations */}
