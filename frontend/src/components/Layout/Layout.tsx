@@ -9,7 +9,6 @@ import {
   Cog6ToothIcon,
   ChevronDownIcon,
   UserCircleIcon,
-  HomeIcon,
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -57,12 +56,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
   const navigation = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: HomeIcon,
-      current: location.pathname === '/dashboard',
-    },
     {
       name: 'PAN KYC',
       href: '/pan-kyc',

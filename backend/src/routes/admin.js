@@ -2082,13 +2082,14 @@ router.get('/archival/users', protect, authorize('admin'), async (req, res) => {
     if (search) {
       query.$or = [
         { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
         { firstName: { $regex: search, $options: 'i' } },
         { lastName: { $regex: search, $options: 'i' } }
       ];
     }
     
     const users = await User.find(query)
-      .select('_id email firstName lastName createdAt')
+      .select('_id email name firstName lastName createdAt')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
