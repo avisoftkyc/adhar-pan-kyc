@@ -141,6 +141,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const navigate = useNavigate();
+  
+  // Rate limiting for refresh attempts
+  const [refreshAttempts, setRefreshAttempts] = React.useState(0);
+  const [lastRefreshAttempt, setLastRefreshAttempt] = React.useState<number>(0);
 
   // Initialize auth state
   useEffect(() => {
@@ -276,6 +280,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('rememberMe');
+    
+    // Reset rate limiting
+    setRefreshAttempts(0);
+    setLastRefreshAttempt(0);
+    
     dispatch({ type: 'LOGOUT' });
     toast.success('Logged out successfully');
     navigate('/login');
@@ -308,11 +317,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Refresh token function
+  // Refresh token function with rate limiting
   const refreshToken = async () => {
+    const now = Date.now();
+    const timeSinceLastAttempt = now - lastRefreshAttempt;
+    
+    // Reset attempts if more than 5 minutes have passed
+    if (timeSinceLastAttempt > 5 * 60 * 1000) {
+      setRefreshAttempts(0);
+    }
+    
+    // Rate limiting: max 3 attempts per 5 minutes
+    if (refreshAttempts >= 3) {
+      console.log('🔍 Too many refresh attempts, logging out');
+      logout();
+      return;
+    }
+    
     try {
+      setRefreshAttempts(prev => prev + 1);
+      setLastRefreshAttempt(now);
+      
       const response = await api.post('/auth/refresh');
       const { token } = response.data;
+      
+      // Reset attempts on successful refresh
+      setRefreshAttempts(0);
       
       // Update token in the same storage where it was originally stored
       const rememberMe = localStorage.getItem('rememberMe') === 'true';
@@ -339,15 +369,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (error) => {
         const originalRequest = error.config;
 
+        // Handle 401 errors (unauthorized)
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
-          try {
-            await refreshToken();
-            return api(originalRequest);
-          } catch (refreshError) {
-            return Promise.reject(refreshError);
+          // Don't retry refresh token requests to avoid infinite loops
+          if (originalRequest.url?.includes('/auth/refresh')) {
+            console.log('🔍 Refresh token request failed, logging out');
+            logout();
+            return Promise.reject(error);
           }
+
+          // Don't retry login requests
+          if (originalRequest.url?.includes('/auth/login')) {
+            return Promise.reject(error);
+          }
+
+          // Only attempt refresh if we have a token
+          if (state.token) {
+            try {
+              console.log('🔍 Attempting to refresh token...');
+              await refreshToken();
+              return api(originalRequest);
+            } catch (refreshError) {
+              console.log('🔍 Token refresh failed, logging out');
+              logout();
+              return Promise.reject(refreshError);
+            }
+          } else {
+            // No token available, just reject
+            return Promise.reject(error);
+          }
+        }
+
+        // Handle 429 errors (rate limit)
+        if (error.response?.status === 429) {
+          console.log('🔍 Rate limit exceeded, logging out to prevent further requests');
+          logout();
+          return Promise.reject(error);
         }
 
         return Promise.reject(error);

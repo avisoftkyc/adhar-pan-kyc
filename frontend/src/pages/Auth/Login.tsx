@@ -40,7 +40,9 @@ const Login: React.FC = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       // Set user-friendly error message
-      if (error.response?.data?.message) {
+      if (error.response?.status === 429) {
+        setError('Too many login attempts. Please wait a few minutes before trying again.');
+      } else if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else if (error.message) {
         setError(error.message);
