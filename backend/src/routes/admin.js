@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 const User = require('../models/User');
 const Audit = require('../models/Audit');
 const PanKyc = require('../models/PanKyc');
@@ -47,7 +47,7 @@ const adminAuth = (req, res, next) => {
 };
 
 // Get all users (admin only)
-router.get('/users', protect, adminAuth, async (req, res) => {
+router.get('/users', protect, authorize('admin'), async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', status = '' } = req.query;
     const skip = (page - 1) * limit;
@@ -95,7 +95,7 @@ router.get('/users', protect, adminAuth, async (req, res) => {
 });
 
 // Get user by ID (admin only)
-router.get('/users/:id', protect, adminAuth, async (req, res) => {
+router.get('/users/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     
@@ -120,7 +120,7 @@ router.get('/users/:id', protect, adminAuth, async (req, res) => {
 });
 
 // Create new user (admin only)
-router.post('/users', protect, adminAuth, async (req, res) => {
+router.post('/users', protect, authorize('admin'), async (req, res) => {
   try {
     const { name, email, password, role, moduleAccess, status } = req.body;
 
@@ -182,7 +182,7 @@ router.post('/users', protect, adminAuth, async (req, res) => {
 });
 
 // Update user (admin only)
-router.put('/users/:id', protect, adminAuth, async (req, res) => {
+router.put('/users/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const { name, email, role, moduleAccess, status } = req.body;
     
@@ -265,7 +265,7 @@ router.put('/users/:id', protect, adminAuth, async (req, res) => {
 });
 
 // Delete user (admin only)
-router.delete('/users/:id', protect, adminAuth, async (req, res) => {
+router.delete('/users/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -314,7 +314,7 @@ router.delete('/users/:id', protect, adminAuth, async (req, res) => {
 });
 
 // Get audit logs (admin only)
-router.get('/audit-logs', protect, adminAuth, async (req, res) => {
+router.get('/audit-logs', protect, authorize('admin'), async (req, res) => {
   try {
     const { page = 1, limit = 50, module = '', action = '', userId = '', startDate = '', endDate = '' } = req.query;
     const skip = (page - 1) * limit;
@@ -361,7 +361,7 @@ router.get('/audit-logs', protect, adminAuth, async (req, res) => {
 });
 
 // Debug endpoint for user performance
-router.get('/debug-user-performance', protect, adminAuth, async (req, res) => {
+router.get('/debug-user-performance', protect, authorize('admin'), async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
@@ -429,7 +429,7 @@ router.get('/debug-user-performance', protect, adminAuth, async (req, res) => {
 });
 
 // Get system statistics (admin only)
-router.get('/stats', protect, adminAuth, async (req, res) => {
+router.get('/stats', protect, authorize('admin'), async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
@@ -1139,7 +1139,7 @@ router.get('/stats', protect, adminAuth, async (req, res) => {
 });
 
 // Get user statistics (admin only)
-router.get('/user-stats', protect, adminAuth, async (req, res) => {
+router.get('/user-stats', protect, authorize('admin'), async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
@@ -1223,7 +1223,7 @@ router.get('/user-stats', protect, adminAuth, async (req, res) => {
 });
 
 // Get API usage statistics (admin only)
-router.get('/api-usage-stats', protect, adminAuth, async (req, res) => {
+router.get('/api-usage-stats', protect, authorize('admin'), async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
@@ -1343,7 +1343,7 @@ router.get('/api-usage-stats', protect, adminAuth, async (req, res) => {
 });
 
 // Get system health (admin only)
-router.get('/health', protect, adminAuth, async (req, res) => {
+router.get('/health', protect, authorize('admin'), async (req, res) => {
   try {
     const health = {
       status: 'healthy',
@@ -1391,7 +1391,7 @@ router.get('/health', protect, adminAuth, async (req, res) => {
 });
 
 // Get system settings (admin only)
-router.get('/settings', protect, adminAuth, async (req, res) => {
+router.get('/settings', protect, authorize('admin'), async (req, res) => {
   try {
     const settings = {
       environment: process.env.NODE_ENV,
@@ -1425,7 +1425,7 @@ router.get('/settings', protect, adminAuth, async (req, res) => {
 });
 
 // Update user module access (admin only)
-router.patch('/users/:id/module-access', protect, adminAuth, async (req, res) => {
+router.patch('/users/:id/module-access', protect, authorize('admin'), async (req, res) => {
   try {
     const { moduleAccess } = req.body;
     
@@ -1497,7 +1497,7 @@ router.patch('/users/:id/module-access', protect, adminAuth, async (req, res) =>
 });
 
 // Get available modules (admin only)
-router.get('/modules', protect, adminAuth, async (req, res) => {
+router.get('/modules', protect, authorize('admin'), async (req, res) => {
   try {
     const modules = [
       {
@@ -1528,7 +1528,7 @@ router.get('/modules', protect, adminAuth, async (req, res) => {
 });
 
 // Update user branding (admin only)
-router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
+router.patch('/users/:id/branding', protect, authorize('admin'), async (req, res) => {
   try {
     const { companyName, displayName, address, gstNumber } = req.body;
 
@@ -1618,7 +1618,7 @@ router.patch('/users/:id/branding', protect, adminAuth, async (req, res) => {
 });
 
 // Upload user logo (admin only)
-router.post('/users/:id/logo', protect, adminAuth, upload.single('logo'), async (req, res) => {
+router.post('/users/:id/logo', protect, authorize('admin'), upload.single('logo'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -1685,7 +1685,7 @@ router.post('/users/:id/logo', protect, adminAuth, upload.single('logo'), async 
 });
 
 // Test endpoint to check if branding fields can be saved
-router.post('/test-branding/:id', protect, adminAuth, async (req, res) => {
+router.post('/test-branding/:id', protect, authorize('admin'), async (req, res) => {
   try {
     console.log('🧪 TEST: Testing branding save...');
     
@@ -1760,6 +1760,444 @@ router.get('/users/:id/logo', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to serve logo'
+    });
+  }
+});
+
+// ==================== ARCHIVAL MANAGEMENT ROUTES ====================
+
+// Get archival configuration
+router.get('/archival/config', protect, authorize('admin'), async (req, res) => {
+  try {
+    const archivalService = require('../services/archivalService');
+    const config = await archivalService.getArchivalStats();
+    
+    res.json({
+      success: true,
+      data: config
+    });
+  } catch (error) {
+    logger.error('Error getting archival config:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get archival configuration',
+      error: error.message
+    });
+  }
+});
+
+// Update archival configuration
+router.put('/archival/config', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { globalSettings, moduleSettings } = req.body;
+    const ArchivalConfig = require('../models/ArchivalConfig');
+    
+    const config = await ArchivalConfig.getConfig();
+    
+    if (globalSettings) {
+      config.globalSettings = { ...config.globalSettings, ...globalSettings };
+    }
+    
+    if (moduleSettings) {
+      if (moduleSettings.panKyc) {
+        config.moduleSettings.panKyc = { ...config.moduleSettings.panKyc, ...moduleSettings.panKyc };
+      }
+      if (moduleSettings.aadhaarPan) {
+        config.moduleSettings.aadhaarPan = { ...config.moduleSettings.aadhaarPan, ...moduleSettings.aadhaarPan };
+      }
+    }
+    
+    config.updatedBy = req.user.id;
+    await config.save();
+    
+    logger.info(`Archival configuration updated by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: 'Archival configuration updated successfully',
+      data: config
+    });
+  } catch (error) {
+    logger.error('Error updating archival config:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update archival configuration',
+      error: error.message
+    });
+  }
+});
+
+// Get archival statistics
+router.get('/archival/stats', protect, authorize('admin'), async (req, res) => {
+  try {
+    const archivalService = require('../services/archivalService');
+    const stats = await archivalService.getArchivalStats();
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    logger.error('Error getting archival stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get archival statistics',
+      error: error.message
+    });
+  }
+});
+
+// Manually trigger archival process
+router.post('/archival/trigger', protect, authorize('admin'), async (req, res) => {
+  try {
+    const archivalService = require('../services/archivalService');
+    
+    // Run archival process in background
+    archivalService.runArchivalProcess().catch(error => {
+      logger.error('Background archival process failed:', error);
+    });
+    
+    logger.info(`Archival process manually triggered by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: 'Archival process triggered successfully'
+    });
+  } catch (error) {
+    logger.error('Error triggering archival process:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to trigger archival process',
+      error: error.message
+    });
+  }
+});
+
+// Get records marked for deletion
+router.get('/archival/records/marked-for-deletion', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { module, page = 1, limit = 20, userId } = req.query;
+    const PanKyc = require('../models/PanKyc');
+    const AadhaarPan = require('../models/AadhaarPan');
+    
+    const Model = module === 'aadhaarPan' ? AadhaarPan : PanKyc;
+    const skip = (page - 1) * limit;
+    
+    const query = {
+      'archival.isMarkedForDeletion': true,
+      'archival.actualDeletionDate': { $exists: false }
+    };
+    
+    if (userId) {
+      query.userId = userId;
+    }
+    
+    const records = await Model.find(query)
+      .populate('userId', 'email firstName lastName')
+      .sort({ 'archival.scheduledDeletionDate': 1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Model.countDocuments(query);
+    
+    res.json({
+      success: true,
+      data: {
+        records,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total,
+          limit: parseInt(limit)
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error getting records marked for deletion:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get records marked for deletion',
+      error: error.message
+    });
+  }
+});
+
+// Manually delete a record
+router.delete('/archival/records/:recordId', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { recordId } = req.params;
+    const { module, reason = 'manual' } = req.body;
+    
+    if (!module || !['panKyc', 'aadhaarPan'].includes(module)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Module must be specified and be either panKyc or aadhaarPan'
+      });
+    }
+    
+    const archivalService = require('../services/archivalService');
+    const result = await archivalService.manualDeleteRecord(recordId, req.user.id, module, reason);
+    
+    logger.info(`Record ${recordId} manually deleted by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    logger.error('Error manually deleting record:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete record',
+      error: error.message
+    });
+  }
+});
+
+// ==================== USER-SPECIFIC ARCHIVAL MANAGEMENT ====================
+
+// Get user-specific archival settings
+router.get('/archival/users/:userId/settings', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const archivalService = require('../services/archivalService');
+    
+    const settings = await archivalService.getUserArchivalSettings(userId);
+    
+    res.json({
+      success: true,
+      data: settings
+    });
+  } catch (error) {
+    logger.error('Error getting user archival settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get user archival settings',
+      error: error.message
+    });
+  }
+});
+
+// Set user-specific archival settings
+router.put('/archival/users/:userId/settings', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { module, settings } = req.body;
+    
+    if (!module || !['panKyc', 'aadhaarPan'].includes(module)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Module must be specified and be either panKyc or aadhaarPan'
+      });
+    }
+    
+    const archivalService = require('../services/archivalService');
+    const result = await archivalService.setUserArchivalSettings(userId, module, settings, req.user.id);
+    
+    logger.info(`User archival settings updated for user ${userId} by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    logger.error('Error setting user archival settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to set user archival settings',
+      error: error.message
+    });
+  }
+});
+
+// Remove user-specific archival settings
+router.delete('/archival/users/:userId/settings', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { module } = req.body;
+    
+    if (!module || !['panKyc', 'aadhaarPan'].includes(module)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Module must be specified and be either panKyc or aadhaarPan'
+      });
+    }
+    
+    const archivalService = require('../services/archivalService');
+    const result = await archivalService.removeUserArchivalSettings(userId, module, req.user.id);
+    
+    logger.info(`User archival settings removed for user ${userId} by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    logger.error('Error removing user archival settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove user archival settings',
+      error: error.message
+    });
+  }
+});
+
+// Get user's records marked for deletion
+router.get('/archival/users/:userId/records', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { module, page = 1, limit = 20 } = req.query;
+    
+    if (!module || !['panKyc', 'aadhaarPan'].includes(module)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Module must be specified and be either panKyc or aadhaarPan'
+      });
+    }
+    
+    const archivalService = require('../services/archivalService');
+    const result = await archivalService.getUserRecordsMarkedForDeletion(userId, module, page, limit);
+    
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    logger.error('Error getting user records marked for deletion:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get user records marked for deletion',
+      error: error.message
+    });
+  }
+});
+
+// Get all users with their archival settings
+router.get('/archival/users', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { page = 1, limit = 20, search } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const query = {};
+    if (search) {
+      query.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    const users = await User.find(query)
+      .select('_id email firstName lastName createdAt')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await User.countDocuments(query);
+    
+    // Get archival settings for each user
+    const archivalService = require('../services/archivalService');
+    const usersWithSettings = await Promise.all(
+      users.map(async (user) => {
+        try {
+          const settings = await archivalService.getUserArchivalSettings(user._id);
+          return {
+            ...user.toObject(),
+            archivalSettings: settings
+          };
+        } catch (error) {
+          logger.error(`Error getting archival settings for user ${user._id}:`, error);
+          return {
+            ...user.toObject(),
+            archivalSettings: null
+          };
+        }
+      })
+    );
+    
+    res.json({
+      success: true,
+      data: {
+        users: usersWithSettings,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limit),
+          total,
+          limit: parseInt(limit)
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error getting users with archival settings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get users with archival settings',
+      error: error.message
+    });
+  }
+});
+
+// ==================== SCHEDULER MANAGEMENT ====================
+
+// Get scheduler status
+router.get('/archival/scheduler/status', protect, authorize('admin'), async (req, res) => {
+  try {
+    const schedulerService = require('../services/schedulerService');
+    const status = await schedulerService.getStatus();
+    
+    res.json({
+      success: true,
+      data: status
+    });
+  } catch (error) {
+    logger.error('Error getting scheduler status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get scheduler status',
+      error: error.message
+    });
+  }
+});
+
+// Start/stop scheduler jobs
+router.post('/archival/scheduler/:action/:jobName', protect, authorize('admin'), async (req, res) => {
+  try {
+    const { action, jobName } = req.params;
+    const schedulerService = require('../services/schedulerService');
+    
+    if (!['start', 'stop', 'restart'].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Action must be start, stop, or restart'
+      });
+    }
+    
+    let result;
+    switch (action) {
+      case 'start':
+        result = await schedulerService.startJob(jobName);
+        break;
+      case 'stop':
+        result = await schedulerService.stopJob(jobName);
+        break;
+      case 'restart':
+        result = await schedulerService.restartJob(jobName);
+        break;
+    }
+    
+    logger.info(`Scheduler job ${jobName} ${action}ed by admin ${req.user.id}`);
+    
+    res.json({
+      success: true,
+      message: result.message,
+      data: result
+    });
+  } catch (error) {
+    logger.error('Error managing scheduler job:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to manage scheduler job',
+      error: error.message
     });
   }
 });

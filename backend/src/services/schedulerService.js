@@ -161,6 +161,21 @@ class SchedulerService {
   }
 
   /**
+   * Restart a specific job
+   */
+  restartJob(jobName) {
+    const job = this.jobs.get(jobName);
+    if (job) {
+      job.stop();
+      job.start();
+      logger.info(`Job '${jobName}' restarted`);
+      return { success: true, message: `Job '${jobName}' restarted successfully` };
+    } else {
+      throw new Error(`Job '${jobName}' not found`);
+    }
+  }
+
+  /**
    * Destroy all jobs and cleanup
    */
   destroy() {

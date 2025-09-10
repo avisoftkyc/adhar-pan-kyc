@@ -38,11 +38,15 @@ const AuditSchema = new mongoose.Schema({
       
       // Admin events
       'admin_action', 'settings_changed', 'api_credentials_updated',
+      
+      // Archival events
+      'archival_process_completed', 'archival_process_failed', 'record_marked_for_deletion',
+      'record_deleted', 'record_manually_deleted', 'archival_config_updated',
     ],
   },
   module: {
     type: String,
-    enum: ['auth', 'user_management', 'pan_kyc', 'aadhaar_pan', 'admin', 'system', 'reports'],
+    enum: ['auth', 'user_management', 'pan_kyc', 'aadhaar_pan', 'admin', 'system', 'reports', 'archival'],
     required: true,
   },
   resource: {

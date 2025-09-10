@@ -416,7 +416,7 @@ class ArchivalService {
   async getArchivalStats() {
     const config = await ArchivalConfig.getConfig();
     
-    // Get PAN KYC statistics
+    // Get PAN KYC statistics - only count current records in database
     const panKycStats = await PanKyc.aggregate([
       {
         $group: {
@@ -427,15 +427,12 @@ class ArchivalService {
           },
           warningSent: {
             $sum: { $cond: [{ $eq: ['$archival.deletionWarningSent', true] }, 1, 0] }
-          },
-          deleted: {
-            $sum: { $cond: [{ $ne: ['$archival.actualDeletionDate', null] }, 1, 0] }
           }
         }
       }
     ]);
 
-    // Get Aadhaar-PAN statistics
+    // Get Aadhaar-PAN statistics - only count current records in database
     const aadhaarPanStats = await AadhaarPan.aggregate([
       {
         $group: {
@@ -446,9 +443,6 @@ class ArchivalService {
           },
           warningSent: {
             $sum: { $cond: [{ $eq: ['$archival.deletionWarningSent', true] }, 1, 0] }
-          },
-          deleted: {
-            $sum: { $cond: [{ $ne: ['$archival.actualDeletionDate', null] }, 1, 0] }
           }
         }
       }
@@ -462,17 +456,17 @@ class ArchivalService {
         nextArchivalRun: config.nextArchivalRun,
       },
       stats: {
-        panKyc: panKycStats[0] || {
-          totalRecords: 0,
-          markedForDeletion: 0,
-          warningSent: 0,
-          deleted: 0,
+        panKyc: {
+          totalRecords: panKycStats[0]?.totalRecords || 0,
+          markedForDeletion: panKycStats[0]?.markedForDeletion || 0,
+          warningSent: panKycStats[0]?.warningSent || 0,
+          deleted: config.stats.panKyc.totalRecordsDeleted, // Use historical count from config
         },
-        aadhaarPan: aadhaarPanStats[0] || {
-          totalRecords: 0,
-          markedForDeletion: 0,
-          warningSent: 0,
-          deleted: 0,
+        aadhaarPan: {
+          totalRecords: aadhaarPanStats[0]?.totalRecords || 0,
+          markedForDeletion: aadhaarPanStats[0]?.markedForDeletion || 0,
+          warningSent: aadhaarPanStats[0]?.warningSent || 0,
+          deleted: config.stats.aadhaarPan.totalRecordsDeleted, // Use historical count from config
         },
       },
       configStats: config.stats,

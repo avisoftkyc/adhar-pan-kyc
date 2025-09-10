@@ -133,8 +133,11 @@ const Admin: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userStats, setUserStats] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [apiUsageStats, setApiUsageStats] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userApiHitCounts, setUserApiHitCounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
@@ -147,6 +150,13 @@ const Admin: React.FC = () => {
   const [userFilterStatus, setUserFilterStatus] = useState('all');
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditSearchTerm, setAuditSearchTerm] = useState('');
+  
+  // Archival-related state
+  const [archivalStats, setArchivalStats] = useState<any>(null);
+  const [usersWithArchivalSettings, setUsersWithArchivalSettings] = useState<any[]>([]);
+  const [archivalLoading, setArchivalLoading] = useState(false);
+  const [selectedUserForArchival, setSelectedUserForArchival] = useState<any>(null);
+  const [userArchivalModalOpen, setUserArchivalModalOpen] = useState(false);
   const [auditFilterAction, setAuditFilterAction] = useState('all');
   const [auditFilterModule, setAuditFilterModule] = useState('all');
   const [auditPage, setAuditPage] = useState(1);
@@ -198,7 +208,17 @@ const Admin: React.FC = () => {
     fetchUserStats();
     fetchApiUsageStats();
     fetchUserApiHitCounts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
+
+  // Fetch archival data when archival tab is activated
+  useEffect(() => {
+    if (activeTab === 'archival') {
+      fetchArchivalStats();
+      fetchUsersWithArchivalSettings();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const fetchUsers = async () => {
     try {
@@ -416,7 +436,7 @@ const Admin: React.FC = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await api.post('/admin/users', formData);
+      await api.post('/admin/users', formData);
       setSuccess('User created successfully');
       setShowCreateUser(false);
       setFormData({
@@ -553,6 +573,125 @@ const Admin: React.FC = () => {
       setError(error.response?.data?.message || 'Failed to update branding');
     } finally {
       setBrandingLoading(false);
+    }
+  };
+
+  // Archival-related functions
+  const fetchArchivalStats = async () => {
+    try {
+      setArchivalLoading(true);
+      const response = await api.get('/admin/archival/stats');
+      setArchivalStats(response.data.data);
+    } catch (error) {
+      console.error('Error fetching archival stats:', error);
+      setError('Failed to fetch archival statistics');
+    } finally {
+      setArchivalLoading(false);
+    }
+  };
+
+  const fetchUsersWithArchivalSettings = async () => {
+    try {
+      setArchivalLoading(true);
+      const response = await api.get(`/admin/archival/users?search=${userSearchTerm}`);
+      setUsersWithArchivalSettings(response.data.data.users);
+    } catch (error) {
+      console.error('Error fetching users with archival settings:', error);
+      setError('Failed to fetch users with archival settings');
+    } finally {
+      setArchivalLoading(false);
+    }
+  };
+
+  const triggerArchivalProcess = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      '⚠️ WARNING: This will trigger the archival process which may delete expired records and send warning emails to users.\n\n' +
+      'This action will:\n' +
+      '• Mark records for deletion that have exceeded retention periods\n' +
+      '• Send 7-day warning emails to affected users\n' +
+      '• Delete records that have passed the deletion date\n\n' +
+      'Are you sure you want to proceed?'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setArchivalLoading(true);
+      await api.post('/admin/archival/trigger');
+      setSuccess('Archival process triggered successfully');
+      // Refresh stats after triggering
+      setTimeout(() => {
+        fetchArchivalStats();
+      }, 2000);
+    } catch (error) {
+      console.error('Error triggering archival process:', error);
+      setError('Failed to trigger archival process');
+    } finally {
+      setArchivalLoading(false);
+    }
+  };
+
+  const openUserArchivalModal = (user: any) => {
+    setSelectedUserForArchival(user);
+    setUserArchivalModalOpen(true);
+  };
+
+  const viewUserArchivalRecords = async (user: any) => {
+    // Get user display name for confirmation
+    const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User';
+    
+    const confirmed = window.confirm(
+      `View archival records for ${userName}?\n\n` +
+      'This will fetch and display all archival records for this user from both PAN KYC and Aadhaar-PAN modules.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setArchivalLoading(true);
+      
+      // Debug: Log user object structure
+      console.log('User object:', user);
+      
+      // Fetch both PAN KYC and Aadhaar-PAN records
+      const [panKycResponse, aadhaarPanResponse] = await Promise.all([
+        api.get(`/admin/archival/users/${user._id}/records?module=panKyc`),
+        api.get(`/admin/archival/users/${user._id}/records?module=aadhaarPan`)
+      ]);
+      
+      const panKycRecords = panKycResponse.data.data.records || [];
+      const aadhaarPanRecords = aadhaarPanResponse.data.data.records || [];
+      
+      // Combine and format records
+      const allRecords = [
+        ...panKycRecords.map((record: any) => ({ ...record, module: 'PAN KYC' })),
+        ...aadhaarPanRecords.map((record: any) => ({ ...record, module: 'Aadhaar-PAN' }))
+      ];
+      
+      // Get user display name - handle different possible structures
+      const userName = user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown User';
+      
+      if (allRecords.length === 0) {
+        alert(`No archival records found for ${userName}`);
+        return;
+      }
+      
+      // Show records in an alert for now (you can create a proper modal later)
+      const recordSummary = allRecords.map((record: any) => 
+        `${record.module}: ${record.status || 'Active'} (${new Date(record.createdAt).toLocaleDateString()})`
+      ).join('\n');
+      
+      alert(`Archival Records for ${userName}:\n\n${recordSummary}`);
+    } catch (error) {
+      console.error('Error fetching user archival records:', error);
+      setError('Failed to fetch user archival records');
+    } finally {
+      setArchivalLoading(false);
     }
   };
 
@@ -798,6 +937,19 @@ const Admin: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             API Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('archival')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'archival'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Data Archival
           </button>
         </nav>
       </div>
@@ -2191,6 +2343,7 @@ const Admin: React.FC = () => {
                     combinedUsers.map((user, index) => {
                       const totalApiCalls = (user.panKycApiCalls || 0) + (user.aadhaarPanApiCalls || 0);
                       const totalSuccess = (user.panKycSuccess || 0) + (user.aadhaarPanSuccess || 0);
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
                       const totalFailed = (user.panKycFailed || 0) + (user.aadhaarPanFailed || 0);
                       const overallSuccessRate = totalApiCalls > 0 ? (totalSuccess / totalApiCalls) * 100 : 0;
                       
@@ -2570,6 +2723,295 @@ const Admin: React.FC = () => {
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
                   >
                     {brandingLoading ? 'Updating...' : 'Update Branding'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Data Archival Tab */}
+      {activeTab === 'archival' && (
+        <div className="space-y-6">
+          {/* Archival Header */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Data Archival Management</h2>
+                  <p className="text-gray-600">Manage user-wise data retention and archival processes</p>
+                </div>
+              </div>
+              <button
+                onClick={() => triggerArchivalProcess()}
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                Trigger Archival Process
+              </button>
+            </div>
+          </div>
+
+          {/* Archival Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mr-4">
+                  <DocumentTextIcon className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Records</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(archivalStats?.stats?.panKyc?.totalRecords || 0) + (archivalStats?.stats?.aadhaarPan?.totalRecords || 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-yellow-100 rounded-2xl flex items-center justify-center mr-4">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Marked for Deletion</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(archivalStats?.stats?.panKyc?.markedForDeletion || 0) + (archivalStats?.stats?.aadhaarPan?.markedForDeletion || 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mr-4">
+                  <CheckCircleIcon className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Warnings Sent</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(archivalStats?.stats?.panKyc?.warningSent || 0) + (archivalStats?.stats?.aadhaarPan?.warningSent || 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
+                  <XCircleIcon className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Deleted Records</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {(archivalStats?.stats?.panKyc?.deleted || 0) + (archivalStats?.stats?.aadhaarPan?.deleted || 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* User Archival Management */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">User Archival Settings</h3>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <button
+                  onClick={() => fetchUsersWithArchivalSettings()}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PAN KYC Settings</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aadhaar-PAN Settings</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {usersWithArchivalSettings?.map((user) => (
+                    <tr key={user._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User'}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          <div>Retention: {user.archivalSettings?.panKyc?.retentionPeriodDays || 'Default'} days</div>
+                          <div>Warning: {user.archivalSettings?.panKyc?.warningPeriodDays || 'Default'} days</div>
+                          <div className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.archivalSettings?.panKyc?.isEnabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {user.archivalSettings?.panKyc?.isEnabled ? 'Enabled' : 'Disabled'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          <div>Retention: {user.archivalSettings?.aadhaarPan?.retentionPeriodDays || 'Default'} days</div>
+                          <div>Warning: {user.archivalSettings?.aadhaarPan?.warningPeriodDays || 'Default'} days</div>
+                          <div className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            user.archivalSettings?.aadhaarPan?.isEnabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {user.archivalSettings?.aadhaarPan?.isEnabled ? 'Enabled' : 'Disabled'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => openUserArchivalModal(user)}
+                          disabled={archivalLoading}
+                          className="text-purple-600 hover:text-purple-900 mr-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {archivalLoading ? 'Loading...' : 'Configure'}
+                        </button>
+                        <button
+                          onClick={() => viewUserArchivalRecords(user)}
+                          disabled={archivalLoading}
+                          className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {archivalLoading ? 'Loading...' : 'View Records'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Archival Configuration Modal */}
+      {userArchivalModalOpen && selectedUserForArchival && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Configure Archival Settings for {selectedUserForArchival.name || `${selectedUserForArchival.firstName || ''} ${selectedUserForArchival.lastName || ''}`.trim() || selectedUserForArchival.email || 'Unknown User'}
+              </h3>
+              
+              <div className="space-y-6">
+                {/* PAN KYC Settings */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <h4 className="text-md font-semibold text-gray-800 mb-3">PAN KYC Settings</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Retention Period (days)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="3650"
+                        defaultValue={selectedUserForArchival.archivalSettings?.panKyc?.retentionPeriodDays || 365}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="365"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Warning Period (days)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        defaultValue={selectedUserForArchival.archivalSettings?.panKyc?.warningPeriodDays || 7}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="7"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        defaultChecked={selectedUserForArchival.archivalSettings?.panKyc?.isEnabled !== false}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <label className="ml-2 text-sm text-gray-700">Enable archival for PAN KYC</label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Aadhaar-PAN Settings */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <h4 className="text-md font-semibold text-gray-800 mb-3">Aadhaar-PAN Settings</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Retention Period (days)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="3650"
+                        defaultValue={selectedUserForArchival.archivalSettings?.aadhaarPan?.retentionPeriodDays || 365}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="365"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Warning Period (days)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        defaultValue={selectedUserForArchival.archivalSettings?.aadhaarPan?.warningPeriodDays || 7}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        placeholder="7"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        defaultChecked={selectedUserForArchival.archivalSettings?.aadhaarPan?.isEnabled !== false}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <label className="ml-2 text-sm text-gray-700">Enable archival for Aadhaar-PAN</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserArchivalModalOpen(false);
+                      setSelectedUserForArchival(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        'Are you sure you want to save these archival settings?\n\n' +
+                        'This will update the retention and warning periods for this user.'
+                      );
+                      
+                      if (confirmed) {
+                        // TODO: Implement save functionality
+                        alert('Save functionality will be implemented');
+                        setUserArchivalModalOpen(false);
+                        setSelectedUserForArchival(null);
+                      }
+                    }}
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
+                  >
+                    Save Settings
                   </button>
                 </div>
               </div>

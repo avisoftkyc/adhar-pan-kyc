@@ -25,6 +25,12 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 connectDB();
 
+// Initialize scheduler service
+const schedulerService = require('./services/schedulerService');
+schedulerService.initialize().catch(error => {
+  logger.error('Failed to initialize scheduler service:', error);
+});
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
@@ -154,11 +160,13 @@ app.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  schedulerService.destroy();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
   logger.info('SIGINT received, shutting down gracefully');
+  schedulerService.destroy();
   process.exit(0);
 });
 
