@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { 
@@ -128,6 +129,7 @@ interface SystemStats {
 
 const Admin: React.FC = () => {
   const { user, refreshUserData } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [users, setUsers] = useState<User[]>([]);
@@ -141,8 +143,6 @@ const Admin: React.FC = () => {
   const [userApiHitCounts, setUserApiHitCounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [statsTimeRange, setStatsTimeRange] = useState('30');
   const [usersLoading, setUsersLoading] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
@@ -227,7 +227,11 @@ const Admin: React.FC = () => {
       setUsers(response.data.data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
-      setError('Failed to fetch users');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch users. Please try again.',
+        duration: 5000
+      });
     } finally {
       setUsersLoading(false);
     }
@@ -253,7 +257,11 @@ const Admin: React.FC = () => {
       setAuditLogs(response.data.data.logs);
     } catch (error) {
       console.error('Error fetching audit logs:', error);
-      setError('Failed to fetch audit logs');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch audit logs. Please try again.',
+        duration: 5000
+      });
     } finally {
       setAuditLoading(false);
     }
@@ -288,7 +296,11 @@ const Admin: React.FC = () => {
       setSystemStats(response.data.data);
     } catch (error) {
       console.error('Error fetching system stats:', error);
-      setError('Failed to fetch system statistics');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch system statistics. Please try again.',
+        duration: 5000
+      });
     } finally {
       setStatsLoading(false);
     }
@@ -336,7 +348,11 @@ const Admin: React.FC = () => {
       ]);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
-      setError('Failed to fetch analytics data');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch analytics data. Please try again.',
+        duration: 5000
+      });
     } finally {
       setAnalyticsLoading(false);
     }
@@ -357,7 +373,11 @@ const Admin: React.FC = () => {
       await fetchApiUsageStats(days);
     } catch (error) {
       console.error('Error fetching API analytics data:', error);
-      setError('Failed to fetch API analytics data');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch API analytics data. Please try again.',
+        duration: 5000
+      });
     } finally {
       setApiLoading(false);
     }
@@ -437,7 +457,11 @@ const Admin: React.FC = () => {
     try {
       setLoading(true);
       await api.post('/admin/users', formData);
-      setSuccess('User created successfully');
+      showToast({
+        type: 'success',
+        message: 'User created successfully!',
+        duration: 4000
+      });
       setShowCreateUser(false);
       setFormData({
         name: '',
@@ -450,7 +474,11 @@ const Admin: React.FC = () => {
       fetchUsers();
     } catch (error: any) {
       console.error('Error creating user:', error);
-      setError(error.response?.data?.message || 'Failed to create user');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to create user. Please try again.',
+        duration: 5000
+      });
     } finally {
       setLoading(false);
     }
@@ -466,7 +494,11 @@ const Admin: React.FC = () => {
       const dataToSend = password ? formData : updateData;
       
       await api.put(`/admin/users/${editingUser._id}`, dataToSend);
-      setSuccess('User updated successfully');
+      showToast({
+        type: 'success',
+        message: 'User updated successfully!',
+        duration: 4000
+      });
       setEditingUser(null);
       setFormData({
         name: '',
@@ -479,7 +511,11 @@ const Admin: React.FC = () => {
       fetchUsers();
     } catch (error: any) {
       console.error('Error updating user:', error);
-      setError(error.response?.data?.message || 'Failed to update user');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to update user. Please try again.',
+        duration: 5000
+      });
     } finally {
       setLoading(false);
     }
@@ -491,11 +527,19 @@ const Admin: React.FC = () => {
     try {
       setLoading(true);
       await api.delete(`/admin/users/${userId}`);
-      setSuccess('User deleted successfully');
+      showToast({
+        type: 'success',
+        message: 'User deleted successfully!',
+        duration: 4000
+      });
       fetchUsers();
     } catch (error: any) {
       console.error('Error deleting user:', error);
-      setError(error.response?.data?.message || 'Failed to delete user');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to delete user. Please try again.',
+        duration: 5000
+      });
     } finally {
       setLoading(false);
     }
@@ -509,13 +553,21 @@ const Admin: React.FC = () => {
   const handleUpdateModuleAccess = async (userId: string, moduleAccess: string[]) => {
     try {
       await api.patch(`/admin/users/${userId}/module-access`, { moduleAccess });
-      setSuccess('User module access updated successfully');
+      showToast({
+        type: 'success',
+        message: 'User module access updated successfully!',
+        duration: 4000
+      });
       setShowModuleAccess(false);
       setSelectedUserForModules(null);
       fetchUsers();
     } catch (error: any) {
       console.error('Error updating module access:', error);
-      setError(error.response?.data?.message || 'Failed to update module access');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to update module access. Please try again.',
+        duration: 5000
+      });
     }
   };
 
@@ -556,7 +608,11 @@ const Admin: React.FC = () => {
         });
       }
 
-      setSuccess('User branding updated successfully');
+      showToast({
+        type: 'success',
+        message: 'User branding updated successfully!',
+        duration: 4000
+      });
       setShowBranding(false);
       setSelectedUserForModules(null);
       setBrandingForm({ companyName: '', displayName: '', address: '', gstNumber: '', logoFile: null });
@@ -570,7 +626,11 @@ const Admin: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error updating branding:', error);
-      setError(error.response?.data?.message || 'Failed to update branding');
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to update branding. Please try again.',
+        duration: 5000
+      });
     } finally {
       setBrandingLoading(false);
     }
@@ -584,7 +644,11 @@ const Admin: React.FC = () => {
       setArchivalStats(response.data.data);
     } catch (error) {
       console.error('Error fetching archival stats:', error);
-      setError('Failed to fetch archival statistics');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch archival statistics. Please try again.',
+        duration: 5000
+      });
     } finally {
       setArchivalLoading(false);
     }
@@ -597,7 +661,11 @@ const Admin: React.FC = () => {
       setUsersWithArchivalSettings(response.data.data.users);
     } catch (error) {
       console.error('Error fetching users with archival settings:', error);
-      setError('Failed to fetch users with archival settings');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch users with archival settings. Please try again.',
+        duration: 5000
+      });
     } finally {
       setArchivalLoading(false);
     }
@@ -621,14 +689,22 @@ const Admin: React.FC = () => {
     try {
       setArchivalLoading(true);
       await api.post('/admin/archival/trigger');
-      setSuccess('Archival process triggered successfully');
+      showToast({
+        type: 'success',
+        message: 'Archival process triggered successfully! The process is now running in the background.',
+        duration: 6000
+      });
       // Refresh stats after triggering
       setTimeout(() => {
         fetchArchivalStats();
       }, 2000);
     } catch (error) {
       console.error('Error triggering archival process:', error);
-      setError('Failed to trigger archival process');
+      showToast({
+        type: 'error',
+        message: 'Failed to trigger archival process. Please try again.',
+        duration: 5000
+      });
     } finally {
       setArchivalLoading(false);
     }
@@ -689,7 +765,11 @@ const Admin: React.FC = () => {
       alert(`Archival Records for ${userName}:\n\n${recordSummary}`);
     } catch (error) {
       console.error('Error fetching user archival records:', error);
-      setError('Failed to fetch user archival records');
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch user archival records. Please try again.',
+        duration: 5000
+      });
     } finally {
       setArchivalLoading(false);
     }
@@ -773,28 +853,6 @@ const Admin: React.FC = () => {
         </div>
       </div>
 
-      {/* Error and Success Messages */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <XCircleIcon className="h-5 w-5 text-red-400" />
-            <div className="ml-3">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex">
-            <CheckCircleIcon className="h-5 w-5 text-green-400" />
-            <div className="ml-3">
-              <p className="text-sm text-green-800">{success}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Enhanced System Statistics */}
       {systemStats && (
