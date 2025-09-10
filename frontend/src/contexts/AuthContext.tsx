@@ -145,15 +145,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Rate limiting for refresh attempts
   const [refreshAttempts, setRefreshAttempts] = React.useState(0);
   const [lastRefreshAttempt, setLastRefreshAttempt] = React.useState<number>(0);
+  
+  // Prevent multiple simultaneous calls to /auth/me
+  const [isRefreshingUserData, setIsRefreshingUserData] = React.useState(false);
+  const [isInitializing, setIsInitializing] = React.useState(false);
 
   // Initialize auth state
   useEffect(() => {
     const initializeAuth = async () => {
+      // Prevent multiple initialization calls
+      if (isInitializing) {
+        console.log('🔍 Auth initialization already in progress, skipping...');
+        return;
+      }
+
       const token = getStoredToken();
       console.log('🔍 Initializing auth with token:', token ? 'exists' : 'none');
       
       if (token) {
         try {
+          setIsInitializing(true);
           console.log('🔍 Attempting to validate token...');
           dispatch({ type: 'AUTH_START' });
           const response = await api.get('/auth/me', {
@@ -181,6 +192,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           sessionStorage.removeItem('token');
           localStorage.removeItem('rememberMe');
           dispatch({ type: 'AUTH_FAILURE' });
+        } finally {
+          setIsInitializing(false);
         }
       } else {
         console.log('🔍 No token found, setting loading to false');
@@ -297,7 +310,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Refresh current user data
   const refreshUserData = async () => {
+    // Prevent multiple simultaneous calls
+    if (isRefreshingUserData) {
+      console.log('🔄 refreshUserData already in progress, skipping...');
+      return;
+    }
+
     try {
+      setIsRefreshingUserData(true);
+      console.log('🔄 Refreshing user data...');
+      
       const response = await api.get('/auth/me', {
         headers: {
           'Cache-Control': 'no-cache',
@@ -310,10 +332,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           type: 'UPDATE_USER',
           payload: response.data.data,
         });
+        console.log('✅ User data refreshed successfully');
         return response.data.data;
       }
     } catch (error) {
       console.error('Failed to refresh user data:', error);
+    } finally {
+      setIsRefreshingUserData(false);
     }
   };
 

@@ -621,8 +621,11 @@ const Admin: React.FC = () => {
       // If admin is updating their own branding, refresh the auth context
       if (userId === user?._id) {
         console.log('🔄 Refreshing user data for admin...');
-        const refreshedUser = await refreshUserData();
-        console.log('🔄 Refreshed user data:', refreshedUser);
+        // Add a small delay to avoid conflicts with initialization
+        setTimeout(async () => {
+          const refreshedUser = await refreshUserData();
+          console.log('🔄 Refreshed user data:', refreshedUser);
+        }, 100);
       }
     } catch (error: any) {
       console.error('Error updating branding:', error);

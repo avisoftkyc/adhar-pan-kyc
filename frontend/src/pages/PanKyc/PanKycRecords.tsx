@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
@@ -10,7 +10,8 @@ import {
   ExclamationTriangleIcon,
   ClockIcon,
   EyeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
 interface PanKycRecord {
@@ -64,6 +65,7 @@ const PanKycRecords: React.FC = () => {
   }, []);
   const [records, setRecords] = useState<PanKycRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const hasFetchedRecords = useRef(false);
   const [stats, setStats] = useState<RecordsStats>({
     total: 0,
     pending: 0,
@@ -90,12 +92,18 @@ const PanKycRecords: React.FC = () => {
       return;
     }
 
+    // Prevent multiple simultaneous calls
+    if (hasFetchedRecords.current || loading) {
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await api.get('/pan-kyc/records');
       if (response.data.success) {
         setRecords(response.data.data);
         calculateStats(response.data.data);
+        hasFetchedRecords.current = true;
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -111,9 +119,15 @@ const PanKycRecords: React.FC = () => {
         });
         console.error('Error fetching records:', error);
       }
+      hasFetchedRecords.current = false; // Reset on error to allow retry
     } finally {
       setLoading(false);
     }
+  };
+
+  const refreshRecords = async () => {
+    hasFetchedRecords.current = false;
+    await fetchRecords();
   };
 
   // Calculate statistics
@@ -249,10 +263,15 @@ const PanKycRecords: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !hasFetchedRecords.current) {
       fetchRecords();
     }
   }, [isAuthenticated, user]);
+
+  // Reset fetch flag when user changes
+  useEffect(() => {
+    hasFetchedRecords.current = false;
+  }, [user?._id]);
 
   return (
     <div className="space-y-6">
@@ -275,13 +294,23 @@ const PanKycRecords: React.FC = () => {
                 View and manage all PAN KYC verification records
               </p>
             </div>
-            <button
-              onClick={downloadCSV}
-              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30"
-            >
-              <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
-              Download CSV
-            </button>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={refreshRecords}
+                disabled={loading}
+                className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ArrowPathIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              <button
+                onClick={downloadCSV}
+                className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30"
+              >
+                <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+                Download CSV
+              </button>
+            </div>
           </div>
         </div>
       </div>

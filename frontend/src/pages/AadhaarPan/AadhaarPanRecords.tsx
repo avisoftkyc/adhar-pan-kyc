@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
@@ -67,6 +67,9 @@ const AadhaarPanRecords: React.FC = () => {
     linked: 0,
     'not-linked': 0
   });
+  
+  // Ref to track if we've already fetched records to prevent multiple API calls
+  const hasFetchedRecords = useRef(false);
 
   // Pagination and search
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,14 +89,21 @@ const AadhaarPanRecords: React.FC = () => {
       return;
     }
 
+    // Prevent multiple API calls
+    if (hasFetchedRecords.current || loading) {
+      return;
+    }
+
     try {
       setLoading(true);
+      hasFetchedRecords.current = true;
       const response = await api.get('/aadhaar-pan/records');
       if (response.data.success) {
         setRecords(response.data.data);
         calculateStats(response.data.data);
       }
     } catch (error: any) {
+      hasFetchedRecords.current = false; // Reset on error so we can retry
       if (error.response?.status === 401) {
         showToast({
           message: 'Authentication failed. Please log in again.',
@@ -250,8 +260,13 @@ const AadhaarPanRecords: React.FC = () => {
     });
   };
 
+  // Reset fetch flag when user changes
   useEffect(() => {
-    if (isAuthenticated && user) {
+    hasFetchedRecords.current = false;
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !hasFetchedRecords.current) {
       fetchRecords();
     }
   }, [isAuthenticated, user]);
@@ -277,13 +292,32 @@ const AadhaarPanRecords: React.FC = () => {
                 View and manage all Aadhaar-PAN linking verification records
               </p>
             </div>
-            <button
-              onClick={downloadCSV}
-              className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30"
-            >
-              <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
-              Download CSV
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  hasFetchedRecords.current = false;
+                  fetchRecords();
+                }}
+                disabled={loading}
+                className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                ) : (
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                Refresh
+              </button>
+              <button
+                onClick={downloadCSV}
+                className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 hover:scale-105 transform border border-white/30"
+              >
+                <ArrowDownTrayIcon className="h-5 w-5 mr-2" />
+                Download CSV
+              </button>
+            </div>
           </div>
         </div>
       </div>

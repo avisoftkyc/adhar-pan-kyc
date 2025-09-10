@@ -568,31 +568,46 @@ const Dashboard: React.FC = () => {
                   };
 
                   const getStatusText = (activity: any) => {
-                    const { status, module, displayName, identifier, activityType } = activity;
+                    const { status, module, displayName, identifier, activityType, batchId } = activity;
+                    
+                    // Clean up the display name - remove raw IDs and batch IDs
+                    let cleanDisplayName = displayName || identifier || 'Document';
+                    
+                    // Remove batch ID patterns (format: xxxxxxxx:xxxxxxxx)
+                    cleanDisplayName = cleanDisplayName.replace(/^[a-f0-9]{32}:[a-f0-9]{32}\s*/, '');
+                    
+                    // Remove raw ID patterns
+                    cleanDisplayName = cleanDisplayName.replace(/^[a-f0-9]{24}:[a-f0-9]{32}\s*/, '');
+                    
+                    // If still empty or just IDs, use a generic name
+                    if (!cleanDisplayName || cleanDisplayName.trim() === '' || /^[a-f0-9:]+$/.test(cleanDisplayName)) {
+                      cleanDisplayName = module === 'PAN KYC' ? 'PAN Document' : 'Aadhaar-PAN Document';
+                    }
                     
                     if (module === 'PAN KYC') {
-                      switch (activityType) {
-                        case 'verification_success':
-                          return `${displayName} - PAN KYC verified successfully`;
-                        case 'verification_pending':
-                          return `${displayName} - PAN KYC verification pending`;
-                        case 'verification_failed':
-                          return `${displayName} - PAN KYC verification failed`;
-                        case 'document_uploaded':
+                      switch (status) {
+                        case 'verified':
+                        case 'valid':
+                          return `${cleanDisplayName} - PAN KYC verified successfully`;
+                        case 'pending':
+                          return `${cleanDisplayName} - PAN KYC verification pending`;
+                        case 'failed':
+                        case 'invalid':
+                        case 'error':
+                          return `${cleanDisplayName} - PAN KYC verification failed`;
                         default:
-                          return `${displayName} - PAN KYC document uploaded`;
+                          return `${cleanDisplayName} - PAN KYC document processed`;
                       }
                     } else {
-                      switch (activityType) {
-                        case 'linking_success':
-                          return `${displayName} - Aadhaar-PAN linked successfully`;
-                        case 'linking_failed':
-                          return `${displayName} - Aadhaar-PAN linking failed`;
-                        case 'linking_pending':
-                          return `${displayName} - Aadhaar-PAN linking pending`;
-                        case 'document_uploaded':
+                      switch (status) {
+                        case 'linked':
+                          return `${cleanDisplayName} - Aadhaar-PAN linked successfully`;
+                        case 'not-linked':
+                          return `${cleanDisplayName} - Aadhaar-PAN linking failed`;
+                        case 'pending':
+                          return `${cleanDisplayName} - Aadhaar-PAN linking pending`;
                         default:
-                          return `${displayName} - Aadhaar-PAN document uploaded`;
+                          return `${cleanDisplayName} - Aadhaar-PAN document processed`;
                       }
                     }
                   };
@@ -638,7 +653,10 @@ const Dashboard: React.FC = () => {
                         </p>
                         {activity.identifier && (
                           <p className="text-xs text-slate-400 mt-1">
-                            ID: {activity.identifier}
+                            ID: {activity.identifier.length > 20 ? 
+                              `${activity.identifier.substring(0, 8)}...${activity.identifier.substring(activity.identifier.length - 8)}` : 
+                              activity.identifier
+                            }
                           </p>
                         )}
                       </div>

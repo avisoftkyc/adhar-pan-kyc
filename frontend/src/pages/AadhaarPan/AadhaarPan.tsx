@@ -132,6 +132,7 @@ const AadhaarPan: React.FC = () => {
     setLoaderMessage('');
   };
 
+
   useEffect(() => {
     fetchBatches();
   }, []);
@@ -144,13 +145,7 @@ const AadhaarPan: React.FC = () => {
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      showLoader('Loading Aadhaar-PAN records...');
-      
-      // Ensure minimum loading time for better UX
-      const [response] = await Promise.all([
-        api.get('/aadhaar-pan/batches'),
-        new Promise(resolve => setTimeout(resolve, 800)) // Minimum 800ms loading time
-      ]);
+      const response = await api.get('/aadhaar-pan/batches');
       
       console.log('Aadhaar-PAN batches response:', response.data);
       setBatches(response.data.data || []);
@@ -162,7 +157,6 @@ const AadhaarPan: React.FC = () => {
       });
     } finally {
       setLoading(false);
-      hideLoader();
     }
   };
 
@@ -1339,7 +1333,7 @@ const AadhaarPan: React.FC = () => {
         document.body
       )}
 
-      {/* Eye-Catching Full-Page Loader */}
+      {/* Eye-Catching Full-Page Loader - Only for Verify Selected */}
       {showFullScreenLoader && createPortal(
         <div className="fixed inset-0 z-[9999] overflow-hidden" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh' }}>
           {/* Animated Background */}

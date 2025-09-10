@@ -83,6 +83,7 @@ const PanKyc: React.FC = () => {
   const [newlyUploadedBatchId, setNewlyUploadedBatchId] = useState<string | null>(null);
   const batchDetailsRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasFetchedBatches = useRef(false);
   
   // Table pagination and search
   const [tableCurrentPage, setTableCurrentPage] = useState(1);
@@ -121,8 +122,15 @@ const PanKyc: React.FC = () => {
   const [showVerifySelectedPopup, setShowVerifySelectedPopup] = useState(false);
 
   useEffect(() => {
-    fetchBatches();
+    if (!hasFetchedBatches.current) {
+      fetchBatches();
+    }
   }, []);
+
+  // Reset fetch flag when user changes
+  useEffect(() => {
+    hasFetchedBatches.current = false;
+  }, [user?._id]);
 
   // Reset to first page when batches change
   useEffect(() => {
@@ -149,19 +157,31 @@ const PanKyc: React.FC = () => {
   }, [selectedBatch, searchTerm]);
 
   const fetchBatches = async () => {
+    // Prevent multiple simultaneous calls
+    if (hasFetchedBatches.current || loading) {
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await api.get('/pan-kyc/batches');
       setBatches(response.data.data);
-          } catch (error) {
-        console.error('Error fetching batches:', error);
-        showToast({
-          type: 'error',
-          message: 'Failed to fetch batches'
-        });
-      } finally {
+      hasFetchedBatches.current = true;
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch batches'
+      });
+      hasFetchedBatches.current = false; // Reset on error to allow retry
+    } finally {
       setLoading(false);
     }
+  };
+
+  const refreshBatches = async () => {
+    hasFetchedBatches.current = false;
+    await fetchBatches();
   };
 
   const fetchBatchDetails = async (batchId: string) => {
@@ -276,7 +296,7 @@ const PanKyc: React.FC = () => {
       }
       
       // Fetch updated batches list
-      await fetchBatches();
+      await refreshBatches();
       
       // Automatically fetch and display the newly uploaded batch
       if (response.data.data.batchId) {
@@ -420,7 +440,7 @@ const PanKyc: React.FC = () => {
       }
       
       // Refresh batches list
-      await fetchBatches();
+      await refreshBatches();
     } catch (error) {
       console.error('Error verifying records:', error);
       showToast({
@@ -477,7 +497,7 @@ const PanKyc: React.FC = () => {
       }
       
       // Refresh batches list
-      await fetchBatches();
+      await refreshBatches();
     } catch (error) {
       console.error('Error verifying record:', error);
       showToast({
@@ -510,7 +530,7 @@ const PanKyc: React.FC = () => {
       }
       
       // Refresh batches list
-      await fetchBatches();
+      await refreshBatches();
     } catch (error) {
       console.error('Error deleting batch:', error);
       showToast({
@@ -792,7 +812,16 @@ const PanKyc: React.FC = () => {
                 Upload Excel files and verify PAN details in bulk with advanced verification
               </p>
             </div>
-                      <button
+                      <div className="flex items-center space-x-3">
+            <button
+              onClick={refreshBatches}
+              disabled={loading}
+              className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent border border-white/30 hover:border-white/50 hover:scale-105 transform disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ArrowPathIcon className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
               onClick={() => window.location.href = '/pan-kyc-records'}
               className="inline-flex items-center px-6 py-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent border border-white/30 hover:border-white/50 hover:scale-105 transform"
             >
@@ -801,6 +830,7 @@ const PanKyc: React.FC = () => {
             </svg>
             View All Records
           </button>
+          </div>
         </div>
       </div>
 
