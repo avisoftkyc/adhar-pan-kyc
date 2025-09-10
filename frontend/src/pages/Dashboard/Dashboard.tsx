@@ -385,34 +385,67 @@ const Dashboard: React.FC = () => {
               <h2 className="text-xl font-semibold text-slate-800">Quick Actions</h2>
             </div>
             <div className="space-y-3">
-              <button 
-                onClick={() => window.location.href = '/pan-kyc'}
-                className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
-              >
-                <DocumentTextIcon className="h-5 w-5 mr-2" />
-                Upload PAN KYC Document
-              </button>
-              <button 
-                onClick={() => window.location.href = '/aadhaar-pan'}
-                className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
-              >
-                <UserIcon className="h-5 w-5 mr-2" />
-                Upload Aadhaar-PAN Document
-              </button>
-              <button 
-                onClick={() => window.location.href = '/pan-kyc'}
-                className="w-full p-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-2xl hover:from-indigo-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
-              >
-                <DocumentMagnifyingGlassIcon className="h-5 w-5 mr-2" />
-                View PAN KYC Records
-              </button>
-              <button 
-                onClick={() => window.location.href = '/aadhaar-pan'}
-                className="w-full p-3 bg-gradient-to-r from-cyan-500 to-emerald-600 text-white rounded-2xl hover:from-cyan-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
-              >
-                <UserIcon className="h-5 w-5 mr-2" />
-                View Aadhaar-PAN Records
-              </button>
+              {/* PAN KYC Module Actions */}
+              {user?.moduleAccess?.includes('pan-kyc') && (
+                <>
+                  <button 
+                    onClick={() => window.location.href = '/pan-kyc'}
+                    className="w-full p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <DocumentTextIcon className="h-5 w-5 mr-2" />
+                    Upload PAN KYC Document
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/pan-kyc'}
+                    className="w-full p-3 bg-gradient-to-r from-indigo-500 to-blue-600 text-white rounded-2xl hover:from-indigo-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <DocumentMagnifyingGlassIcon className="h-5 w-5 mr-2" />
+                    View PAN KYC Records
+                  </button>
+                </>
+              )}
+
+              {/* Aadhaar-PAN Module Actions */}
+              {user?.moduleAccess?.includes('aadhaar-pan') && (
+                <>
+                  <button 
+                    onClick={() => window.location.href = '/aadhaar-pan'}
+                    className="w-full p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <UserIcon className="h-5 w-5 mr-2" />
+                    Upload Aadhaar-PAN Document
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/aadhaar-pan'}
+                    className="w-full p-3 bg-gradient-to-r from-cyan-500 to-emerald-600 text-white rounded-2xl hover:from-cyan-600 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <UserIcon className="h-5 w-5 mr-2" />
+                    View Aadhaar-PAN Records
+                  </button>
+                </>
+              )}
+
+              {/* Admin Module Actions */}
+              {user?.role === 'admin' && (
+                <button 
+                  onClick={() => window.location.href = '/admin'}
+                  className="w-full p-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-2xl hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                >
+                  <ShieldCheckIcon className="h-5 w-5 mr-2" />
+                  Admin Panel
+                </button>
+              )}
+
+              {/* No Module Access Message */}
+              {(!user?.moduleAccess || user.moduleAccess.length === 0) && user?.role !== 'admin' && (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 mb-2">
+                    <UserGroupIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  </div>
+                  <p className="text-gray-600 font-medium">No module access granted</p>
+                  <p className="text-sm text-gray-500 mt-1">Contact your administrator for module permissions</p>
+                </div>
+              )}
             </div>
           </div>
 
