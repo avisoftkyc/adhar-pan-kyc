@@ -116,6 +116,27 @@ const logAadhaarPanEvent = async (action, userId, linkData, req) => {
   });
 };
 
+// Log Aadhaar verification events
+const logAadhaarVerificationEvent = async (action, userId, verificationData, req) => {
+  return await logEvent({
+    userId,
+    action,
+    module: 'aadhaar_verification',
+    resource: 'verification_record',
+    resourceId: verificationData.recordId,
+    details: {
+      batchId: verificationData.batchId,
+      aadhaarNumber: verificationData.aadhaarNumber ? '***' + verificationData.aadhaarNumber.slice(-4) : undefined,
+      status: verificationData.status,
+      processingTime: verificationData.processingTime,
+    },
+    ipAddress: req.ip,
+    userAgent: req.get('User-Agent'),
+    sessionId: req.sessionID,
+    requestId: req.headers['x-request-id'],
+  });
+};
+
 // Log API call events
 const logApiCall = async (service, action, userId, apiData, req) => {
   return await logEvent({
@@ -349,6 +370,7 @@ module.exports = {
   logFileUpload,
   logPanKycEvent,
   logAadhaarPanEvent,
+  logAadhaarVerificationEvent,
   logApiCall,
   logAdminEvent,
   logSystemEvent,

@@ -2660,6 +2660,24 @@ const Admin: React.FC = () => {
                       />
                       <span className="ml-2 text-sm text-gray-700">Aadhaar-PAN Linking</span>
                     </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserForModules.moduleAccess.includes('aadhaar-verification')}
+                        onChange={(e) => {
+                          const newModuleAccess = e.target.checked
+                            ? [...selectedUserForModules.moduleAccess, 'aadhaar-verification']
+                            : selectedUserForModules.moduleAccess.filter(m => m !== 'aadhaar-verification');
+                          setSelectedUserForModules({
+                            ...selectedUserForModules,
+                            moduleAccess: newModuleAccess
+                          });
+                        }}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Aadhaar Verification</span>
+                    </label>
                   </div>
                 </div>
                 

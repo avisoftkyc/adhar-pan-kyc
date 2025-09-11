@@ -9,6 +9,7 @@ import {
   Cog6ToothIcon,
   ChevronDownIcon,
   UserCircleIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -56,6 +57,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
 
   const navigation = [
+    ...(user?.role !== 'admin' ? [{
+      name: 'Dashboard',
+      href: '/dashboard',
+      icon: ChartBarIcon,
+      current: location.pathname === '/dashboard',
+    }] : []),
     {
       name: 'PAN KYC',
       href: '/pan-kyc',
@@ -69,6 +76,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: IdentificationIcon,
       current: location.pathname === '/aadhaar-pan',
       module: 'aadhaar-pan',
+    },
+    {
+      name: 'Aadhaar Verification',
+      href: '/aadhaar-verification',
+      icon: IdentificationIcon,
+      current: location.pathname.startsWith('/aadhaar-verification'),
+      module: 'aadhaar-verification',
     },
     ...(user?.role === 'admin' ? [{
       name: 'Admin',

@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
   },
   moduleAccess: {
     type: [String],
-    enum: ['pan-kyc', 'aadhaar-pan'],
+    enum: ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification'],
     default: [],
   },
   isActive: {

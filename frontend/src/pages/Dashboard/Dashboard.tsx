@@ -12,7 +12,8 @@ import {
   ClockIcon,
   DocumentMagnifyingGlassIcon,
   UserIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  IdentificationIcon
 } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -20,6 +21,7 @@ interface Stats {
   totalRecords: number;
   panKycRecords: number;
   aadhaarPanRecords: number;
+  aadhaarVerificationRecords: number;
   verifiedRecords: number;
   panKyc: {
     total: number;
@@ -32,6 +34,13 @@ interface Stats {
     linked: number;
     notLinked: number;
     pending: number;
+  };
+  aadhaarVerification: {
+    total: number;
+    verified: number;
+    rejected: number;
+    pending: number;
+    error: number;
   };
   recentActivity: Array<{
     _id: string;
@@ -54,6 +63,7 @@ const Dashboard: React.FC = () => {
     totalRecords: 0,
     panKycRecords: 0,
     aadhaarPanRecords: 0,
+    aadhaarVerificationRecords: 0,
     verifiedRecords: 0,
     panKyc: {
       total: 0,
@@ -66,6 +76,13 @@ const Dashboard: React.FC = () => {
       linked: 0,
       notLinked: 0,
       pending: 0
+    },
+    aadhaarVerification: {
+      total: 0,
+      verified: 0,
+      rejected: 0,
+      pending: 0,
+      error: 0
     },
     recentActivity: []
   });
@@ -101,10 +118,12 @@ const Dashboard: React.FC = () => {
         // Fallback to dummy data for demonstration
         const panKycRecords = 0;
         const aadhaarPanRecords = 0;
+        const aadhaarVerificationRecords = 0;
         const fallbackStats = {
-          totalRecords: panKycRecords + aadhaarPanRecords,
+          totalRecords: panKycRecords + aadhaarPanRecords + aadhaarVerificationRecords,
           panKycRecords: panKycRecords,
           aadhaarPanRecords: aadhaarPanRecords,
+          aadhaarVerificationRecords: aadhaarVerificationRecords,
           verifiedRecords: 0,
           panKyc: {
             total: 0,
@@ -117,6 +136,13 @@ const Dashboard: React.FC = () => {
             linked: 0,
             notLinked: 0,
             pending: 0
+          },
+          aadhaarVerification: {
+            total: 0,
+            verified: 0,
+            rejected: 0,
+            pending: 0,
+            error: 0
           },
           recentActivity: []
         };
@@ -186,6 +212,10 @@ const Dashboard: React.FC = () => {
     { name: 'Total Records', value: stats.aadhaarPanRecords, color: '#10b981' }
   ];
 
+  const aadhaarVerificationData = [
+    { name: 'Total Records', value: stats.aadhaarVerificationRecords, color: '#8b5cf6' }
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
@@ -223,10 +253,11 @@ const Dashboard: React.FC = () => {
 
         {/* Stats Cards with staggered animations - Module-wise */}
         <div className={`grid gap-6 mb-8 ${
-          // Dynamic grid based on number of accessible modules
+          // For normal users, always display stats in one row
+          user?.role !== 'admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
+          // For admin users, use the original dynamic grid
           user?.moduleAccess?.length === 2 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
           user?.moduleAccess?.length === 1 ? 'grid-cols-1 md:grid-cols-2' :
-          user?.role === 'admin' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
           'grid-cols-1'
         }`}>
           {/* Total Records - Show only if user has access to any module or is admin */}
@@ -382,6 +413,57 @@ const Dashboard: React.FC = () => {
             </div>
           )}
 
+          {/* Aadhaar Verification Records - Show only for users with aadhaar-verification access */}
+          {user?.moduleAccess?.includes('aadhaar-verification') && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-out cursor-pointer group animate-fade-in-up"
+              style={{ animationDelay: '0.5s' }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <IdentificationIcon className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-600">Aadhaar Verification</p>
+                  <AnimatedNumber 
+                    value={stats.aadhaarVerificationRecords} 
+                    className="text-2xl font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+              {/* Pie Chart */}
+              <div className="h-32 bg-gray-50 rounded-xl flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={aadhaarVerificationData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={40}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {aadhaarVerificationData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legend */}
+              <div className="mt-3 space-y-1">
+                {aadhaarVerificationData.map((item) => (
+                  <div key={item.name} className="flex items-center text-xs">
+                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }}></div>
+                    <span className="text-slate-600">{item.name}: {item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* No Module Access Message */}
           {(!user?.moduleAccess || user.moduleAccess.length === 0) && user?.role !== 'admin' && (
             <div 
@@ -450,6 +532,33 @@ const Dashboard: React.FC = () => {
                   >
                     <UserIcon className="h-5 w-5 mr-2" />
                     View Aadhaar-PAN Records
+                  </button>
+                </>
+              )}
+
+              {/* Aadhaar Verification Module Actions */}
+              {user?.moduleAccess?.includes('aadhaar-verification') && (
+                <>
+                  <button 
+                    onClick={() => window.location.href = '/aadhaar-verification'}
+                    className="w-full p-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-2xl hover:from-purple-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <IdentificationIcon className="h-5 w-5 mr-2" />
+                    Verify Aadhaar
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/aadhaar-verification-upload'}
+                    className="w-full p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <IdentificationIcon className="h-5 w-5 mr-2" />
+                    Upload Aadhaar File
+                  </button>
+                  <button 
+                    onClick={() => window.location.href = '/aadhaar-verification-records'}
+                    className="w-full p-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-2xl hover:from-violet-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                  >
+                    <IdentificationIcon className="h-5 w-5 mr-2" />
+                    View Aadhaar Records
                   </button>
                 </>
               )}

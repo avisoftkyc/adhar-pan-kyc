@@ -16,6 +16,9 @@ import PanKyc from './pages/PanKyc/PanKyc';
 import PanKycRecords from './pages/PanKyc/PanKycRecords';
 import AadhaarPan from './pages/AadhaarPan/AadhaarPan';
 import AadhaarPanRecords from './pages/AadhaarPan/AadhaarPanRecords';
+import AadhaarVerification from './pages/AadhaarVerification/AadhaarVerification';
+import AadhaarVerificationRecords from './pages/AadhaarVerification/AadhaarVerificationRecords';
+import AadhaarVerificationUpload from './pages/AadhaarVerification/AadhaarVerificationUpload';
 import ProfileWrapper from './pages/Profile/ProfileWrapper';
 import Admin from './pages/Admin/Admin';
 
@@ -147,7 +150,29 @@ const AppContent: React.FC = () => {
             </ModuleRoute>
           } />
 
+          <Route path="/aadhaar-verification" element={
+            <ModuleRoute module="aadhaar-verification">
+              <Layout>
+                <AadhaarVerification />
+              </Layout>
+            </ModuleRoute>
+          } />
 
+          <Route path="/aadhaar-verification-records" element={
+            <ModuleRoute module="aadhaar-verification">
+              <Layout>
+                <AadhaarVerificationRecords />
+              </Layout>
+            </ModuleRoute>
+          } />
+
+          <Route path="/aadhaar-verification-upload" element={
+            <ModuleRoute module="aadhaar-verification">
+              <Layout>
+                <AadhaarVerificationUpload />
+              </Layout>
+            </ModuleRoute>
+          } />
 
           <Route path="/profile" element={
             <ProtectedRoute>

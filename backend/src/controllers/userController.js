@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const PanKyc = require('../models/PanKyc');
 const AadhaarPan = require('../models/AadhaarPan');
+const AadhaarVerification = require('../models/AadhaarVerification');
 const emailService = require('../services/emailService');
 const logger = require('../utils/logger');
 
@@ -117,6 +118,9 @@ const getUserStats = async (userId, days = 30) => {
   // Get Aadhaar-PAN stats
   const aadhaarPanStats = await AadhaarPan.getUserStats(userId, days);
 
+  // Get Aadhaar verification stats
+  const aadhaarVerificationStats = await AadhaarVerification.getUserStats(userId, days);
+
   // Get audit activity summary
   const auditService = require('../services/auditService');
   const activitySummary = await auditService.getUserActivitySummary(userId, days);
@@ -124,6 +128,7 @@ const getUserStats = async (userId, days = 30) => {
   return {
     panKyc: panKycStats,
     aadhaarPan: aadhaarPanStats,
+    aadhaarVerification: aadhaarVerificationStats,
     activity: activitySummary,
     period: {
       startDate,
