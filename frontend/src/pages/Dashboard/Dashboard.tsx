@@ -547,13 +547,6 @@ const Dashboard: React.FC = () => {
                     Verify Aadhaar
                   </button>
                   <button 
-                    onClick={() => window.location.href = '/aadhaar-verification-upload'}
-                    className="w-full p-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
-                  >
-                    <IdentificationIcon className="h-5 w-5 mr-2" />
-                    Upload Aadhaar File
-                  </button>
-                  <button 
                     onClick={() => window.location.href = '/aadhaar-verification-records'}
                     className="w-full p-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-2xl hover:from-violet-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
                   >

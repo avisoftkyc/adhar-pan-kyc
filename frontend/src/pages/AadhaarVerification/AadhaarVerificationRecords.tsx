@@ -21,14 +21,14 @@ interface VerificationRecord {
   status: string;
   createdAt: string;
   processedAt?: string;
-  aadhaarNumber: string;
-  name: string;
+    aadhaarNumber: string;
+    name: string;
   dateOfBirth: string;
-  gender: string;
+    gender: string;
   address?: string;
   pinCode?: string;
   state?: string;
-  district?: string;
+    district?: string;
   careOf?: string;
   photo?: string;
   verificationDetails?: {
@@ -188,157 +188,253 @@ const AadhaarVerificationRecords: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+      {/* Subtle Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <IdentificationIcon className="w-8 h-8 text-blue-600" />
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+              <div className="relative p-6 bg-white rounded-full shadow-2xl border-4 border-white/50 transform group-hover:scale-110 transition-transform duration-300">
+                <IdentificationIcon className="w-16 h-16 text-blue-600" />
+              </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Aadhaar Verification Records</h1>
-          <p className="text-gray-600 mb-4">View your Aadhaar verification history and details</p>
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 animate-pulse">
+            📋 Verification Records
+          </h1>
+          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            🔍 View your complete Aadhaar verification history with detailed information and status tracking
+          </p>
           
           {/* Back to Verification Button */}
           <button
             onClick={() => navigate('/aadhaar-verification')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
           >
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
-            Back to Verification
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <ArrowLeftIcon className="w-6 h-6 mr-3 relative z-10" />
+            <span className="relative z-10 text-lg">Back to Verification</span>
           </button>
         </div>
 
         {/* Records Table */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center space-x-2">
-                <ArrowPathIcon className="w-6 h-6 animate-spin text-blue-600" />
-                <span className="text-gray-600">Loading verification records...</span>
+            <div className="flex items-center justify-center py-20">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                  <div className="relative p-4 bg-white rounded-full shadow-xl">
+                    <ArrowPathIcon className="w-8 h-8 animate-spin text-blue-600" />
+                  </div>
+                </div>
+                <span className="text-xl font-semibold text-gray-600">Loading verification records...</span>
               </div>
             </div>
           ) : records.length === 0 ? (
-            <div className="text-center py-12">
-              <IdentificationIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No verification records found</h3>
-              <p className="text-gray-500">You haven't performed any Aadhaar verifications yet.</p>
+            <div className="text-center py-20">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-gray-300 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                <div className="relative p-8 bg-white rounded-full shadow-xl mx-auto w-32 h-32 flex items-center justify-center">
+                  <IdentificationIcon className="w-16 h-16 text-gray-400" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">No verification records found</h3>
+              <p className="text-lg text-gray-500 mb-8">You haven't performed any Aadhaar verifications yet.</p>
+              <button
+                onClick={() => navigate('/aadhaar-verification')}
+                className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10 flex items-center">
+                  <span className="mr-2">🚀</span>
+                  Start Verification
+                </span>
+              </button>
             </div>
           ) : (
             <>
               {/* Desktop Table */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200" id="aadhaarTable">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
                     <tr>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                         S. No.
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                          Status
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                          Date
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Aadhaar Number
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                          Aadhaar Number
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                          Name
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Gender
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                          Gender
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date Of Birth
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-teal-500 rounded-full mr-2"></span>
+                          Date Of Birth
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        District
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                          District
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        State
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                          State
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Address
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-cyan-500 rounded-full mr-2"></span>
+                          Address
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Care Of
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
+                          Care Of
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Photo
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-violet-500 rounded-full mr-2"></span>
+                          Photo
+                        </span>
                       </th>
-                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>
+                          Actions
+                        </span>
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-100">
                     {records.map((record, index) => (
-                      <tr key={record._id} className="hover:bg-gray-50">
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <tr key={record._id} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform hover:scale-[1.01]">
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
                           {(pagination.currentPage - 1) * 10 + index + 1}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap">
+                        <td className="px-4 py-6 whitespace-nowrap">
                           <div className="flex items-center">
                             {getStatusIcon(record.status)}
                             <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
                               {getStatusText(record.status)}
                             </span>
-                          </div>
+                            </div>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatDate(record.createdAt)}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-800">
+                            {formatDate(record.createdAt)}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
-                          {record.aadhaarNumber ? 
-                            record.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
-                            '-'
-                          }
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-bold text-gray-900 font-mono">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                            {record.aadhaarNumber ? 
+                              record.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
+                              '-'
+                            }
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.name || '-'}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-800">
+                            {record.name || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.gender === 'M' ? 'Male' : record.gender === 'F' ? 'Female' : 'Other'}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-800">
+                            {record.gender === 'M' ? 'Male' : record.gender === 'F' ? 'Female' : 'Other'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.dateOfBirth || '-'}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-teal-100 text-teal-800">
+                            {record.dateOfBirth || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.district || '-'}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800">
+                            {record.district || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {record.state || '-'}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                            {record.state || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 text-sm text-gray-900 max-w-xs truncate">
-                          {record.address || '-'}
+                        <td className="px-4 py-6 text-sm font-semibold text-gray-900 max-w-xs truncate">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-800">
+                            {record.address || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 text-sm text-gray-900 max-w-xs truncate">
-                          {record.careOf || '-'}
+                        <td className="px-4 py-6 text-sm font-semibold text-gray-900 max-w-xs truncate">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                            {record.careOf || '-'}
+                          </span>
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
                           {record.photo ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800">
                               <img 
                                 src={`data:image/jpeg;base64,${record.photo}`} 
                                 alt="Photo" 
-                                className="w-6 h-8 object-cover rounded mr-1"
+                                className="w-8 h-10 object-cover rounded mr-2 border-2 border-green-200"
                               />
-                              Yes
+                              Available
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              No
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-800">
+                              Not Available
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
                           <button
                             onClick={() => handleViewDetails(record)}
-                            className="text-blue-600 hover:text-blue-800 underline"
+                            className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                           >
-                            View Details
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <EyeIcon className="w-4 h-4 mr-2 relative z-10" />
+                            <span className="relative z-10">View Details</span>
                           </button>
                         </td>
                       </tr>
@@ -431,45 +527,50 @@ const AadhaarVerificationRecords: React.FC = () => {
 
               {/* Pagination */}
               {pagination.totalPages > 1 && (
-                <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-6 flex items-center justify-between border-t border-gray-200">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <button
                       onClick={() => handlePageChange(pagination.currentPage - 1)}
                       disabled={!pagination.hasPrev}
-                      className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
-                      Previous
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10">← Previous</span>
                     </button>
                     <button
                       onClick={() => handlePageChange(pagination.currentPage + 1)}
                       disabled={!pagination.hasNext}
-                      className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
-                      Next
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10">Next →</span>
                     </button>
                   </div>
                   <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm text-gray-700">
-                        Showing page <span className="font-medium">{pagination.currentPage}</span> of{' '}
-                        <span className="font-medium">{pagination.totalPages}</span> ({pagination.totalRecords} total records)
+                      <p className="text-lg font-bold text-gray-700">
+                        📄 Showing page <span className="font-bold text-blue-600">{pagination.currentPage}</span> of{' '}
+                        <span className="font-bold text-purple-600">{pagination.totalPages}</span> 
+                        <span className="ml-2 text-sm font-semibold text-gray-600">({pagination.totalRecords} total records)</span>
                       </p>
                     </div>
                     <div>
-                      <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                      <nav className="relative z-0 inline-flex rounded-xl shadow-lg space-x-2">
                         <button
                           onClick={() => handlePageChange(pagination.currentPage - 1)}
                           disabled={!pagination.hasPrev}
-                          className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                         >
-                          Previous
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <span className="relative z-10">← Previous</span>
                         </button>
                         <button
                           onClick={() => handlePageChange(pagination.currentPage + 1)}
                           disabled={!pagination.hasNext}
-                          className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                         >
-                          Next
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <span className="relative z-10">Next →</span>
                         </button>
                       </nav>
                     </div>
@@ -521,7 +622,7 @@ const AadhaarVerificationRecords: React.FC = () => {
                     )}
                     
                     {selectedRecord.processingTime && (
-                      <div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700">Processing Time</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.processingTime}ms</p>
                       </div>
@@ -530,36 +631,36 @@ const AadhaarVerificationRecords: React.FC = () => {
                   </div>
 
                   {/* Aadhaar Information */}
-                  <div className="border-t pt-4">
-                    <h4 className="text-lg font-medium text-gray-900 mb-3">Aadhaar Information</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Aadhaar Number</label>
-                        <p className="mt-1 text-sm text-gray-900 font-mono">
+                    <div className="border-t pt-4">
+                      <h4 className="text-lg font-medium text-gray-900 mb-3">Aadhaar Information</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Aadhaar Number</label>
+                          <p className="mt-1 text-sm text-gray-900 font-mono">
                           {selectedRecord.aadhaarNumber ? 
                             selectedRecord.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
-                            '-'
-                          }
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                              '-'
+                            }
+                          </p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Name</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.name || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Gender</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.gender === 'M' ? 'Male' : selectedRecord.gender === 'F' ? 'Female' : 'Other'}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.dateOfBirth || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">District</label>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">District</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.district || '-'}</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">State</label>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">State</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.state || '-'}</p>
                       </div>
                       <div>
@@ -573,7 +674,7 @@ const AadhaarVerificationRecords: React.FC = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Care Of</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.careOf || '-'}</p>
-                      </div>
+                        </div>
                       {selectedRecord.photo && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-gray-700">Photo</label>

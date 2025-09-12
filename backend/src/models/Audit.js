@@ -30,7 +30,7 @@ const AuditSchema = new mongoose.Schema({
       'aadhaar_pan_api_call', 'aadhaar_pan_api_error', 'single_linking_verified',
       
       // Aadhaar Verification events
-      'aadhaar_verification_upload', 'aadhaar_verification_verification', 'aadhaar_verification_batch_complete',
+      'aadhaar_verification_verification', 'aadhaar_verification_batch_complete',
       'aadhaar_verification_api_call', 'aadhaar_verification_api_error', 'single_aadhaar_verified',
       'otp_sent', 'otp_verification_completed', 'otp_verification_failed',
       

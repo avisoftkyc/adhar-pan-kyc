@@ -10,7 +10,6 @@ import {
   ExclamationTriangleIcon,
   ArrowPathIcon,
   DocumentTextIcon,
-  CloudArrowUpIcon,
   TableCellsIcon,
   UserIcon,
   CalendarIcon,
@@ -52,7 +51,7 @@ const AadhaarVerification: React.FC = () => {
         });
       }, 1000);
     }
-    
+
     return () => {
       if (interval) {
         clearInterval(interval);
@@ -230,52 +229,63 @@ const AadhaarVerification: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+      {/* Subtle Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-100 rounded-full">
-              <IdentificationIcon className="w-8 h-8 text-blue-600" />
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-8">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
+              <div className="relative p-6 bg-white rounded-full shadow-2xl border-4 border-white/50 transform group-hover:scale-110 transition-transform duration-300">
+                <IdentificationIcon className="w-16 h-16 text-blue-600" />
+              </div>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Aadhaar Verification</h1>
-          <p className="text-gray-600 mb-4">Verify Aadhaar details using Sandbox API</p>
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 animate-pulse">
+            Aadhaar Verification
+          </h1>
+          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+            🔐 Secure OTP-based verification with real-time validation and comprehensive data retrieval
+          </p>
           
           {/* Navigation Buttons */}
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-6">
           <button
             onClick={() => navigate('/aadhaar-verification-records')}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
           >
-            <DocumentTextIcon className="w-4 h-4 mr-2" />
-              View Records
-            </button>
-            <button
-              onClick={() => navigate('/aadhaar-verification-upload')}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-            >
-              <CloudArrowUpIcon className="w-4 h-4 mr-2" />
-              Upload File
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <DocumentTextIcon className="w-6 h-6 mr-3 relative z-10" />
+              <span className="relative z-10 text-lg">View Records</span>
           </button>
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Main Verification Area */}
           <div>
-            <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 lg:p-12 transform hover:scale-[1.02] transition-transform duration-300">
               {/* Step 1: Enter Details */}
               {currentStep.step === 'enter-details' && (
                 <div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-6">Enter Aadhaar Details</h2>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-10 text-center">
+                    ✨ Enter Aadhaar Details
+                  </h2>
+                  <form onSubmit={handleSubmit} className="space-y-10">
                     {/* Form Fields in One Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       {/* Aadhaar Number Field */}
-                    <div>
-                      <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                          Aadhaar Number *
+                    <div className="group">
+                      <label htmlFor="aadhaarNumber" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                        Aadhaar Number *
                       </label>
                       <input
                         type="text"
@@ -283,15 +293,16 @@ const AadhaarVerification: React.FC = () => {
                         value={aadhaarNumber}
                         onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, '').slice(0, 12))}
                         placeholder="1234 5678 9012"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg"
                         maxLength={12}
                         required
                       />
                     </div>
 
                       {/* Location Field */}
-                      <div>
-                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="group">
+                        <label htmlFor="location" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
                           Location *
                         </label>
                         <input
@@ -300,14 +311,15 @@ const AadhaarVerification: React.FC = () => {
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
                           placeholder="Enter location"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-lg font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
                           required
                         />
                       </div>
 
                       {/* Dummy Field 1 */}
-                      <div>
-                        <label htmlFor="dummyField1" className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="group">
+                        <label htmlFor="dummyField1" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                           Additional Info 1
                         </label>
                         <input
@@ -316,13 +328,14 @@ const AadhaarVerification: React.FC = () => {
                           value={dummyField1}
                           onChange={(e) => setDummyField1(e.target.value)}
                           placeholder="Additional info"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 text-lg font-medium transition-all duration-300 group-hover:border-green-300 group-hover:shadow-lg"
                         />
                       </div>
 
                       {/* Dummy Field 2 */}
-                      <div>
-                        <label htmlFor="dummyField2" className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="group">
+                        <label htmlFor="dummyField2" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
                           Additional Info 2
                         </label>
                         <input
@@ -331,28 +344,28 @@ const AadhaarVerification: React.FC = () => {
                           value={dummyField2}
                           onChange={(e) => setDummyField2(e.target.value)}
                           placeholder="Additional info"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 text-lg font-medium transition-all duration-300 group-hover:border-orange-300 group-hover:shadow-lg"
                         />
                           </div>
                         </div>
 
                     {/* Consent Checkbox */}
-                    <div className="flex items-start">
-                      <div className="flex items-center h-5">
+                    <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border-2 border-blue-100">
+                      <div className="flex items-center h-6">
                           <input
                           id="consent"
                             type="checkbox"
                             checked={consentAccepted}
                             onChange={(e) => setConsentAccepted(e.target.checked)}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
                           required
                         />
                       </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor="consent" className="font-medium text-gray-700">
-                          I consent to the verification process *
+                      <div className="ml-4 text-base">
+                        <label htmlFor="consent" className="font-bold text-gray-700 cursor-pointer">
+                          ✅ I consent to the verification process *
                           </label>
-                        <p className="text-gray-500">
+                        <p className="text-gray-600 mt-1">
                           By checking this box, I agree to the terms and conditions and consent to the Aadhaar verification process.
                         </p>
                       </div>
@@ -361,15 +374,19 @@ const AadhaarVerification: React.FC = () => {
                     <button
                       type="submit"
                       disabled={isLoading || !validateAadhaarNumber(aadhaarNumber) || !location.trim() || !consentAccepted}
-                      className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 px-8 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       {isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <ArrowPathIcon className="w-5 h-5 animate-spin mr-2" />
-                          Verifying...
+                        <div className="flex items-center justify-center relative z-10">
+                          <ArrowPathIcon className="w-6 h-6 animate-spin mr-3" />
+                          <span className="text-lg">Sending OTP...</span>
                         </div>
                       ) : (
-                        'Verify Aadhaar'
+                        <span className="relative z-10 flex items-center justify-center">
+                          <span className="mr-2">🚀</span>
+                          Send OTP
+                        </span>
                       )}
                     </button>
                   </form>
@@ -379,15 +396,18 @@ const AadhaarVerification: React.FC = () => {
               {/* Step 2: OTP Verification */}
               {currentStep.step === 'otp-verification' && (
                 <div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-6">Enter OTP</h2>
-                  <p className="text-gray-600 mb-6">
-                    We have sent a 6-digit OTP to your registered mobile number. Please enter it below to complete the verification.
+                  <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-8 text-center">
+                    📱 Enter OTP
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-10 text-center max-w-2xl mx-auto">
+                    🔐 We have sent a 6-digit OTP to your registered mobile number. Please enter it below to complete the verification.
                   </p>
                   
-                  <form onSubmit={handleOtpVerification} className="space-y-6">
-                    <div>
-                      <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                        OTP *
+                  <form onSubmit={handleOtpVerification} className="space-y-8">
+                    <div className="group">
+                      <label htmlFor="otp" className="block text-lg font-bold text-gray-700 mb-4 text-center">
+                        <span className="w-3 h-3 bg-green-500 rounded-full mr-2 inline-block"></span>
+                        OTP Code *
                       </label>
                       <input
                         type="text"
@@ -395,61 +415,70 @@ const AadhaarVerification: React.FC = () => {
                         value={otp}
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                         placeholder="123456"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg text-center tracking-widest"
+                        className="w-full px-6 py-6 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 text-2xl text-center tracking-widest font-bold transition-all duration-300 group-hover:border-green-300 group-hover:shadow-lg"
                         maxLength={6}
                         required
                       />
-                      <p className="mt-2 text-sm text-gray-500">
-                        Enter the 6-digit OTP sent to your mobile number
+                      <p className="mt-4 text-center text-gray-600 font-medium">
+                        📲 Enter the 6-digit OTP sent to your mobile number
                       </p>
                     </div>
                     
                     <button
                       type="submit"
                       disabled={isLoading || otp.length !== 6}
-                      className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="group relative w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-5 px-8 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       {isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <ArrowPathIcon className="w-5 h-5 animate-spin mr-2" />
-                          Verifying OTP...
+                        <div className="flex items-center justify-center relative z-10">
+                          <ArrowPathIcon className="w-6 h-6 animate-spin mr-3" />
+                          <span className="text-lg">Verifying OTP...</span>
                         </div>
                       ) : (
-                        'Verify OTP'
+                        <span className="relative z-10 flex items-center justify-center">
+                          <span className="mr-2">✅</span>
+                          Verify OTP
+                        </span>
                       )}
                     </button>
                   </form>
                   
-                  <div className="mt-6 text-center space-y-3">
-                    <button
+                  <div className="mt-8 text-center space-y-4">
+                      <button
                       onClick={() => setCurrentStep({ step: 'enter-details' })}
-                      className="text-blue-600 hover:text-blue-800 text-sm underline block"
-                    >
+                      className="group inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
+                      >
+                      <span className="mr-2">←</span>
                       Back to form
-                    </button>
+                      </button>
                     
-                    <div className="border-t pt-3">
-                      <p className="text-sm text-gray-600 mb-2">
-                        Didn't receive the OTP?
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-2xl border-2 border-yellow-100">
+                      <p className="text-lg font-semibold text-gray-700 mb-4 text-center">
+                        📱 Didn't receive the OTP?
                       </p>
                       <button
                         onClick={handleResendOtp}
                         disabled={!canResend || isLoading}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`group relative w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform ${
                           canResend && !isLoading
-                            ? 'bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2'
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-500/20'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                       >
+                        <div className={`absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canResend || isLoading ? 'hidden' : ''}`}></div>
                         {isLoading ? (
-                          <div className="flex items-center">
-                            <ArrowPathIcon className="w-4 h-4 animate-spin mr-2" />
-                            Resending...
+                          <div className="flex items-center justify-center relative z-10">
+                            <ArrowPathIcon className="w-5 h-5 animate-spin mr-2" />
+                            <span>Resending...</span>
                           </div>
                         ) : resendCooldown > 0 ? (
-                          `Resend OTP in ${resendCooldown}s`
+                          <span className="relative z-10">⏰ Resend OTP in {resendCooldown}s</span>
                         ) : (
-                          'Resend OTP'
+                          <span className="relative z-10 flex items-center justify-center">
+                            <span className="mr-2">🔄</span>
+                            Resend OTP
+                          </span>
                         )}
                       </button>
                     </div>
@@ -460,49 +489,56 @@ const AadhaarVerification: React.FC = () => {
               {/* Step 3: Success */}
               {currentStep.step === 'success' && (
                 <div className="text-center">
-                  <div className="flex justify-center mb-6">
-                    <CheckCircleIcon className="w-16 h-16 text-green-500" />
+                  <div className="flex justify-center mb-8">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-green-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                      <div className="relative p-6 bg-white rounded-full shadow-2xl border-4 border-green-100">
+                        <CheckCircleIcon className="w-20 h-20 text-green-500" />
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Verification Successful!</h2>
-                  <p className="text-gray-600 mb-6">
-                    Your Aadhaar details have been successfully verified.
+                  <h2 className="text-5xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-6">
+                    🎉 Verification Successful!
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                    ✅ Your Aadhaar details have been successfully verified and stored securely.
                   </p>
                   
                   {currentStep.data && (
-                    <div className="bg-green-50 rounded-lg p-6 mb-6 text-left">
-                      <h3 className="font-medium text-green-800 mb-3">Verification Details:</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center">
-                          <IdentificationIcon className="w-4 h-4 mr-2 text-green-600" />
-                          <span className="font-medium">Aadhaar Number:</span>
-                          <span className="ml-2 font-mono">{formatAadhaarNumber(currentStep.data.aadhaarNumber)}</span>
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8 mb-8 border-2 border-green-100 shadow-xl">
+                      <h3 className="text-2xl font-bold text-green-800 mb-6 text-center">📋 Verification Details</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base">
+                        <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                          <IdentificationIcon className="w-5 h-5 mr-3 text-blue-600" />
+                          <span className="font-bold text-gray-700">Aadhaar Number:</span>
+                          <span className="ml-2 font-mono text-lg font-bold text-blue-600">{formatAadhaarNumber(currentStep.data.aadhaarNumber)}</span>
                         </div>
-                        <div className="flex items-center">
-                          <UserIcon className="w-4 h-4 mr-2 text-green-600" />
-                          <span className="font-medium">Name:</span>
-                          <span className="ml-2">{currentStep.data.name}</span>
+                        <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                          <UserIcon className="w-5 h-5 mr-3 text-purple-600" />
+                          <span className="font-bold text-gray-700">Name:</span>
+                          <span className="ml-2 text-lg font-bold text-purple-600">{currentStep.data.name}</span>
                         </div>
-                        <div className="flex items-center">
-                          <CalendarIcon className="w-4 h-4 mr-2 text-green-600" />
-                          <span className="font-medium">Date of Birth:</span>
-                          <span className="ml-2">{currentStep.data.dateOfBirth}</span>
+                        <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                          <CalendarIcon className="w-5 h-5 mr-3 text-green-600" />
+                          <span className="font-bold text-gray-700">Date of Birth:</span>
+                          <span className="ml-2 text-lg font-bold text-green-600">{currentStep.data.dateOfBirth}</span>
                         </div>
-                        <div className="flex items-center">
-                          <UserIcon className="w-4 h-4 mr-2 text-green-600" />
-                          <span className="font-medium">Gender:</span>
-                          <span className="ml-2">{currentStep.data.gender === 'M' ? 'Male' : currentStep.data.gender === 'F' ? 'Female' : 'Other'}</span>
+                        <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                          <UserIcon className="w-5 h-5 mr-3 text-pink-600" />
+                          <span className="font-bold text-gray-700">Gender:</span>
+                          <span className="ml-2 text-lg font-bold text-pink-600">{currentStep.data.gender === 'M' ? 'Male' : currentStep.data.gender === 'F' ? 'Female' : 'Other'}</span>
                         </div>
                         {currentStep.data.verificationDetails && (
                           <>
-                            <div className="flex items-center">
-                              <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" />
-                              <span className="font-medium">Status:</span>
-                              <span className="ml-2 capitalize">{currentStep.data.status}</span>
+                            <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                              <CheckCircleIcon className="w-5 h-5 mr-3 text-green-600" />
+                              <span className="font-bold text-gray-700">Status:</span>
+                              <span className="ml-2 text-lg font-bold text-green-600 capitalize">{currentStep.data.status}</span>
                             </div>
-                            <div className="flex items-center">
-                              <ClockIcon className="w-4 h-4 mr-2 text-green-600" />
-                              <span className="font-medium">Processing Time:</span>
-                              <span className="ml-2">{currentStep.data.processingTime}ms</span>
+                            <div className="flex items-center bg-white/50 p-3 rounded-xl">
+                              <ClockIcon className="w-5 h-5 mr-3 text-orange-600" />
+                              <span className="font-bold text-gray-700">Processing Time:</span>
+                              <span className="ml-2 text-lg font-bold text-orange-600">{currentStep.data.processingTime}ms</span>
                             </div>
                           </>
                         )}
@@ -510,18 +546,26 @@ const AadhaarVerification: React.FC = () => {
                     </div>
                   )}
                   
-                  <div className="flex space-x-4 justify-center">
+                  <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 justify-center">
                   <button
                     onClick={resetVerification}
-                    className="bg-blue-600 text-white py-3 px-8 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  >
-                      Verify Another
+                      className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10 flex items-center">
+                        <span className="mr-2">🔄</span>
+                        Verify Another
+                      </span>
                     </button>
                     <button
                       onClick={() => navigate('/aadhaar-verification-records')}
-                      className="bg-gray-600 text-white py-3 px-8 rounded-lg font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+                      className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
-                      View Records
+                      <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10 flex items-center">
+                        <span className="mr-2">📋</span>
+                        View Records
+                      </span>
                   </button>
                   </div>
                 </div>
@@ -530,19 +574,30 @@ const AadhaarVerification: React.FC = () => {
               {/* Step 3: Error */}
               {currentStep.step === 'error' && (
                 <div className="text-center">
-                  <div className="flex justify-center mb-6">
-                    <XCircleIcon className="w-16 h-16 text-red-500" />
+                  <div className="flex justify-center mb-8">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-red-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                      <div className="relative p-6 bg-white rounded-full shadow-2xl border-4 border-red-100">
+                        <XCircleIcon className="w-20 h-20 text-red-500" />
+                      </div>
+                    </div>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">Verification Failed</h2>
-                  <p className="text-gray-600 mb-6">
+                  <h2 className="text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-6">
+                    ❌ Verification Failed
+                  </h2>
+                  <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
                     {currentStep.data?.message || 'An error occurred during verification.'}
                   </p>
                   
                   <button
                     onClick={resetVerification}
-                    className="bg-blue-600 text-white py-3 px-8 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                   >
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-red-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10 flex items-center">
+                      <span className="mr-2">🔄</span>
                     Try Again
+                    </span>
                   </button>
                 </div>
               )}
