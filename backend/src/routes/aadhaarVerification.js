@@ -12,8 +12,83 @@ const { verifyAadhaar, simulateAadhaarVerification } = require('../services/aadh
 // Get all records for a user
 router.get('/records', protect, async (req, res) => {
   try {
-    const records = await AadhaarVerification.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const status = req.query.status || '';
+    const dateFrom = req.query.dateFrom || '';
+    const dateTo = req.query.dateTo || '';
+    const sortBy = req.query.sortBy || 'createdAt';
+    const sortOrder = req.query.sortOrder || 'desc';
+
+    // Build search query
+    let searchQuery = { userId: req.user.id };
+    
+    // Add search term filter
+    if (search) {
+      // Create regex for case-insensitive search
+      const searchRegex = new RegExp(search, 'i');
+      
+      // Search in multiple fields including API response data
+      searchQuery = {
+        ...searchQuery,
+        $or: [
+          { aadhaarNumber: searchRegex },
+          { name: searchRegex },
+          { address: searchRegex },
+          { district: searchRegex },
+          { state: searchRegex },
+          { pinCode: searchRegex },
+          { careOf: searchRegex },
+          // Search in API response data (where actual decrypted values are stored)
+          { 'verificationDetails.apiResponse.data.name': searchRegex },
+          { 'verificationDetails.apiResponse.data.address.full_address': searchRegex },
+          { 'verificationDetails.apiResponse.data.address.district': searchRegex },
+          { 'verificationDetails.apiResponse.data.address.state': searchRegex },
+          { 'verificationDetails.apiResponse.data.address.pincode': searchRegex },
+          { 'verificationDetails.apiResponse.data.care_of': searchRegex }
+        ]
+      };
+    }
+
+    // Add status filter
+    if (status) {
+      searchQuery = {
+        ...searchQuery,
+        status: status
+      };
+    }
+
+    // Add date range filter
+    if (dateFrom || dateTo) {
+      searchQuery.dateOfBirth = {};
+      if (dateFrom) {
+        searchQuery.dateOfBirth.$gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        searchQuery.dateOfBirth.$lte = new Date(dateTo);
+      }
+    }
+
+    // Debug: Log the search query
+    if (search) {
+      console.log('Search query built:', JSON.stringify(searchQuery, null, 2));
+    }
+
+    // Get total count for pagination
+    const totalRecords = await AadhaarVerification.countDocuments(searchQuery);
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    // Build sort object
+    const sortObj = {};
+    sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Get paginated records
+    const records = await AadhaarVerification.find(searchQuery)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     // Decrypt sensitive data for each record
@@ -40,10 +115,36 @@ router.get('/records', protect, async (req, res) => {
       }
     });
 
-      res.json({
-        success: true,
-      data: decryptedRecords
+    const responseData = {
+      success: true,
+      data: decryptedRecords,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+        limit: limit
+      }
+    };
+    
+    console.log('Aadhaar verification records response:', {
+      totalRecords,
+      totalPages,
+      currentPage: page,
+      recordsReturned: decryptedRecords.length,
+      searchTerm: search || 'none',
+      searchQuery: search ? 'Applied' : 'None',
+      filters: {
+        status: status || 'none',
+        dateFrom: dateFrom || 'none',
+        dateTo: dateTo || 'none',
+        sortBy,
+        sortOrder
+      }
     });
+    
+    res.json(responseData);
   } catch (error) {
     logger.error('Error fetching Aadhaar verification records:', error);
     res.status(500).json({

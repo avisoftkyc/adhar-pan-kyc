@@ -12,7 +12,12 @@ import {
   EyeIcon,
   CalendarIcon,
   UserIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  FunnelIcon,
+  ChevronUpIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 
 interface VerificationRecord {
@@ -78,12 +83,34 @@ const AadhaarVerificationRecords: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<VerificationRecord | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filters, setFilters] = useState({
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Load verification records
-  const loadRecords = async (page: number = 1) => {
+  const loadRecords = async (page: number = 1, search: string = '', currentFilters = filters) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3002/api'}/aadhaar-verification/records`, {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10'
+      });
+      
+      if (search) params.append('search', search);
+      if (currentFilters.status) params.append('status', currentFilters.status);
+      if (currentFilters.dateFrom) params.append('dateFrom', currentFilters.dateFrom);
+      if (currentFilters.dateTo) params.append('dateTo', currentFilters.dateTo);
+      if (currentFilters.sortBy) params.append('sortBy', currentFilters.sortBy);
+      if (currentFilters.sortOrder) params.append('sortOrder', currentFilters.sortOrder);
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3002/api'}/aadhaar-verification/records?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         }
@@ -91,13 +118,14 @@ const AadhaarVerificationRecords: React.FC = () => {
 
       const data = await response.json();
       if (data.success) {
+        console.log('Pagination data received:', data.pagination);
         setRecords(data.data);
         setPagination({
-          currentPage: 1,
-          totalPages: 1,
-          totalRecords: data.data.length,
-          hasNext: false,
-          hasPrev: false
+          currentPage: data.pagination.currentPage,
+          totalPages: data.pagination.totalPages,
+          totalRecords: data.pagination.totalRecords,
+          hasNext: data.pagination.hasNext,
+          hasPrev: data.pagination.hasPrev
         });
       } else {
         toast.error(data.message || 'Failed to load verification records');
@@ -174,7 +202,65 @@ const AadhaarVerificationRecords: React.FC = () => {
 
 
   const handlePageChange = (page: number) => {
-    loadRecords(page);
+    loadRecords(page, searchTerm, filters);
+  };
+
+  // Handle search
+  const handleSearch = async (search: string) => {
+    setSearchTerm(search);
+    setIsSearching(true);
+    await loadRecords(1, search, filters);
+    setIsSearching(false);
+  };
+
+  // Handle filter changes
+  const handleFilterChange = async (newFilters: typeof filters) => {
+    setFilters(newFilters);
+    setIsSearching(true);
+    await loadRecords(1, searchTerm, newFilters);
+    setIsSearching(false);
+  };
+
+  // Handle sort change
+  const handleSortChange = (sortBy: string) => {
+    const newSortOrder = filters.sortBy === sortBy && filters.sortOrder === 'desc' ? 'asc' : 'desc';
+    const newFilters = { ...filters, sortBy, sortOrder: newSortOrder };
+    handleFilterChange(newFilters);
+  };
+
+  // Handle search input change with debounce
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // Clear existing timeout
+    if ((window as any).searchTimeout) {
+      clearTimeout((window as any).searchTimeout);
+    }
+    
+    // Set new timeout for debounced search
+    (window as any).searchTimeout = setTimeout(() => {
+      handleSearch(value);
+    }, 500);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchTerm('');
+    handleSearch('');
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    const defaultFilters = {
+      status: '',
+      dateFrom: '',
+      dateTo: '',
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    };
+    setFilters(defaultFilters);
+    handleFilterChange(defaultFilters);
   };
 
   const handleViewDetails = (record: VerificationRecord) => {
@@ -225,6 +311,167 @@ const AadhaarVerificationRecords: React.FC = () => {
           </button>
         </div>
 
+        {/* Enhanced Search Section */}
+        <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 transform hover:scale-[1.01] transition-transform duration-300">
+          {/* Main Search Bar */}
+          <div className="flex flex-col lg:flex-row gap-4 items-center mb-6">
+            <div className="flex-1 relative">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <MagnifyingGlassIcon className="h-6 w-6 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by Aadhaar Number, Name, Address, District, State, PIN Code, or Care Of..."
+                value={searchTerm}
+                onChange={handleSearchInputChange}
+                className="block w-full pl-12 pr-12 py-4 border border-gray-300 rounded-2xl text-lg font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+              />
+              {searchTerm && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              )}
+            </div>
+            
+            {/* Advanced Filters Toggle */}
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`group relative inline-flex items-center px-6 py-4 font-bold rounded-2xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
+                showAdvancedFilters 
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-purple-600 hover:to-blue-600'
+              }`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <FunnelIcon className="w-5 h-5 mr-2 relative z-10" />
+              <span className="relative z-10">Filters</span>
+            </button>
+
+            {isSearching && (
+              <div className="flex items-center space-x-2 text-blue-600">
+                <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                <span className="text-sm font-medium">Searching...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Advanced Filters Panel */}
+          {showAdvancedFilters && (
+            <div className="border-t border-gray-200 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                  <select
+                    value={filters.status}
+                    onChange={(e) => handleFilterChange({ ...filters, status: e.target.value })}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                  >
+                    <option value="">All Status</option>
+                    <option value="verified">Verified</option>
+                    <option value="failed">Failed</option>
+                    <option value="expired">Expired</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+
+                {/* Date From Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date From</label>
+                  <input
+                    type="date"
+                    value={filters.dateFrom}
+                    onChange={(e) => handleFilterChange({ ...filters, dateFrom: e.target.value })}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                  />
+                </div>
+
+                {/* Date To Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date To</label>
+                  <input
+                    type="date"
+                    value={filters.dateTo}
+                    onChange={(e) => handleFilterChange({ ...filters, dateTo: e.target.value })}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                  />
+                </div>
+
+                {/* Sort By Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sort By</label>
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange({ ...filters, sortBy: e.target.value })}
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                  >
+                    <option value="createdAt">Date Created</option>
+                    <option value="name">Name</option>
+                    <option value="aadhaarNumber">Aadhaar Number</option>
+                    <option value="status">Status</option>
+                    <option value="district">District</option>
+                    <option value="state">State</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Filter Actions */}
+              <div className="flex flex-wrap gap-3 justify-center">
+                <button
+                  onClick={() => handleFilterChange({ ...filters, sortOrder: filters.sortOrder === 'desc' ? 'asc' : 'desc' })}
+                  className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-green-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  {filters.sortOrder === 'desc' ? (
+                    <ChevronDownIcon className="w-5 h-5 mr-2 relative z-10" />
+                  ) : (
+                    <ChevronUpIcon className="w-5 h-5 mr-2 relative z-10" />
+                  )}
+                  <span className="relative z-10">Sort {filters.sortOrder === 'desc' ? 'Descending' : 'Ascending'}</span>
+                </button>
+
+                <button
+                  onClick={clearAllFilters}
+                  className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <XMarkIcon className="w-5 h-5 mr-2 relative z-10" />
+                  <span className="relative z-10">Clear All Filters</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Active Filters Display */}
+          {(searchTerm || filters.status || filters.dateFrom || filters.dateTo) && (
+            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+              {searchTerm && (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  🔍 Search: "{searchTerm}"
+                </span>
+              )}
+              {filters.status && (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  📊 Status: {filters.status}
+                </span>
+              )}
+              {filters.dateFrom && (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                  📅 From: {filters.dateFrom}
+                </span>
+              )}
+              {filters.dateTo && (
+                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                  📅 To: {filters.dateTo}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Records Table */}
         <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
           {isLoading ? (
@@ -244,21 +491,44 @@ const AadhaarVerificationRecords: React.FC = () => {
               <div className="relative mb-8">
                 <div className="absolute inset-0 bg-gray-300 rounded-full blur-lg opacity-60 animate-pulse"></div>
                 <div className="relative p-8 bg-white rounded-full shadow-xl mx-auto w-32 h-32 flex items-center justify-center">
-                  <IdentificationIcon className="w-16 h-16 text-gray-400" />
+                  {searchTerm ? (
+                    <MagnifyingGlassIcon className="w-16 h-16 text-gray-400" />
+                  ) : (
+                    <IdentificationIcon className="w-16 h-16 text-gray-400" />
+                  )}
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No verification records found</h3>
-              <p className="text-lg text-gray-500 mb-8">You haven't performed any Aadhaar verifications yet.</p>
-              <button
-                onClick={() => navigate('/aadhaar-verification')}
-                className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <span className="relative z-10 flex items-center">
-                  <span className="mr-2">🚀</span>
-                  Start Verification
-                </span>
-              </button>
+              {searchTerm ? (
+                <>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">No records found for "{searchTerm}"</h3>
+                  <p className="text-lg text-gray-500 mb-8">Try searching with different keywords or clear the search to see all records.</p>
+                  <button
+                    onClick={clearSearch}
+                    className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10 flex items-center">
+                      <span className="mr-2">🔍</span>
+                      Clear Search
+                    </span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">No verification records found</h3>
+                  <p className="text-lg text-gray-500 mb-8">You haven't performed any Aadhaar verifications yet.</p>
+                  <button
+                    onClick={() => navigate('/aadhaar-verification')}
+                    className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10 flex items-center">
+                      <span className="mr-2">🚀</span>
+                      Start Verification
+                    </span>
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -267,28 +537,60 @@ const AadhaarVerificationRecords: React.FC = () => {
                 <table className="min-w-max divide-y divide-gray-200" id="aadhaarTable" style={{ minWidth: '1200px' }}>
                   <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
                     <tr>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-0 bg-gradient-to-r from-blue-50 to-purple-50 z-10">
+                      <th 
+                        className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-0 bg-gradient-to-r from-blue-50 to-purple-50 z-10 cursor-pointer hover:bg-gradient-to-r hover:from-indigo-100 hover:to-purple-100 transition-all duration-300"
+                        onClick={() => handleSortChange('aadhaarNumber')}
+                      >
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
                           Aadhaar Number
+                          {filters.sortBy === 'aadhaarNumber' && (
+                            filters.sortOrder === 'desc' ? 
+                              <ChevronDownIcon className="w-4 h-4 ml-1 text-indigo-600" /> : 
+                              <ChevronUpIcon className="w-4 h-4 ml-1 text-indigo-600" />
+                          )}
                         </span>
                       </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-32 bg-gradient-to-r from-blue-50 to-purple-50 z-10">
+                      <th 
+                        className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-32 bg-gradient-to-r from-blue-50 to-purple-50 z-10 cursor-pointer hover:bg-gradient-to-r hover:from-pink-100 hover:to-purple-100 transition-all duration-300"
+                        onClick={() => handleSortChange('name')}
+                      >
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
                           Name
+                          {filters.sortBy === 'name' && (
+                            filters.sortOrder === 'desc' ? 
+                              <ChevronDownIcon className="w-4 h-4 ml-1 text-pink-600" /> : 
+                              <ChevronUpIcon className="w-4 h-4 ml-1 text-pink-600" />
+                          )}
                         </span>
                       </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gradient-to-r hover:from-green-100 hover:to-purple-100 transition-all duration-300"
+                        onClick={() => handleSortChange('status')}
+                      >
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                           Status
+                          {filters.sortBy === 'status' && (
+                            filters.sortOrder === 'desc' ? 
+                              <ChevronDownIcon className="w-4 h-4 ml-1 text-green-600" /> : 
+                              <ChevronUpIcon className="w-4 h-4 ml-1 text-green-600" />
+                          )}
                         </span>
                       </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gradient-to-r hover:from-purple-100 hover:to-blue-100 transition-all duration-300"
+                        onClick={() => handleSortChange('createdAt')}
+                      >
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                        Date
+                          Date
+                          {filters.sortBy === 'createdAt' && (
+                            filters.sortOrder === 'desc' ? 
+                              <ChevronDownIcon className="w-4 h-4 ml-1 text-purple-600" /> : 
+                              <ChevronUpIcon className="w-4 h-4 ml-1 text-purple-600" />
+                          )}
                         </span>
                       </th>
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -533,7 +835,7 @@ const AadhaarVerificationRecords: React.FC = () => {
               </div>
 
               {/* Pagination */}
-              {pagination.totalPages > 1 && (
+              {pagination.totalRecords > 0 && (
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-6 py-6 flex items-center justify-between border-t border-gray-200">
                   <div className="flex-1 flex justify-between sm:hidden">
                     <button
@@ -566,18 +868,52 @@ const AadhaarVerificationRecords: React.FC = () => {
                         <button
                           onClick={() => handlePageChange(pagination.currentPage - 1)}
                           disabled={!pagination.hasPrev}
-                          className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                          className="group relative inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <span className="relative z-10">← Previous</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <span className="relative z-10">←</span>
                         </button>
+                        
+                        {/* Page Numbers */}
+                        {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                          let pageNum: number;
+                          if (pagination.totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (pagination.currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                            pageNum = pagination.totalPages - 4 + i;
+                          } else {
+                            pageNum = pagination.currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handlePageChange(pageNum)}
+                              className={`group relative inline-flex items-center px-4 py-2 font-bold rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
+                                pageNum === pagination.currentPage
+                                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white'
+                                  : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-600 hover:text-white'
+                              }`}
+                            >
+                              <div className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                                pageNum === pagination.currentPage
+                                  ? 'bg-gradient-to-r from-blue-600 to-purple-500'
+                                  : 'bg-gradient-to-r from-purple-600 to-blue-500'
+                              }`}></div>
+                              <span className="relative z-10">{pageNum}</span>
+                            </button>
+                          );
+                        })}
+                        
                         <button
                           onClick={() => handlePageChange(pagination.currentPage + 1)}
                           disabled={!pagination.hasNext}
-                          className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                          className="group relative inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <span className="relative z-10">Next →</span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <span className="relative z-10">→</span>
                         </button>
                       </nav>
                     </div>
