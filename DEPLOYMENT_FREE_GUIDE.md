@@ -4,12 +4,14 @@
 - GitHub account
 - MongoDB Atlas account (free tier)
 - Vercel account (free)
-- Railway account (free tier)
+- Render account (free tier) - **Recommended**
+- Railway account (free tier) - Alternative
 
 ## 🎯 Deployment Strategy
 
 ### Frontend: Vercel (Free)
-### Backend: Railway (Free tier)
+### Backend: Render (Free tier) - **Recommended**
+### Backend: Railway (Free tier) - Alternative
 ### Database: MongoDB Atlas (Free tier)
 
 ---
@@ -45,7 +47,41 @@ Click "Deploy" and get your frontend URL!
 
 ---
 
-## ⚙️ Backend Deployment (Railway)
+## ⚙️ Backend Deployment (Render) - **Recommended**
+
+### Step 1: Prepare Backend
+Your backend is already configured with `render.yaml` and `backend/render.json`.
+
+### Step 2: Deploy to Render
+1. Go to [render.com](https://render.com)
+2. Sign up with GitHub
+3. Click "New +" → "Web Service"
+4. Connect your GitHub repository
+5. Configure the service:
+   - **Name**: `kyc-aadhaar-backend`
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Plan**: Free
+
+### Step 3: Set Environment Variables
+In Render dashboard, go to Environment tab and add:
+```
+NODE_ENV=production
+PORT=3002
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+SANDBOX_API_KEY=your_sandbox_api_key
+SANDBOX_API_SECRET=your_sandbox_api_secret
+ENCRYPTION_KEY=your_super_secret_encryption_key_32_chars_long
+```
+
+### Step 4: Deploy
+Click "Create Web Service" and wait for deployment.
+
+---
+
+## ⚙️ Backend Deployment (Railway) - Alternative
 
 ### Step 1: Prepare Backend
 Ensure your `backend/package.json` has:
