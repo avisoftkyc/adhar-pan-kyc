@@ -50,7 +50,12 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://yourdomain.com'] 
+    ? [
+        'https://your-app.vercel.app',
+        'https://your-custom-domain.com',
+        /\.vercel\.app$/,
+        /\.netlify\.app$/
+      ] 
     : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -152,11 +157,12 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+const serverPort = process.env.PORT || PORT;
+app.listen(serverPort, '0.0.0.0', () => {
+  logger.info(`Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
+  console.log(`🚀 Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
+  console.log(`📊 Health check: http://localhost:${serverPort}/health`);
+  console.log(`🔗 API Base URL: http://localhost:${serverPort}/api`);
 });
 
 // Graceful shutdown
