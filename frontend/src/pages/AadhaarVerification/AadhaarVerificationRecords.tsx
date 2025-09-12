@@ -29,6 +29,8 @@ interface VerificationRecord {
   pinCode?: string;
   state?: string;
   district?: string;
+  careOf?: string;
+  photo?: string;
   verificationDetails?: {
     apiResponse?: any;
     verificationDate?: string;
@@ -42,6 +44,12 @@ interface VerificationRecord {
     addressMatch?: boolean;
     transactionId?: string;
     fullAddress?: string;
+    careOf?: string;
+    photo?: string;
+    emailHash?: string;
+    mobileHash?: string;
+    yearOfBirth?: string;
+    shareCode?: string;
   };
   processingTime?: number;
   errorMessage?: string;
@@ -255,6 +263,12 @@ const AadhaarVerificationRecords: React.FC = () => {
                         Address
                       </th>
                       <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Care Of
+                      </th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Photo
+                      </th>
+                      <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -299,6 +313,25 @@ const AadhaarVerificationRecords: React.FC = () => {
                         </td>
                         <td className="px-2 py-4 text-sm text-gray-900 max-w-xs truncate">
                           {record.address || '-'}
+                        </td>
+                        <td className="px-2 py-4 text-sm text-gray-900 max-w-xs truncate">
+                          {record.careOf || '-'}
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {record.photo ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <img 
+                                src={`data:image/jpeg;base64,${record.photo}`} 
+                                alt="Photo" 
+                                className="w-6 h-8 object-cover rounded mr-1"
+                              />
+                              Yes
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              No
+                            </span>
+                          )}
                         </td>
                         <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-900">
                           <button
@@ -346,6 +379,27 @@ const AadhaarVerificationRecords: React.FC = () => {
                       <div>
                         <span className="text-gray-500">State:</span>
                         <span className="ml-1 font-medium">{record.state || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Care Of:</span>
+                        <span className="ml-1 font-medium">{record.careOf || '-'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Photo:</span>
+                        <span className="ml-1 font-medium">
+                          {record.photo ? (
+                            <span className="inline-flex items-center text-green-600">
+                              <img 
+                                src={`data:image/jpeg;base64,${record.photo}`} 
+                                alt="Photo" 
+                                className="w-4 h-6 object-cover rounded mr-1"
+                              />
+                              Available
+                            </span>
+                          ) : (
+                            'Not Available'
+                          )}
+                        </span>
                       </div>
                     </div>
                     
@@ -516,6 +570,22 @@ const AadhaarVerificationRecords: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700">Address</label>
                         <p className="mt-1 text-sm text-gray-900">{selectedRecord.address || '-'}</p>
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Care Of</label>
+                        <p className="mt-1 text-sm text-gray-900">{selectedRecord.careOf || '-'}</p>
+                      </div>
+                      {selectedRecord.photo && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Photo</label>
+                          <div className="mt-1">
+                            <img 
+                              src={`data:image/jpeg;base64,${selectedRecord.photo}`} 
+                              alt="Aadhaar Photo" 
+                              className="w-24 h-32 object-cover border rounded"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -25,9 +25,14 @@ const AuditSchema = new mongoose.Schema({
       'pan_kyc_upload', 'pan_kyc_verification', 'pan_kyc_batch_complete',
       'pan_kyc_api_call', 'pan_kyc_api_error', 'record_verified', 'batch_deleted', 'single_kyc_verified',
       
-                        // Aadhaar-PAN events
-                  'aadhaar_pan_upload', 'aadhaar_pan_verification', 'aadhaar_pan_batch_complete',
-                  'aadhaar_pan_api_call', 'aadhaar_pan_api_error', 'single_linking_verified',
+      // Aadhaar-PAN events
+      'aadhaar_pan_upload', 'aadhaar_pan_verification', 'aadhaar_pan_batch_complete',
+      'aadhaar_pan_api_call', 'aadhaar_pan_api_error', 'single_linking_verified',
+      
+      // Aadhaar Verification events
+      'aadhaar_verification_upload', 'aadhaar_verification_verification', 'aadhaar_verification_batch_complete',
+      'aadhaar_verification_api_call', 'aadhaar_verification_api_error', 'single_aadhaar_verified',
+      'otp_sent', 'otp_verification_completed', 'otp_verification_failed',
       
       // Report events
       'report_generated', 'report_downloaded', 'report_deleted',
@@ -46,7 +51,7 @@ const AuditSchema = new mongoose.Schema({
   },
   module: {
     type: String,
-    enum: ['auth', 'user_management', 'pan_kyc', 'aadhaar_pan', 'admin', 'system', 'reports', 'archival'],
+    enum: ['auth', 'user_management', 'pan_kyc', 'aadhaar_pan', 'aadhaar_verification', 'admin', 'system', 'reports', 'archival'],
     required: true,
   },
   resource: {

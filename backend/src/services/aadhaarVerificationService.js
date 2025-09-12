@@ -1,4 +1,5 @@
 const logger = require('../utils/logger');
+const axios = require('axios');
 
 // Sandbox API Configuration
 const SANDBOX_API_KEY = process.env.SANDBOX_API_KEY || 'key_live_6edea225e1354559b2422d3921c795cf';
@@ -33,7 +34,7 @@ function formatDateToDDMMYYYY(dateStr) {
     const year = date.getFullYear();
     
     return `${day}/${month}/${year}`;
-  } catch (error) {
+    } catch (error) {
     logger.error('Date formatting error:', error);
     throw new Error(`Invalid date format: ${dateStr}`);
   }
@@ -74,76 +75,161 @@ async function authenticateWithSandbox() {
     logger.info("Sandbox authentication successful for Aadhaar verification");
     return accessToken;
     
-  } catch (error) {
+    } catch (error) {
     logger.error("Sandbox authentication error for Aadhaar verification:", error);
     throw error;
   }
 }
 
-// Verify Aadhaar with Sandbox API
-async function verifyAadhaarWithSandbox(aadhaarNumber, name, dateOfBirth, gender, reason) {
+// Send OTP for Aadhaar verification with retry logic
+async function sendAadhaarOTP(aadhaarNumber, reason = 'For KYC', retryCount = 0) {
+  const maxRetries = 2;
+  
   try {
-    logger.info("Starting Sandbox API Aadhaar verification...");
-    
-    // Step 1: Authenticate
+    logger.info("Sending Aadhaar OTP...", { aadhaarNumber, retryCount });
+
+    // Step 1: Authenticate first
     const accessToken = await authenticateWithSandbox();
-    
-    // Step 2: Format date
-    const formattedDob = formatDateToDDMMYYYY(dateOfBirth);
-    
-    // Step 3: Verify Aadhaar
-    const verificationResponse = await fetch(`${SANDBOX_BASE_URL}/kyc/aadhaar/verify`, {
+
+    const requestData = {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.request',
+      aadhaar_number: aadhaarNumber.replace(/\s/g, ''),
+      consent: 'y',
+      reason: reason
+    };
+
+    logger.info("OTP Send request data:", {
+      url: `${SANDBOX_BASE_URL}/kyc/aadhaar/okyc/otp`,
+      data: requestData,
+      hasAccessToken: !!accessToken,
+      accessTokenLength: accessToken ? accessToken.length : 0
+    });
+
+    const options = {
       method: 'POST',
+      url: `${SANDBOX_BASE_URL}/kyc/aadhaar/okyc/otp`,
       headers: {
-        'accept': 'application/json',
-        'Content-Type': 'application/json',
-        'authorization': accessToken,
+        accept: 'application/json',
+        'x-api-version': '2.0',
+        'content-type': 'application/json',
         'x-api-key': SANDBOX_API_KEY,
-        'x-accept-cache': 'true',
+        'authorization': accessToken
       },
-      body: JSON.stringify({
-        "@entity": "in.co.sandbox.kyc.aadhaar_verification.request",
-        aadhaar_number: aadhaarNumber.replace(/\s/g, ''),
-        name_as_per_aadhaar: name.trim(),
-        date_of_birth: formattedDob,
-        gender: gender || 'M',
-        consent: "Y",
-        reason: reason || "KYC Verification",
-      }),
-    });
+      data: requestData
+    };
 
-    if (!verificationResponse.ok) {
-      const errorData = await verificationResponse.json();
-      logger.error("Sandbox Aadhaar verification failed:", {
-        status: verificationResponse.status,
-        data: errorData
+    const response = await axios.request(options);
+    
+    logger.info("Aadhaar OTP sent successfully:", {
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    });
+    
+    // Log the transaction ID for debugging
+    if (response.data) {
+      logger.info("OTP Response transaction ID fields:", {
+        transaction_id: response.data.transaction_id,
+        txn_id: response.data.txn_id,
+        reference_id: response.data.reference_id,
+        ref_id: response.data.ref_id,
+        id: response.data.id,
+        fullResponse: response.data
       });
-      throw new Error(`Verification failed: ${verificationResponse.status} - ${JSON.stringify(errorData)}`);
     }
+    
+    return response.data;
 
-    const verificationData = await verificationResponse.json();
-    
-    logger.info("Sandbox Aadhaar verification successful:", {
-      status: verificationResponse.status,
-      data: verificationData
+    } catch (error) {
+    logger.error("Error sending Aadhaar OTP:", {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers
+      }
     });
+
+    // Handle specific error cases
+    if (error.response?.status === 500) {
+      const errorMessage = error.response?.data?.message || 'Internal server error from Sandbox API';
+      
+      // Check if it's a rate limit error
+      if (errorMessage.includes('45 seconds') || errorMessage.includes('rate limit')) {
+        throw new Error(`Rate limit exceeded. Please wait 45 seconds before trying again.`);
+      }
+      
+      // Retry logic for temporary 500 errors
+      if (retryCount < maxRetries) {
+        logger.info(`Retrying OTP send (attempt ${retryCount + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, 2000 * (retryCount + 1))); // Exponential backoff
+        return sendAadhaarOTP(aadhaarNumber, reason, retryCount + 1);
+      }
+      
+      throw new Error(`Sandbox API error: ${errorMessage}. Please try again later.`);
+    }
     
-    return verificationData;
+    throw new Error(`Failed to send OTP: ${error.response?.data?.message || error.message}`);
+  }
+}
+
+// Verify OTP for Aadhaar verification
+async function verifyAadhaarOTP(referenceId, otp) {
+  try {
+    logger.info("Verifying Aadhaar OTP...", { 
+      referenceId, 
+      otp,
+      referenceIdType: typeof referenceId,
+      referenceIdLength: referenceId ? referenceId.length : 'null'
+    });
+
+    // Step 1: Authenticate first
+    const accessToken = await authenticateWithSandbox();
+
+    const requestData = {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.request',
+      reference_id: String(referenceId), // Convert to string as required by API
+      otp: otp
+    };
+
+    logger.info("OTP Verification request data:", requestData);
+
+    const options = {
+      method: 'POST',
+      url: `${SANDBOX_BASE_URL}/kyc/aadhaar/okyc/otp/verify`,
+      headers: {
+        accept: 'application/json',
+        'x-api-version': '2.0',
+        'content-type': 'application/json',
+        'x-api-key': SANDBOX_API_KEY,
+        'authorization': accessToken
+      },
+      data: requestData
+    };
+
+    const response = await axios.request(options);
     
-  } catch (error) {
-    logger.error("Sandbox Aadhaar verification error:", error);
-    throw error;
+    logger.info("Aadhaar OTP verification successful:", response.data);
+    return response.data;
+
+    } catch (error) {
+    logger.error("Error verifying Aadhaar OTP:", error.response?.data || error.message);
+    throw new Error(`Failed to verify OTP: ${error.response?.data?.message || error.message}`);
   }
 }
 
 // Main Aadhaar verification function
-async function verifyAadhaar(aadhaarNumber, name, dateOfBirth, gender = 'M', reason = "KYC Verification") {
+async function verifyAadhaar(aadhaarNumber, location, dummyField1, dummyField2, reason = "KYC Verification") {
   try {
-    logger.info("Starting Aadhaar verification:", {
+    logger.info("Starting Aadhaar verification (OTP flow):", {
       aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-      name,
-      dateOfBirth,
-      gender,
+      location,
+      dummyField1,
+      dummyField2,
       reason
     });
     
@@ -153,45 +239,45 @@ async function verifyAadhaar(aadhaarNumber, name, dateOfBirth, gender = 'M', rea
       throw new Error('Invalid Aadhaar number format. Must be 12 digits.');
     }
     
-    // Use Sandbox API for verification
-    const result = await verifyAadhaarWithSandbox(aadhaarNumber, name, dateOfBirth, gender, reason);
+    // Send OTP first
+    const otpResponse = await sendAadhaarOTP(aadhaarNumber, reason);
+
+    // Extract the correct reference ID
+    // The reference_id might be in the data object or at root level
+    const extractedReferenceId = otpResponse.data?.reference_id || otpResponse.reference_id || otpResponse.transaction_id || otpResponse.txn_id;
     
-    // Process the response
-    const verificationData = result.data || result;
-    
-    return {
-      valid: verificationData.status === 'valid',
-      message: 'Aadhaar verification completed successfully',
+    logger.info("Extracting reference ID from OTP response:", {
+      data_reference_id: otpResponse.data?.reference_id,
+      root_reference_id: otpResponse.reference_id,
+      transaction_id: otpResponse.transaction_id,
+      txn_id: otpResponse.txn_id,
+      extractedReferenceId: extractedReferenceId,
+      extractedType: typeof extractedReferenceId,
+      fullResponse: otpResponse
+    });
+
+        return {
+          success: true,
+      message: 'OTP sent successfully',
       details: {
         aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-        name: name.trim(),
-        dateOfBirth,
-        gender,
-        verifiedAt: new Date(),
-        source: 'sandbox_api',
-        apiResponse: result,
-        confidence: 95,
-        dataMatch: verificationData.name_as_per_aadhaar_match && verificationData.date_of_birth_match && verificationData.gender_match,
-        nameMatch: verificationData.name_as_per_aadhaar_match,
-        dobMatch: verificationData.date_of_birth_match,
-        genderMatch: verificationData.gender_match,
-        addressMatch: verificationData.address_match,
-        remarks: verificationData.remarks,
-        transactionId: result.transaction_id,
-        fullAddress: verificationData.full_address,
-        state: verificationData.state,
-        district: verificationData.district,
-        pinCode: verificationData.pin_code
+        location: location.trim(),
+        dummyField1: dummyField1.trim(),
+        dummyField2: dummyField2.trim(),
+        otpSent: true,
+        transactionId: extractedReferenceId,
+        apiResponse: otpResponse,
+        source: 'sandbox_api'
       }
     };
-  } catch (error) {
-    logger.error("Aadhaar verification failed:", {
+    } catch (error) {
+    logger.error("Aadhaar verification (OTP flow) failed:", {
       error: error.message,
       stack: error.stack,
       aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-      name,
-      dateOfBirth,
-      gender
+      location,
+      dummyField1,
+      dummyField2
     });
     
     throw new Error(`Aadhaar verification failed: ${error.message}`);
@@ -295,7 +381,8 @@ async function simulateAadhaarVerification(record) {
 
 module.exports = {
   verifyAadhaar,
-  verifyAadhaarWithSandbox,
+  sendAadhaarOTP,
+  verifyAadhaarOTP,
   authenticateWithSandbox,
   simulateAadhaarVerification
 };

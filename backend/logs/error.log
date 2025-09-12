@@ -14693,3 +14693,509 @@
     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
   timestamp: '2025-09-11 16:43:47'
 }
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-11 16:50:47'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-11 17:01:18'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-11 17:01:30'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-11 17:01:32'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-11 17:01:34'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 11:21:02'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 13:58:25'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 13:58:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 401,
+  message: 'Error sending Aadhaar OTP: Unauthorized',
+  timestamp: '2025-09-12 14:30:32',
+  transaction_id: '0eb6ec9c-5a0b-4094-841c-e7d7651a5119',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Unauthorized',
+  stack: 'Error: Failed to send OTP: Unauthorized\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:113:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:167:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  name: 'a',
+  dateOfBirth: '',
+  gender: '',
+  level: 'error',
+  message: 'Aadhaar verification failed:',
+  timestamp: '2025-09-12 14:30:32'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Unauthorized',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Unauthorized\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:193:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 14:30:32'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 401,
+  message: 'Error sending Aadhaar OTP: Unauthorized',
+  timestamp: '2025-09-12 14:32:39',
+  transaction_id: '89be89e5-9062-45f3-987a-db16e683668c',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Unauthorized',
+  stack: 'Error: Failed to send OTP: Unauthorized\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:113:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:167:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  name: 'a',
+  dateOfBirth: '',
+  gender: '',
+  level: 'error',
+  message: 'Aadhaar verification failed:',
+  timestamp: '2025-09-12 14:32:39'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Unauthorized',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Unauthorized\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:193:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 14:32:39'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 422,
+  timestamp: '2025-09-12 14:33:48',
+  message: 'Error verifying Aadhaar OTP: Invalid reference_id',
+  transaction_id: '9f17dbd3-1115-4d4e-9553-9cef98ab9f99',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid reference_id',
+  stack: 'Error: Failed to verify OTP: Invalid reference_id\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:153:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:853:23',
+  timestamp: '2025-09-12 14:33:48'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 422,
+  timestamp: '2025-09-12 14:38:26',
+  message: 'Error verifying Aadhaar OTP: Invalid reference_id',
+  transaction_id: 'caef94bd-dc5e-412c-ae13-e3947fc40da5',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid reference_id',
+  stack: 'Error: Failed to verify OTP: Invalid reference_id\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:153:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:853:23',
+  timestamp: '2025-09-12 14:38:26'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 422,
+  timestamp: '2025-09-12 14:40:39',
+  message: 'Error verifying Aadhaar OTP: Invalid reference_id',
+  transaction_id: 'e1f2cdf4-cce3-43a9-9729-5c9ac14fc50b',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid reference_id',
+  stack: 'Error: Failed to verify OTP: Invalid reference_id\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:153:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:853:23',
+  timestamp: '2025-09-12 14:40:39'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 422,
+  timestamp: '2025-09-12 14:49:45',
+  message: 'Error verifying Aadhaar OTP: Invalid reference_id',
+  transaction_id: '11c221eb-139d-4301-9d5b-f460c5574354',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid reference_id',
+  stack: 'Error: Failed to verify OTP: Invalid reference_id\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:153:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:853:23',
+  timestamp: '2025-09-12 14:49:45'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 400,
+  timestamp: '2025-09-12 14:54:20',
+  message: 'Error verifying Aadhaar OTP: Invalid request body',
+  transaction_id: 'abbd8333-d32c-42ff-a209-cfa32d2924b3',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid request body',
+  stack: 'Error: Failed to verify OTP: Invalid request body\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:179:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:868:23',
+  timestamp: '2025-09-12 14:54:20'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 500,
+  timestamp: '2025-09-12 14:59:56',
+  message: 'Error sending Aadhaar OTP: Failed to send OTP',
+  transaction_id: '2831b78a-a29b-476a-a5df-adab10d1b129',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Failed to send OTP: Failed to send OTP\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:134:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:201:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  location: 'l',
+  dummyField1: '',
+  dummyField2: '',
+  level: 'error',
+  message: 'Aadhaar verification (OTP flow) failed:',
+  timestamp: '2025-09-12 14:59:56'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Failed to send OTP\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:241:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 14:59:56'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 500,
+  timestamp: '2025-09-12 15:03:51',
+  message: 'Error sending Aadhaar OTP: Failed to send OTP',
+  transaction_id: 'b434caf5-1cc1-4b08-be43-ade328179425',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Failed to send OTP: Failed to send OTP\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:134:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:201:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  location: 'l',
+  dummyField1: '',
+  dummyField2: '',
+  level: 'error',
+  message: 'Aadhaar verification (OTP flow) failed:',
+  timestamp: '2025-09-12 15:03:51'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Failed to send OTP\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:241:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 15:03:51'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 500,
+  timestamp: '2025-09-12 15:04:54',
+  message: 'Error sending Aadhaar OTP: Failed to send OTP',
+  transaction_id: 'f7981add-b130-4c32-b620-722f045c8279',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Failed to send OTP: Failed to send OTP\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:134:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:201:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  location: 'aw',
+  dummyField1: '',
+  dummyField2: '',
+  level: 'error',
+  message: 'Aadhaar verification (OTP flow) failed:',
+  timestamp: '2025-09-12 15:04:54'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Failed to send OTP\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:241:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 15:04:54'
+}
+{
+  service: 'kyc-aadhaar-api',
+  message: 'Error sending Aadhaar OTP: Request failed with status code 500',
+  status: 500,
+  statusText: 'Internal Server Error',
+  data: {
+    code: 500,
+    timestamp: 1757669804961,
+    message: 'Failed to send OTP',
+    transaction_id: '85b24b66-2bce-4032-b6d0-422d610a8e34'
+  },
+  headers: Object [AxiosHeaders] {
+    date: 'Fri, 12 Sep 2025 09:36:49 GMT',
+    'content-type': 'application/json',
+    'content-length': '143',
+    connection: 'close',
+    'x-amzn-requestid': '85b24b66-2bce-4032-b6d0-422d610a8e34',
+    'x-amz-apigw-id': 'QyFzFHAZBcwEeHQ=',
+    'x-amzn-trace-id': 'Root=1-68c3e9ac-5bfdc08938915d257963f2fb;Parent=1a3f3c16ca121df5;Sampled=0;Lineage=2:76c99777:0'
+  },
+  config: {
+    url: 'https://api.sandbox.co.in/kyc/aadhaar/okyc/otp',
+    method: 'post',
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-api-version': '2.0',
+      'x-api-key': 'key_live_6edea225e1354559b2422d3921c795cf',
+      authorization: 'eyJ0eXAiOiJKV1MiLCJhbGciOiJSU0FTU0FfUFNTX1NIQV81MTIiLCJraWQiOiIwYzYwMGUzMS01MDAwLTRkYTItYjM3YS01ODdkYTA0ZTk4NTEifQ.eyJyZWZyZXNoX3Rva2VuIjoiZXlKMGVYQWlPaUpLVjFNaUxDSmhiR2NpT2lKU1UwRlRVMEZmVUZOVFgxTklRVjgxTVRJaUxDSnJhV1FpT2lJd1l6WXdNR1V6TVMwMU1EQXdMVFJrWVRJdFlqTTNZUzAxT0Rka1lUQTBaVGs0TlRFaWZRLmV5SnpkV0lpT2lKclpYbGZiR2wyWlY4MlpXUmxZVEl5TldVeE16VTBOVFU1WWpJME1qSmtNemt5TVdNM09UVmpaaUlzSW1Gd2FWOXJaWGtpT2lKclpYbGZiR2wyWlY4MlpXUmxZVEl5TldVeE16VTBOVFU1WWpJME1qSmtNemt5TVdNM09UVmpaaUlzSW5kdmNtdHpjR0ZqWlY5cFpDSTZJak0yTXpRME1EVXdMVFJqWW1JdE5EVXhNQzFoT0RnekxXTTFPR015WkRBM01EVmxNU0lzSW1GMVpDSTZJa0ZRU1NJc0ltbHVkR1Z1ZENJNklsSkZSbEpGVTBoZlZFOUxSVTRpTENKcGMzTWlPaUp3Y205a01TMWhjR2t1YzJGdVpHSnZlQzVqYnk1cGJpSXNJbVY0Y0NJNk1UYzRPVEl3TlRnd05Dd2lhV0YwSWpveE56VTNOalk1T0RBMGZRLmhmS0dBendLeHhINGZJN1JuZGJMR0JXMnFxajc4ZTdBWVZERE14VEVMWnE5NEFkZlp0ZThRX2pDYVFjOWNJRFdnZUNOOTNLYnM3ek9zNVA5MU1FRU12b1dUWktXWDlfcWhDWVRPbTZ5M2c2dFA1eGJMUlAtX1dFVUo0VXdUcGp4Tk5rdFhIaHU1LVFCMTdaVnBzaUxnMkc5XzB4TUNmUXFQUGU1TUs0UndCN3hDOUlkQ3RsUzV6TkFzVU1jS3g1TGVxT09MMHVRcDBPRUh6SEs0ZjY2SW12b0NnY2JUd09JRmlCSHFVYzZBNElBaFlhRkNveEhyTjdKbU03VWpDWWdEb2FlSW1pRVoybXVBeVlZUzJ4RnpfMmNvcDZMM1YwcXNOOXF0ZDhSWWdNSk1OcTM4OThUS1N4Szl4M1FWOGlRc2E3anhfWnNmZ0JkbWxOUmRDX2JqZyIsIndvcmtzcGFjZV9pZCI6IjM2MzQ0MDUwLTRjYmItNDUxMC1hODgzLWM1OGMyZDA3MDVlMSIsInN1YiI6ImtleV9saXZlXzZlZGVhMjI1ZTEzNTQ1NTliMjQyMmQzOTIxYzc5NWNmIiwiYXBpX2tleSI6ImtleV9saXZlXzZlZGVhMjI1ZTEzNTQ1NTliMjQyMmQzOTIxYzc5NWNmIiwiYXVkIjoiQVBJIiwiaW50ZW50IjoiQUNDRVNTX1RPS0VOIiwiaXNzIjoicHJvZDEtYXBpLnNhbmRib3guY28uaW4iLCJpYXQiOjE3NTc2Njk4MDQsImV4cCI6MTc1Nzc1NjIwNH0.wU0yfgAcwhSGI8ppDhMSVShJNZR_-rhzqjq5wp03YGQTxHWITTygRgppaEFTHOBTtBDVyB5dAHRUop4T6YlPFOqfxThPTSXNq-xVQ80xLpGzA8Us1H48Hm8EBoHJuH1gpwF36nVBLkkDNQAwahhiWeYzMKN2TKdnc27ows0tpxI_MWEosLcDdPsKvmLfCfJaT2PYoyBuPOjAlVFP1OtT3s6A6uDhTSRYiNZbPTMxf6pq7wLNJcPM68GFOWDtpFf3l3E_uRz8JHfDDEcF0HLamq6RNVWYcizYCDAebUq7lTXqAHPNCjRQZn9qC9LQjZtOf8Zn-ajZ-2_3-nWIB4xKAw',
+      'User-Agent': 'axios/1.11.0',
+      'Content-Length': '130',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    }
+  },
+  level: 'error',
+  timestamp: '2025-09-12 15:06:49'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: 'Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Failed to send OTP: Failed to send OTP\n' +
+    '    at sendAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:154:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:221:25)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  aadhaarNumber: '697798350410',
+  location: 'aadada',
+  dummyField1: '',
+  dummyField2: '',
+  level: 'error',
+  message: 'Aadhaar verification (OTP flow) failed:',
+  timestamp: '2025-09-12 15:06:49'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error in single Aadhaar verification: Aadhaar verification failed: Failed to send OTP: Failed to send OTP',
+  stack: 'Error: Aadhaar verification failed: Failed to send OTP: Failed to send OTP\n' +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:261:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:739:23',
+  timestamp: '2025-09-12 15:06:49'
+}
+{
+  service: 'kyc-aadhaar-api',
+  message: 'Error sending Aadhaar OTP: Request failed with status code 500',
+  status: 500,
+  statusText: 'Internal Server Error',
+  data: {
+    code: 500,
+    timestamp: 1757669992922,
+    message: 'Failed to send OTP',
+    transaction_id: 'f28ea734-3d22-434d-a013-b487a0b357d1'
+  },
+  headers: Object [AxiosHeaders] {
+    date: 'Fri, 12 Sep 2025 09:39:56 GMT',
+    'content-type': 'application/json',
+    'content-length': '143',
+    connection: 'close',
+    'x-amzn-requestid': 'f28ea734-3d22-434d-a013-b487a0b357d1',
+    'x-amz-apigw-id': 'QyGQdHCOhcwEG3g=',
+    'x-amzn-trace-id': 'Root=1-68c3ea68-302ca26562c97bab5a43da8b;Parent=48747d7b7a11ac16;Sampled=0;Lineage=2:76c99777:0'
+  },
+  config: {
+    url: 'https://api.sandbox.co.in/kyc/aadhaar/okyc/otp',
+    method: 'post',
+    headers: Object [AxiosHeaders] {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'x-api-version': '2.0',
+      'x-api-key': 'key_live_6edea225e1354559b2422d3921c795cf',
+      authorization: 'eyJ0eXAiOiJKV1MiLCJhbGciOiJSU0FTU0FfUFNTX1NIQV81MTIiLCJraWQiOiIwYzYwMGUzMS01MDAwLTRkYTItYjM3YS01ODdkYTA0ZTk4NTEifQ.eyJyZWZyZXNoX3Rva2VuIjoiZXlKMGVYQWlPaUpLVjFNaUxDSmhiR2NpT2lKU1UwRlRVMEZmVUZOVFgxTklRVjgxTVRJaUxDSnJhV1FpT2lJd1l6WXdNR1V6TVMwMU1EQXdMVFJrWVRJdFlqTTNZUzAxT0Rka1lUQTBaVGs0TlRFaWZRLmV5SnpkV0lpT2lKclpYbGZiR2wyWlY4MlpXUmxZVEl5TldVeE16VTBOVFU1WWpJME1qSmtNemt5TVdNM09UVmpaaUlzSW1Gd2FWOXJaWGtpT2lKclpYbGZiR2wyWlY4MlpXUmxZVEl5TldVeE16VTBOVFU1WWpJME1qSmtNemt5TVdNM09UVmpaaUlzSW5kdmNtdHpjR0ZqWlY5cFpDSTZJak0yTXpRME1EVXdMVFJqWW1JdE5EVXhNQzFoT0RnekxXTTFPR015WkRBM01EVmxNU0lzSW1GMVpDSTZJa0ZRU1NJc0ltbHVkR1Z1ZENJNklsSkZSbEpGVTBoZlZFOUxSVTRpTENKcGMzTWlPaUp3Y205a01TMWhjR2t1YzJGdVpHSnZlQzVqYnk1cGJpSXNJbVY0Y0NJNk1UYzRPVEl3TlRrNU1pd2lhV0YwSWpveE56VTNOalk1T1RreWZRLmJ1UTlBY0trXzVPSGRSakE3cW13VUY4NHRFZXR6SHpyM2ZWYmdLN2NQUk9zTzNQRmtGdE0tcU9XREx4NzdRejgwVDItN28xTEMtWnpHSHVSbXh2M3NkUkhLdlRaWm9DRmVHMHg0SjhJY2k1SHE4S0lVZVd6Q2JyNXpzYzdhVGg1NnVfeDM0YVBmcXB2RkExQU5ld2VZTlBfanlWckxGNDBaWjl1cG1JaEVFalRYdXNiOXVsT0RXV18tV0FmNUZ1eVg5Y19ybzVGVk5UbFZHVEYzTEQtNHBqMk9DS2txbzFPWFhqQ2lHclR5cXdiSDBrUGhjQ19iV3lrSkR4T0hIX045dnpGSDktbndLYmJVWnNtWDAzZk91Y0JWdl9OVjM2X3lIYWV1MWxVekZydXNYVUlPcEVhaDBxS1A4NVJWdm4zbmNudGpReU85aHRoUGpxZUtpT0xYQSIsIndvcmtzcGFjZV9pZCI6IjM2MzQ0MDUwLTRjYmItNDUxMC1hODgzLWM1OGMyZDA3MDVlMSIsInN1YiI6ImtleV9saXZlXzZlZGVhMjI1ZTEzNTQ1NTliMjQyMmQzOTIxYzc5NWNmIiwiYXBpX2tleSI6ImtleV9saXZlXzZlZGVhMjI1ZTEzNTQ1NTliMjQyMmQzOTIxYzc5NWNmIiwiYXVkIjoiQVBJIiwiaW50ZW50IjoiQUNDRVNTX1RPS0VOIiwiaXNzIjoicHJvZDEtYXBpLnNhbmRib3guY28uaW4iLCJpYXQiOjE3NTc2Njk5OTIsImV4cCI6MTc1Nzc1NjM5Mn0.WvoeyL5q9hH3Lhr_leclNu7-ZyPhTpuFaCMwh2TzyKT8VUgw1n81edu10xDYS5rMtxLHyJdPJeh4LvjZJLCLDi65aVyCDAdBEigl4P6EhaHUYC-dY67yyibJPGUpjmanFU5OA5q7pISDeD6mPwokRSKez9SsiDWtwqBLQxzP51pYH1c7hx0oWfd61veZUFkmS_kVVePjvDr1xORucAU_c9D_ozNAOCxNE0qij5aMiyMK0EoNzPsT9QXwyPdneNJ0aEwsJKJpU1ASyAE7VOBTrcX5lhU1CIvPrgQW-W2XT_FXKLQul2F8oLBgzU0itCkhwCD7inz9UU1_bniTFYXlqg',
+      'User-Agent': 'axios/1.11.0',
+      'Content-Length': '130',
+      'Accept-Encoding': 'gzip, compress, deflate, br'
+    }
+  },
+  level: 'error',
+  timestamp: '2025-09-12 15:09:55'
+}
+{
+  service: 'kyc-aadhaar-api',
+  code: 400,
+  timestamp: '2025-09-12 15:29:28',
+  message: 'Error verifying Aadhaar OTP: Invalid request body',
+  transaction_id: '242f778c-a2f6-4040-82bc-f351196f6f04',
+  level: 'error'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error verifying OTP: Failed to verify OTP: Invalid request body',
+  stack: 'Error: Failed to verify OTP: Invalid request body\n' +
+    '    at verifyAadhaarOTP (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:221:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:868:23',
+  timestamp: '2025-09-12 15:29:28'
+}
+{
+  service: 'kyc-aadhaar-api',
+  name: 'JsonWebTokenError',
+  message: 'Token verification failed: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at protect (/Users/ashulkumar/kyc-aadhaar-app/backend/src/middleware/auth.js:15:27)\n' +
+    '    at Layer.handle [as handle_request] (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at next (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/route.js:149:13)\n' +
+    '    at Route.dispatch (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/layer.js:95:5)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/index.js:284:15\n' +
+    '    at Function.process_params (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/index.js:346:12)\n' +
+    '    at next (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/index.js:280:10)\n' +
+    '    at Function.handle (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/router/index.js:175:3)',
+  timestamp: '2025-09-12 15:38:09'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 15:39:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 15:43:09'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-12 15:52:38'
+}

@@ -47,6 +47,14 @@ const AadhaarVerificationSchema = new mongoose.Schema({
     type: String,
     encrypted: true,
   },
+  careOf: {
+    type: String,
+    encrypted: true,
+  },
+  photo: {
+    type: String,
+    encrypted: true,
+  },
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected', 'invalid', 'error'],
@@ -160,7 +168,7 @@ AadhaarVerificationSchema.pre('save', function(next) {
   // Only encrypt if this is a new document or if fields have been modified
   if (this.isNew || this.isModified()) {
     // Encrypt sensitive fields
-    const fieldsToEncrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'verificationDetails'];
+    const fieldsToEncrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'verificationDetails'];
     
     fieldsToEncrypt.forEach(field => {
       if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
@@ -221,7 +229,7 @@ AadhaarVerificationSchema.methods.decryptData = function() {
   }
 
   const decrypted = this.toObject();
-  const fieldsToDecrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'verificationDetails'];
+  const fieldsToDecrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'verificationDetails'];
 
   fieldsToDecrypt.forEach(field => {
     if (decrypted[field] && typeof decrypted[field] === 'string') {
