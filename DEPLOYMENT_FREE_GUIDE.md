@@ -63,7 +63,11 @@ Ensure your `backend/package.json` has:
 3. Click "New Project"
 4. Select "Deploy from GitHub repo"
 5. Choose your repository
-6. Railway will auto-detect Node.js
+6. **If Railway doesn't auto-detect Node.js:**
+   - Go to Settings → Deploy
+   - Set **Root Directory**: `backend`
+   - Set **Build Command**: `npm install`
+   - Set **Start Command**: `npm start`
 
 ### Step 3: Environment Variables
 Add in Railway dashboard:
@@ -160,6 +164,14 @@ REACT_APP_API_URL=https://your-railway-backend-url.railway.app/api
 2. **Environment variables**: Double-check all variables are set
 3. **Build failures**: Check build logs in deployment platform
 4. **Database connection**: Verify MongoDB Atlas connection string
+5. **Railway auto-detection fails**: 
+   - Set Root Directory to `backend`
+   - Set Build Command to `npm install`
+   - Set Start Command to `npm start`
+6. **Railway deployment fails**:
+   - Check if `package.json` exists in backend folder
+   - Verify Node.js version compatibility
+   - Check Railway logs for specific errors
 
 ### Support:
 - Vercel: [vercel.com/docs](https://vercel.com/docs)
