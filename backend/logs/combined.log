@@ -67321,3 +67321,15 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-09-12 21:19:51'
 }
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-12 21:45:12'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-12 21:45:23'
+}

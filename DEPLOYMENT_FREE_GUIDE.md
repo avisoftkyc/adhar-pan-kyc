@@ -165,9 +165,15 @@ REACT_APP_API_URL=https://your-railway-backend-url.railway.app/api
 3. **Build failures**: Check build logs in deployment platform
 4. **Database connection**: Verify MongoDB Atlas connection string
 5. **Railway auto-detection fails**: 
+   **Option A: Manual Configuration**
    - Set Root Directory to `backend`
    - Set Build Command to `npm install`
    - Set Start Command to `npm start`
+
+   **Option B: Use Configuration Files (Recommended)**
+   - Keep root directory as default
+   - Railway will use `railway.json` and `nixpacks.toml` automatically
+   - If still failing, try `Procfile` approach
 6. **Railway deployment fails**:
    - Check if `package.json` exists in backend folder
    - Verify Node.js version compatibility
