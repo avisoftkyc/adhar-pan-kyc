@@ -264,13 +264,19 @@ const AadhaarVerificationRecords: React.FC = () => {
             <>
               {/* Desktop Table */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200" id="aadhaarTable">
+                <table className="min-w-max divide-y divide-gray-200" id="aadhaarTable" style={{ minWidth: '1200px' }}>
                   <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
                     <tr>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-0 bg-gradient-to-r from-blue-50 to-purple-50 z-10">
                         <span className="flex items-center">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                        S. No.
+                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                          Aadhaar Number
+                        </span>
+                      </th>
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider sticky left-32 bg-gradient-to-r from-blue-50 to-purple-50 z-10">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                          Name
                         </span>
                       </th>
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -282,19 +288,7 @@ const AadhaarVerificationRecords: React.FC = () => {
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                          Date
-                        </span>
-                      </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
-                        <span className="flex items-center">
-                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                          Aadhaar Number
-                        </span>
-                      </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
-                        <span className="flex items-center">
-                          <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
-                          Name
+                        Date
                         </span>
                       </th>
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -350,9 +344,17 @@ const AadhaarVerificationRecords: React.FC = () => {
                   <tbody className="bg-white divide-y divide-gray-100">
                     {records.map((record, index) => (
                       <tr key={record._id} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform hover:scale-[1.01]">
-                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
-                          <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full font-bold">
-                          {(pagination.currentPage - 1) * 10 + index + 1}
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-bold text-gray-900 font-mono sticky left-0 bg-white z-10">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
+                            {record.aadhaarNumber ? 
+                              record.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
+                              '-'
+                            }
+                          </span>
+                        </td>
+                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900 sticky left-32 bg-white z-10">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-800">
+                            {record.name || '-'}
                           </span>
                         </td>
                         <td className="px-4 py-6 whitespace-nowrap">
@@ -365,20 +367,7 @@ const AadhaarVerificationRecords: React.FC = () => {
                         </td>
                         <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
                           <span className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-800">
-                            {formatDate(record.createdAt)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-6 whitespace-nowrap text-sm font-bold text-gray-900 font-mono">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-100 text-indigo-800">
-                            {record.aadhaarNumber ? 
-                              record.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
-                              '-'
-                            }
-                          </span>
-                        </td>
-                        <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-800">
-                            {record.name || '-'}
+                          {formatDate(record.createdAt)}
                           </span>
                         </td>
                         <td className="px-4 py-6 whitespace-nowrap text-sm font-semibold text-gray-900">
@@ -401,9 +390,12 @@ const AadhaarVerificationRecords: React.FC = () => {
                             {record.state || '-'}
                           </span>
                         </td>
-                        <td className="px-4 py-6 text-sm font-semibold text-gray-900 max-w-xs truncate">
+                        <td className="px-4 py-6 text-sm font-semibold text-gray-900 max-w-xs">
                           <span className="inline-flex items-center px-3 py-1 rounded-full bg-cyan-100 text-cyan-800">
-                            {record.address || '-'}
+                            {record.address ? 
+                              (record.address.length > 30 ? record.address.substring(0, 30) + '...' : record.address) 
+                              : '-'
+                            }
                           </span>
                         </td>
                         <td className="px-4 py-6 text-sm font-semibold text-gray-900 max-w-xs truncate">
@@ -413,17 +405,14 @@ const AadhaarVerificationRecords: React.FC = () => {
                         </td>
                         <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
                           {record.photo ? (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800">
-                              <img 
-                                src={`data:image/jpeg;base64,${record.photo}`} 
-                                alt="Photo" 
-                                className="w-8 h-10 object-cover rounded mr-2 border-2 border-green-200"
-                              />
-                              Available
-                            </span>
+                            <img 
+                              src={`data:image/jpeg;base64,${record.photo}`} 
+                              alt="Photo" 
+                              className="w-12 h-16 object-cover rounded border-2 border-green-200 shadow-sm"
+                            />
                           ) : (
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-100 text-gray-800">
-                              Not Available
+                            <span className="w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center">
+                              <span className="text-xs text-gray-500">-</span>
                             </span>
                           )}
                         </td>
@@ -447,10 +436,7 @@ const AadhaarVerificationRecords: React.FC = () => {
               <div className="lg:hidden">
                 {records.map((record, index) => (
                   <div key={record._id} className="border-b border-gray-200 p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-500">
-                        #{(pagination.currentPage - 1) * 10 + index + 1}
-                      </span>
+                    <div className="flex items-center justify-end mb-3">
                       <div className="flex items-center">
                         {getStatusIcon(record.status)}
                         <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
@@ -459,11 +445,23 @@ const AadhaarVerificationRecords: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                      <div>
-                        <span className="text-gray-500">Name:</span>
-                        <span className="ml-1 font-medium">{record.name || '-'}</span>
+                    <div className="mb-4">
+                      <div className="mb-2">
+                        <span className="text-gray-500 font-semibold">Aadhaar Number:</span>
+                        <span className="ml-2 font-bold text-indigo-600 font-mono">
+                          {record.aadhaarNumber ? 
+                            record.aadhaarNumber.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3') : 
+                            '-'
+                          }
+                      </span>
                       </div>
+                      <div className="mb-2">
+                        <span className="text-gray-500 font-semibold">Name:</span>
+                        <span className="ml-2 font-bold text-pink-600">{record.name || '-'}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                       <div>
                         <span className="text-gray-500">Gender:</span>
                         <span className="ml-1 font-medium">{record.gender === 'M' ? 'Male' : record.gender === 'F' ? 'Female' : 'Other'}</span>
@@ -484,20 +482,29 @@ const AadhaarVerificationRecords: React.FC = () => {
                         <span className="text-gray-500">Photo:</span>
                         <span className="ml-1 font-medium">
                           {record.photo ? (
-                            <span className="inline-flex items-center text-green-600">
-                              <img 
-                                src={`data:image/jpeg;base64,${record.photo}`} 
-                                alt="Photo" 
-                                className="w-4 h-6 object-cover rounded mr-1"
-                              />
-                              Available
-                            </span>
+                            <img 
+                              src={`data:image/jpeg;base64,${record.photo}`} 
+                              alt="Photo" 
+                              className="w-8 h-12 object-cover rounded border border-gray-300"
+                            />
                           ) : (
-                            'Not Available'
+                            <span className="w-8 h-12 bg-gray-200 rounded border border-gray-300 flex items-center justify-center">
+                              <span className="text-xs text-gray-500">-</span>
+                            </span>
                           )}
                         </span>
                       </div>
                     </div>
+                    
+                    {/* Address Section */}
+                    {record.address && (
+                      <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                        <span className="text-gray-500 font-semibold block mb-1">Address:</span>
+                        <div className="text-sm text-gray-700 font-medium">
+                          {record.address.length > 50 ? record.address.substring(0, 50) + '...' : record.address}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="space-y-1 text-sm text-gray-600">
                       <div className="flex items-center">

@@ -21,7 +21,18 @@ router.get('/records', protect, async (req, res) => {
       try {
         // Create a temporary AadhaarVerification instance to use the decryptData method
         const tempRecord = new AadhaarVerification(record);
-        return tempRecord.decryptData();
+        const decryptedRecord = tempRecord.decryptData();
+        
+        // Extract care_of from API response if careOf field is encrypted or missing
+        if ((decryptedRecord.careOf === '[ENCRYPTED]' || !decryptedRecord.careOf) && 
+            decryptedRecord.verificationDetails && 
+            decryptedRecord.verificationDetails.apiResponse && 
+            decryptedRecord.verificationDetails.apiResponse.data && 
+            decryptedRecord.verificationDetails.apiResponse.data.care_of) {
+          decryptedRecord.careOf = decryptedRecord.verificationDetails.apiResponse.data.care_of;
+        }
+        
+        return decryptedRecord;
       } catch (error) {
         console.error('Decryption error for record:', record._id, error.message);
         // Return original record if decryption fails
