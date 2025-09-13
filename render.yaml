@@ -9,14 +9,18 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3002
+        value: 10000
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
         sync: false
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
       - key: SANDBOX_API_KEY
         sync: false
       - key: SANDBOX_API_SECRET
-        sync: false
-      - key: ENCRYPTION_KEY
         sync: false
