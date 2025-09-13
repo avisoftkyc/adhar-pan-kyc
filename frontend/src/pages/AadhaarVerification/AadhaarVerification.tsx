@@ -114,7 +114,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
