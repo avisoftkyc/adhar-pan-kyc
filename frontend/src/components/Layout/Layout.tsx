@@ -305,7 +305,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Enhanced Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/30 bg-white/90 backdrop-blur-xl px-4 shadow-xl sm:gap-x-6 sm:px-6 lg:px-8 relative overflow-visible">
+        <div className="z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-white/30 bg-white/90 backdrop-blur-xl px-4 shadow-xl sm:gap-x-6 sm:px-6 lg:px-8 relative overflow-visible">
           {/* Enhanced Background Pattern */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50/40 via-teal-50/40 to-cyan-50/40"></div>
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-200/20 rounded-full blur-2xl"></div>
