@@ -110,7 +110,7 @@ const AadhaarVerificationRecords: React.FC = () => {
       if (currentFilters.sortBy) params.append('sortBy', currentFilters.sortBy);
       if (currentFilters.sortOrder) params.append('sortOrder', currentFilters.sortOrder);
       
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records?${params.toString()}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         }
