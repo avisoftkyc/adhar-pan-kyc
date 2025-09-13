@@ -51,8 +51,8 @@ app.use(helmet({
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        'https://your-app.vercel.app',
-        'https://your-custom-domain.com',
+        'https://kyc-aadhaar-app.vercel.app',
+        'https://kyc-aadhaar-app-ashuls-projects-2dabf902.vercel.app',
         /\.vercel\.app$/,
         /\.netlify\.app$/
       ] 
