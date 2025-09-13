@@ -7,32 +7,16 @@
       "config": {
         "distDir": "build"
       }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/health",
-      "dest": "/api/health.js"
-    },
-    {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "https://your-backend-url.railway.app/api/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/frontend/build/$1"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "functions": {
-    "api/**/*.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
