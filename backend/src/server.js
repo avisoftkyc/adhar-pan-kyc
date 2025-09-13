@@ -156,14 +156,19 @@ app.use('*', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
-const serverPort = process.env.PORT || PORT;
-app.listen(serverPort, '0.0.0.0', () => {
-  logger.info(`Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
-  console.log(`🚀 Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
-  console.log(`📊 Health check: http://localhost:${serverPort}/health`);
-  console.log(`🔗 API Base URL: http://localhost:${serverPort}/api`);
-});
+// Export app for Vercel
+module.exports = app;
+
+// Start server only if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const serverPort = process.env.PORT || PORT;
+  app.listen(serverPort, '0.0.0.0', () => {
+    logger.info(`Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
+    console.log(`🚀 Server running on port ${serverPort} in ${process.env.NODE_ENV} mode`);
+    console.log(`📊 Health check: http://localhost:${serverPort}/health`);
+    console.log(`🔗 API Base URL: http://localhost:${serverPort}/api`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

@@ -3,20 +3,65 @@
 ## 📋 Prerequisites
 - GitHub account
 - MongoDB Atlas account (free tier)
-- Vercel account (free)
-- Render account (free tier) - **Recommended**
+- Vercel account (free) - **Recommended for Full-Stack**
+- Render account (free tier) - Alternative
 - Railway account (free tier) - Alternative
 
 ## 🎯 Deployment Strategy
 
-### Frontend: Vercel (Free)
-### Backend: Render (Free tier) - **Recommended**
-### Backend: Railway (Free tier) - Alternative
-### Database: MongoDB Atlas (Free tier)
+### Option 1: Full-Stack on Vercel (Recommended)
+- **Frontend**: Vercel (Free)
+- **Backend**: Vercel Serverless Functions (Free)
+- **Database**: MongoDB Atlas (Free tier)
+
+### Option 2: Separate Services
+- **Frontend**: Vercel (Free)
+- **Backend**: Render (Free tier)
+- **Database**: MongoDB Atlas (Free tier)
 
 ---
 
-## 🖥️ Frontend Deployment (Vercel)
+## 🚀 Full-Stack Deployment on Vercel (Recommended)
+
+### Step 1: Prepare Your Repository
+Your repository is already configured with:
+- `vercel.json` - Main Vercel configuration
+- `api/index.js` - API entry point
+- `frontend/vercel.json` - Frontend build config
+- `backend/api/vercel.json` - Backend API config
+
+### Step 2: Deploy to Vercel
+1. Go to [vercel.com](https://vercel.com)
+2. Sign up with GitHub
+3. Click "New Project"
+4. Import your repository: `ashulk311-ux/adhar-pan-kyc`
+5. Vercel will auto-detect the configuration
+
+### Step 3: Set Environment Variables
+In Vercel dashboard, go to Settings → Environment Variables and add:
+
+```
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+SANDBOX_API_KEY=your_sandbox_api_key
+SANDBOX_API_SECRET=your_sandbox_api_secret
+ENCRYPTION_KEY=your_super_secret_encryption_key_32_chars_long
+REACT_APP_API_URL=/api
+```
+
+### Step 4: Deploy
+1. Click "Deploy"
+2. Wait for build to complete
+3. Your app will be available at: `https://your-app.vercel.app`
+
+### Step 5: Test Your Deployment
+- Frontend: `https://your-app.vercel.app`
+- API Health: `https://your-app.vercel.app/api/health`
+- API Docs: `https://your-app.vercel.app/api`
+
+---
+
+## 🖥️ Frontend Deployment (Vercel) - Alternative
 
 ### Step 1: Prepare Frontend
 ```bash

@@ -67363,3 +67363,139 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-09-12 22:09:14'
 }
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-12 22:36:54'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-12 22:37:05'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 00:37:36'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 03:37:55'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 06:01:09'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 06:01:19'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:32:34'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:32:45'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:08'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:08'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:08'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:08'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:09'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:18'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:18'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:18'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:18'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:18'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:02:07:46 +0000] "GET /api/aadhaar-verification/records?page=1&limit=10&sortBy=createdAt&sortOrder=desc HTTP/1.1" 304 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:46'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 07:37:46'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:02:07:46 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:46'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:02:07:47 +0000] "GET /api/aadhaar-verification/records?page=1&limit=10&sortBy=createdAt&sortOrder=desc HTTP/1.1" 304 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 07:37:47'
+}
