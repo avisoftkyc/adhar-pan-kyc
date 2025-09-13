@@ -59,6 +59,7 @@ REACT_APP_API_URL=/api
 - API Health: `https://your-app.vercel.app/api/health`
 - API Docs: `https://your-app.vercel.app/api`
 
+
 ---
 
 ## 🖥️ Frontend Deployment (Vercel) - Alternative
