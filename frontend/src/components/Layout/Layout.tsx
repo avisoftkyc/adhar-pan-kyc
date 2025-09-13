@@ -402,6 +402,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {children}
           </div>
         </main>
+
+        {/* Footer */}
+        <footer className="fixed bottom-4 right-4 z-50">
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg px-3 py-2 shadow-lg">
+            <p className="text-xs text-gray-600 font-medium">
+              Powered by <span className="text-blue-600 font-semibold">@ AVI HR Software Pvt Ltd</span>
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );

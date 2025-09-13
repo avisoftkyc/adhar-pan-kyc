@@ -67785,3 +67785,1335 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-09-13 19:04:26'
 }
+{
+  service: 'kyc-aadhaar-api',
+  userId: new ObjectId("68c0210acff0074d7175563d"),
+  action: 'login',
+  module: 'auth',
+  resource: 'user',
+  resourceId: new ObjectId("68c0210acff0074d7175563d"),
+  level: 'info',
+  message: 'Audit event logged: login in auth',
+  timestamp: '2025-09-13 19:12:33'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:33 +0000] "POST /api/auth/login HTTP/1.1" 200 794 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:33'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:34 +0000] "GET /api/admin/users/68c0210acff0074d7175563d/logo?v=logo-1757524615242-346908417.jpg HTTP/1.1" 304 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:34 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:34 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 62,
+  panKycRecords: 38,
+  aadhaarPanRecords: 24,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:34 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 6442 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 62,
+  panKycRecords: 38,
+  aadhaarPanRecords: 24,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:42:34 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 6442 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:12:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:43:04 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:13:04'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:43:34 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:13:34'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:44:04 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:14:04'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:44:07 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:14:07'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:44:07 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:14:07'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:44:13 +0000] "GET /api/pan-kyc/batch/PAN%20aadhar%20KYC_1757524669560_bv4wnj HTTP/1.1" 200 17690 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:14:13'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:17 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:17 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:17'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:20 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:20'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:20 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:20'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:23 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 62,
+  panKycRecords: 38,
+  aadhaarPanRecords: 24,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:23 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 6442 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 62,
+  panKycRecords: 38,
+  aadhaarPanRecords: 24,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:23 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 6442 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:23 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:23'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:45:53 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:15:53'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:46:23 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 7751 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:23'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:46:33 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:46:33 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:33'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:46:53 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:53'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:46:53 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:53'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:16:59'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c0210acff0074d7175563d: 41',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  '0': 'AADHAAR002',
+  '1': 'PAN aadhar KYC_1757438077975_h7ebhl',
+  '2': 'PAN aadhar KYC_1757524817895_embky6',
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c0210acff0074d7175563d:',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:47:00 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  message: 'Found 3 batches for user 68c0210acff0074d7175563d',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:47:00 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 709 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:17:00'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:49:10 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:19:10'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:49:10 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 653 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:19:10'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  action: 'login',
+  module: 'auth',
+  resource: 'user',
+  resourceId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  level: 'info',
+  message: 'Audit event logged: login in auth',
+  timestamp: '2025-09-13 19:20:11'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:11 +0000] "POST /api/auth/login HTTP/1.1" 200 535 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:11'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:12 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:12 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:12 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:12 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:12 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:20:20'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:13:50:20 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:20:20'
+}
+{
+  service: 'kyc-aadhaar-api',
+  aadhaarNumber: '697798350410',
+  location: 'ugjhg',
+  dummyField1: undefined,
+  dummyField2: undefined,
+  reason: 'KYC Verification',
+  level: 'info',
+  message: 'Starting Aadhaar verification (OTP flow):',
+  timestamp: '2025-09-13 19:31:38'
+}
+{
+  service: 'kyc-aadhaar-api',
+  aadhaarNumber: '697798350410',
+  retryCount: 0,
+  level: 'info',
+  message: 'Sending Aadhaar OTP...',
+  timestamp: '2025-09-13 19:31:38'
+}
+{
+  message: 'Authenticating with Sandbox API for Aadhaar verification...',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:31:38'
+}
+{
+  message: 'Sandbox authentication successful for Aadhaar verification',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:31:38'
+}
+{
+  service: 'kyc-aadhaar-api',
+  url: 'https://api.sandbox.co.in/kyc/aadhaar/okyc/otp',
+  data: {
+    '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.request',
+    aadhaar_number: '697798350410',
+    consent: 'y',
+    reason: 'KYC Verification'
+  },
+  hasAccessToken: true,
+  accessTokenLength: 1909,
+  level: 'info',
+  message: 'OTP Send request data:',
+  timestamp: '2025-09-13 19:31:38'
+}
+{
+  service: 'kyc-aadhaar-api',
+  status: 200,
+  data: {
+    code: 200,
+    timestamp: 1757772099061,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574183,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '265293c9-6ca3-45b1-a121-6473f1f7c3a6'
+  },
+  headers: Object [AxiosHeaders] {
+    date: 'Sat, 13 Sep 2025 14:01:43 GMT',
+    'content-type': 'application/json',
+    'content-length': '209',
+    connection: 'close',
+    'x-amzn-requestid': '265293c9-6ca3-45b1-a121-6473f1f7c3a6',
+    'x-amz-apigw-id': 'Q1_iiGGdhcwEYtg=',
+    'x-amzn-trace-id': 'Root=1-68c57943-5064d5885baf72756b7a48fb;Parent=231b5df6574ad2a6;Sampled=0;Lineage=2:76c99777:0'
+  },
+  level: 'info',
+  message: 'Aadhaar OTP sent successfully:',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  service: 'kyc-aadhaar-api',
+  transaction_id: '265293c9-6ca3-45b1-a121-6473f1f7c3a6',
+  txn_id: undefined,
+  reference_id: undefined,
+  ref_id: undefined,
+  id: undefined,
+  fullResponse: {
+    code: 200,
+    timestamp: 1757772099061,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574183,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '265293c9-6ca3-45b1-a121-6473f1f7c3a6'
+  },
+  level: 'info',
+  message: 'OTP Response transaction ID fields:',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  service: 'kyc-aadhaar-api',
+  data_reference_id: 62574183,
+  root_reference_id: undefined,
+  transaction_id: '265293c9-6ca3-45b1-a121-6473f1f7c3a6',
+  txn_id: undefined,
+  extractedReferenceId: 62574183,
+  extractedType: 'number',
+  fullResponse: {
+    code: 200,
+    timestamp: 1757772099061,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574183,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '265293c9-6ca3-45b1-a121-6473f1f7c3a6'
+  },
+  level: 'info',
+  message: 'Extracting reference ID from OTP response:',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  service: 'kyc-aadhaar-api',
+  error: "Cannot read properties of undefined (reading 'trim')",
+  stack: "TypeError: Cannot read properties of undefined (reading 'trim')\n" +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:265:34)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:192:23',
+  aadhaarNumber: '697798350410',
+  location: 'ugjhg',
+  dummyField1: undefined,
+  dummyField2: undefined,
+  level: 'error',
+  message: 'Aadhaar verification (OTP flow) failed:',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: "Error in single Aadhaar verification: Aadhaar verification failed: Cannot read properties of undefined (reading 'trim')",
+  stack: "Error: Aadhaar verification failed: Cannot read properties of undefined (reading 'trim')\n" +
+    '    at verifyAadhaar (/Users/ashulkumar/kyc-aadhaar-app/backend/src/services/aadhaarVerificationService.js:283:11)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/aadhaarVerification.js:192:23',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:01:43 +0000] "POST /api/aadhaar-verification/verify-single HTTP/1.1" 500 111 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:31:43'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:01'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:01'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:01'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:01'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:02'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:16'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:16'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:16'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:16'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:16'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:26'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:26'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:26'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:26'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:27'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:41'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:41'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:41'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:42'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:42'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:52'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:52'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:52'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:52'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:33:52'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:07'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:07'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:07'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:07'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:07'
+}
+{
+  service: 'kyc-aadhaar-api',
+  aadhaarNumber: '697798350410',
+  location: 'sdad',
+  dynamicFields: [
+    { id: 'field_1757772279555', value: 'lll' },
+    { id: 'field_1757772284494', value: 'lll' }
+  ],
+  reason: 'KYC Verification',
+  level: 'info',
+  message: 'Starting Aadhaar verification (OTP flow):',
+  timestamp: '2025-09-13 19:34:51'
+}
+{
+  service: 'kyc-aadhaar-api',
+  aadhaarNumber: '697798350410',
+  retryCount: 0,
+  level: 'info',
+  message: 'Sending Aadhaar OTP...',
+  timestamp: '2025-09-13 19:34:51'
+}
+{
+  message: 'Authenticating with Sandbox API for Aadhaar verification...',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:51'
+}
+{
+  message: 'Sandbox authentication successful for Aadhaar verification',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:51'
+}
+{
+  service: 'kyc-aadhaar-api',
+  url: 'https://api.sandbox.co.in/kyc/aadhaar/okyc/otp',
+  data: {
+    '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.request',
+    aadhaar_number: '697798350410',
+    consent: 'y',
+    reason: 'KYC Verification'
+  },
+  hasAccessToken: true,
+  accessTokenLength: 1909,
+  level: 'info',
+  message: 'OTP Send request data:',
+  timestamp: '2025-09-13 19:34:51'
+}
+{
+  service: 'kyc-aadhaar-api',
+  status: 200,
+  data: {
+    code: 200,
+    timestamp: 1757772291902,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574427,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36'
+  },
+  headers: Object [AxiosHeaders] {
+    date: 'Sat, 13 Sep 2025 14:04:55 GMT',
+    'content-type': 'application/json',
+    'content-length': '209',
+    connection: 'close',
+    'x-amzn-requestid': '82cedf4d-7592-46b4-8521-dfa48fca0e36',
+    'x-amz-apigw-id': 'Q2AArGJbhcwEIQg=',
+    'x-amzn-trace-id': 'Root=1-68c57a03-564180c420059ee24f88e438;Parent=511ec6737b6fcad6;Sampled=0;Lineage=2:76c99777:0'
+  },
+  level: 'info',
+  message: 'Aadhaar OTP sent successfully:',
+  timestamp: '2025-09-13 19:34:55'
+}
+{
+  service: 'kyc-aadhaar-api',
+  transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36',
+  txn_id: undefined,
+  reference_id: undefined,
+  ref_id: undefined,
+  id: undefined,
+  fullResponse: {
+    code: 200,
+    timestamp: 1757772291902,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574427,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36'
+  },
+  level: 'info',
+  message: 'OTP Response transaction ID fields:',
+  timestamp: '2025-09-13 19:34:55'
+}
+{
+  service: 'kyc-aadhaar-api',
+  data_reference_id: 62574427,
+  root_reference_id: undefined,
+  transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36',
+  txn_id: undefined,
+  extractedReferenceId: 62574427,
+  extractedType: 'number',
+  fullResponse: {
+    code: 200,
+    timestamp: 1757772291902,
+    data: {
+      '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+      reference_id: 62574427,
+      message: 'OTP sent successfully'
+    },
+    transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36'
+  },
+  level: 'info',
+  message: 'Extracting reference ID from OTP response:',
+  timestamp: '2025-09-13 19:34:55'
+}
+{
+  service: 'kyc-aadhaar-api',
+  transactionId: 62574427,
+  transactionIdType: 'number',
+  fullOtpResult: {
+    success: true,
+    message: 'OTP sent successfully',
+    details: {
+      aadhaarNumber: '697798350410',
+      location: 'sdad',
+      dynamicFields: [
+        { id: 'field_1757772279555', value: 'lll' },
+        { id: 'field_1757772284494', value: 'lll' }
+      ],
+      otpSent: true,
+      transactionId: 62574427,
+      apiResponse: {
+        code: 200,
+        timestamp: 1757772291902,
+        data: {
+          '@entity': 'in.co.sandbox.kyc.aadhaar.okyc.otp.response',
+          reference_id: 62574427,
+          message: 'OTP sent successfully'
+        },
+        transaction_id: '82cedf4d-7592-46b4-8521-dfa48fca0e36'
+      },
+      source: 'sandbox_api'
+    }
+  },
+  level: 'info',
+  message: 'OTP sent successfully - returning transaction ID:',
+  timestamp: '2025-09-13 19:34:55'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:04:55 +0000] "POST /api/aadhaar-verification/verify-single HTTP/1.1" 200 507 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:34:55'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:35:29'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:35:29'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:35:29'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:35:29'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:35:30'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:14:52 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:44:52'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:14:52 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:44:52'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:01 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:01 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:01 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:01 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:01 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:15:31 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:45:31'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:16:01 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:46:01'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:16:31 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:46:31'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:17:01 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:01'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:17:12 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:17:12 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:17:12 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:47:12'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:27 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:27 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:27 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:27 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 19,
+  panKycRecords: 19,
+  aadhaarPanRecords: 0,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:27 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 5490 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:27'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:19:57 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:49:57'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:34 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 6646 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:34'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'error',
+  message: 'Error serving user logo: path argument is required to res.sendFile',
+  stack: 'TypeError: path argument is required to res.sendFile\n' +
+    '    at ServerResponse.sendFile (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/express/lib/response.js:427:11)\n' +
+    '    at /Users/ashulkumar/kyc-aadhaar-app/backend/src/routes/admin.js:1757:9\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-13 19:50:46'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:46 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo HTTP/1.1" 500 50 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:46'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:46 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:46'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:46 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:46'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:48 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:20:48 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:50:48'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: 'Total Aadhaar-PAN records for user 68c124ded5378b25a8ac62d7: 0',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  service: 'kyc-aadhaar-api',
+  level: 'info',
+  message: 'Unique batch IDs for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:09 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: 'Found 0 batches for user 68c124ded5378b25a8ac62d7',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:09 +0000] "GET /api/aadhaar-pan/batches HTTP/1.1" 200 26 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:09'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:14 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:14'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:14 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 244 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:14'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:21 +0000] "GET /api/aadhaar-verification/records?page=1&limit=10&sortBy=createdAt&sortOrder=desc HTTP/1.1" 304 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:21'
+}
+{
+  message: '127.0.0.1 - - [13/Sep/2025:14:28:22 +0000] "GET /api/aadhaar-verification/records?page=1&limit=10&sortBy=createdAt&sortOrder=desc HTTP/1.1" 304 - "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-09-13 19:58:22'
+}

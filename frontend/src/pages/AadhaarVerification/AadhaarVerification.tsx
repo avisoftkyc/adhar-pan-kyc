@@ -13,7 +13,9 @@ import {
   TableCellsIcon,
   UserIcon,
   CalendarIcon,
-  MapPinIcon
+  MapPinIcon,
+  PlusIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 interface VerificationStep {
@@ -28,13 +30,12 @@ const AadhaarVerification: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [location, setLocation] = useState('');
-  const [dummyField1, setDummyField1] = useState('');
-  const [dummyField2, setDummyField2] = useState('');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [otp, setOtp] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [canResend, setCanResend] = useState(false);
+  const [dynamicFields, setDynamicFields] = useState<Array<{id: string, value: string}>>([]);
 
   // Countdown timer effect for resend OTP
   useEffect(() => {
@@ -58,6 +59,27 @@ const AadhaarVerification: React.FC = () => {
       }
     };
   }, [resendCooldown]);
+
+  // Add dynamic field
+  const addDynamicField = () => {
+    const newField = {
+      id: `field_${Date.now()}`,
+      value: ''
+    };
+    setDynamicFields([...dynamicFields, newField]);
+  };
+
+  // Remove dynamic field
+  const removeDynamicField = (id: string) => {
+    setDynamicFields(dynamicFields.filter(field => field.id !== id));
+  };
+
+  // Update dynamic field value
+  const updateDynamicField = (id: string, value: string) => {
+    setDynamicFields(dynamicFields.map(field => 
+      field.id === id ? { ...field, value } : field
+    ));
+  };
 
   // Validate Aadhaar number format
   const validateAadhaarNumber = (number: string) => {
@@ -101,8 +123,10 @@ const AadhaarVerification: React.FC = () => {
         body: JSON.stringify({ 
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           location: location.trim(),
-          dummyField1: dummyField1.trim(),
-          dummyField2: dummyField2.trim(),
+          dynamicFields: dynamicFields.map(field => ({
+            id: field.id,
+            value: field.value.trim()
+          })),
           consentAccepted: consentAccepted
         })
       });
@@ -148,8 +172,10 @@ const AadhaarVerification: React.FC = () => {
         body: JSON.stringify({
           aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
           location: location.trim(),
-          dummyField1: dummyField1.trim(),
-          dummyField2: dummyField2.trim(),
+          dynamicFields: dynamicFields.map(field => ({
+            id: field.id,
+            value: field.value.trim()
+          })),
           consentAccepted: true
         })
       });
@@ -219,13 +245,12 @@ const AadhaarVerification: React.FC = () => {
     setCurrentStep({ step: 'enter-details' });
     setAadhaarNumber('');
     setLocation('');
-    setDummyField1('');
-    setDummyField2('');
     setConsentAccepted(false);
     setOtp('');
     setTransactionId('');
     setResendCooldown(0);
     setCanResend(false);
+    setDynamicFields([]);
   };
 
   return (
@@ -243,15 +268,15 @@ const AadhaarVerification: React.FC = () => {
           <div className="flex justify-center mb-8">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-              <div className="relative p-6 bg-white rounded-full shadow-2xl border-4 border-white/50 transform group-hover:scale-110 transition-transform duration-300">
-                <IdentificationIcon className="w-16 h-16 text-blue-600" />
+              <div className="relative p-4 bg-white rounded-full shadow-2xl border-4 border-white/50 transform group-hover:scale-110 transition-transform duration-300">
+                <IdentificationIcon className="w-12 h-12 text-blue-600" />
               </div>
             </div>
           </div>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 animate-pulse">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4 animate-pulse">
             Aadhaar Verification
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             🔐 Secure OTP-based verification with real-time validation and comprehensive data retrieval
           </p>
           
@@ -275,17 +300,17 @@ const AadhaarVerification: React.FC = () => {
               {/* Step 1: Enter Details */}
               {currentStep.step === 'enter-details' && (
                 <div>
-                  <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-10 text-center">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8 text-center">
                     ✨ Enter Aadhaar Details
                   </h2>
-                  <form onSubmit={handleSubmit} className="space-y-10">
-                    {/* Form Fields in One Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Form Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Aadhaar Number Field */}
-                    <div className="group">
-                      <label htmlFor="aadhaarNumber" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                        Aadhaar Number *
+                      <div className="group">
+                        <label htmlFor="aadhaarNumber" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                          Aadhaar Number *
                       </label>
                       <input
                         type="text"
@@ -293,94 +318,121 @@ const AadhaarVerification: React.FC = () => {
                         value={aadhaarNumber}
                         onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, '').slice(0, 12))}
                         placeholder="1234 5678 9012"
-                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-lg font-medium transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg"
+                          className="w-full px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-base font-medium transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg"
                         maxLength={12}
                         required
                       />
-                    </div>
+                      </div>
 
-                      {/* Location Field */}
+                      {/* Location Field with Plus Icon */}
                       <div className="group">
-                        <label htmlFor="location" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                        <label htmlFor="location" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
                           <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
                           Location *
                         </label>
-                        <input
-                          type="text"
-                          id="location"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          placeholder="Enter location"
-                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-lg font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
-                          required
-                        />
-                      </div>
-
-                      {/* Dummy Field 1 */}
-                      <div className="group">
-                        <label htmlFor="dummyField1" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                          Additional Info 1
-                        </label>
-                        <input
-                          type="text"
-                          id="dummyField1"
-                          value={dummyField1}
-                          onChange={(e) => setDummyField1(e.target.value)}
-                          placeholder="Additional info"
-                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 text-lg font-medium transition-all duration-300 group-hover:border-green-300 group-hover:shadow-lg"
-                        />
-                      </div>
-
-                      {/* Dummy Field 2 */}
-                      <div className="group">
-                        <label htmlFor="dummyField2" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                          Additional Info 2
-                        </label>
-                        <input
-                          type="text"
-                          id="dummyField2"
-                          value={dummyField2}
-                          onChange={(e) => setDummyField2(e.target.value)}
-                          placeholder="Additional info"
-                          className="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 text-lg font-medium transition-all duration-300 group-hover:border-orange-300 group-hover:shadow-lg"
-                        />
-                          </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            id="location"
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            placeholder="Enter location"
+                            className="flex-1 px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-base font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={addDynamicField}
+                            className="group flex items-center justify-center px-3 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                            title="Add additional field"
+                          >
+                            <PlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                          </button>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Dynamic Fields */}
+                    {dynamicFields.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-base font-bold text-gray-700 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                          Additional Fields
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {dynamicFields.map((field, index) => (
+                            <div key={field.id} className="group relative">
+                              <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center">
+                                <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                                Field {index + 1}
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={field.value}
+                                  onChange={(e) => updateDynamicField(field.id, e.target.value)}
+                                  placeholder={`Additional field ${index + 1}`}
+                                  className="w-full px-3 py-2 pr-10 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-medium transition-all duration-300 group-hover:border-indigo-300 group-hover:shadow-lg"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeDynamicField(field.id)}
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-all duration-300 hover:scale-110 shadow-lg"
+                                  title="Remove field"
+                                >
+                                  <TrashIcon className="w-3 h-3" />
+                                </button>
+                              </div>
+                          </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Consent Checkbox */}
-                    <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border-2 border-blue-100">
-                      <div className="flex items-center h-6">
+                    <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-blue-100">
+                      <div className="flex items-center h-5">
                           <input
                           id="consent"
                             type="checkbox"
                             checked={consentAccepted}
                             onChange={(e) => setConsentAccepted(e.target.checked)}
-                          className="w-5 h-5 text-blue-600 bg-white border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                          className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
                           required
                         />
                       </div>
-                      <div className="ml-4 text-base">
+                      <div className="ml-3 text-sm">
                         <label htmlFor="consent" className="font-bold text-gray-700 cursor-pointer">
-                          ✅ I consent to the verification process *
+                          ✅ Aadhaar Consent Declaration *
                           </label>
-                        <p className="text-gray-600 mt-1">
-                          By checking this box, I agree to the terms and conditions and consent to the Aadhaar verification process.
-                        </p>
+                        <div className="text-gray-600 mt-1 text-xs space-y-2">
+                          <p className="font-semibold">I hereby voluntarily provide my Aadhaar details to Metalman Auto Limited for the purpose of employee verification, statutory compliance, and internal record maintenance.</p>
+                          
+                          <p className="font-semibold">I confirm and acknowledge that:</p>
+                          
+                          <ul className="list-disc list-inside space-y-1 ml-2">
+                            <li>My Aadhaar information will be used only for official and lawful purposes, including identity verification and compliance with applicable laws.</li>
+                            <li>The company shall ensure the confidentiality and security of my Aadhaar details, in accordance with the Aadhaar Act, 2016 and relevant data protection regulations.</li>
+                            <li>I am submitting this information willingly and without any coercion or undue pressure.</li>
+                            <li>I authorize Metalman Auto Limited to use, store, and process the provided Aadhaar details solely for the purposes stated above.</li>
+                            <li>The information I have provided is true and correct to the best of my knowledge.</li>
+                          </ul>
+                          
+                          <p className="font-semibold">I have read and understood the above declaration and provide my consent.</p>
+                        </div>
                       </div>
                     </div>
                     
                     <button
                       type="submit"
                       disabled={isLoading || !validateAadhaarNumber(aadhaarNumber) || !location.trim() || !consentAccepted}
-                      className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 px-8 rounded-2xl font-bold text-xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+                      className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       {isLoading ? (
                         <div className="flex items-center justify-center relative z-10">
-                          <ArrowPathIcon className="w-6 h-6 animate-spin mr-3" />
-                          <span className="text-lg">Sending OTP...</span>
+                          <ArrowPathIcon className="w-5 h-5 animate-spin mr-2" />
+                          <span className="text-base">Sending OTP...</span>
                         </div>
                       ) : (
                         <span className="relative z-10 flex items-center justify-center">

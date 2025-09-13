@@ -223,13 +223,12 @@ async function verifyAadhaarOTP(referenceId, otp) {
 }
 
 // Main Aadhaar verification function
-async function verifyAadhaar(aadhaarNumber, location, dummyField1, dummyField2, reason = "KYC Verification") {
+async function verifyAadhaar(aadhaarNumber, location, dynamicFields = [], reason = "KYC Verification") {
   try {
     logger.info("Starting Aadhaar verification (OTP flow):", {
       aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
       location,
-      dummyField1,
-      dummyField2,
+      dynamicFields,
       reason
     });
     
@@ -256,14 +255,13 @@ async function verifyAadhaar(aadhaarNumber, location, dummyField1, dummyField2, 
       fullResponse: otpResponse
     });
 
-        return {
-          success: true,
+    return {
+      success: true,
       message: 'OTP sent successfully',
       details: {
         aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
         location: location.trim(),
-        dummyField1: dummyField1.trim(),
-        dummyField2: dummyField2.trim(),
+        dynamicFields: dynamicFields,
         otpSent: true,
         transactionId: extractedReferenceId,
         apiResponse: otpResponse,
@@ -276,8 +274,7 @@ async function verifyAadhaar(aadhaarNumber, location, dummyField1, dummyField2, 
       stack: error.stack,
       aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
       location,
-      dummyField1,
-      dummyField2
+      dynamicFields
     });
     
     throw new Error(`Aadhaar verification failed: ${error.message}`);

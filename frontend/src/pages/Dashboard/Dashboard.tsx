@@ -243,7 +243,7 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header with staggered animation */}
         <div className="mb-8 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <h1 className="text-4xl font-bold text-slate-800 tracking-tight drop-shadow-lg">
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight drop-shadow-lg">
             Welcome back, {user?.branding?.displayName || user?.name || 'User'}! 👋
           </h1>
           <p className="mt-2 text-slate-600 font-medium">
@@ -271,10 +271,10 @@ const Dashboard: React.FC = () => {
                   <DocumentTextIcon className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-600">Total Records</p>
+                  <p className="text-xs font-medium text-slate-600">Total Records</p>
                   <AnimatedNumber 
                     value={stats.totalRecords} 
-                    className="text-2xl font-bold text-slate-900"
+                    className="text-xl font-bold text-slate-900"
                   />
                 </div>
               </div>
@@ -322,10 +322,10 @@ const Dashboard: React.FC = () => {
                   <DocumentMagnifyingGlassIcon className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-600">PAN KYC Records</p>
+                  <p className="text-xs font-medium text-slate-600">PAN KYC Records</p>
                   <AnimatedNumber 
                     value={stats.panKycRecords} 
-                    className="text-2xl font-bold text-slate-900"
+                    className="text-xl font-bold text-slate-900"
                   />
                 </div>
               </div>
@@ -373,10 +373,10 @@ const Dashboard: React.FC = () => {
                   <UserIcon className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-600">Aadhaar-PAN Records</p>
+                  <p className="text-xs font-medium text-slate-600">Aadhaar-PAN Records</p>
                   <AnimatedNumber 
                     value={stats.aadhaarPanRecords} 
-                    className="text-2xl font-bold text-slate-900"
+                    className="text-xl font-bold text-slate-900"
                   />
                 </div>
               </div>
@@ -424,10 +424,10 @@ const Dashboard: React.FC = () => {
                   <IdentificationIcon className="h-6 w-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-600">Aadhaar Verification</p>
+                  <p className="text-xs font-medium text-slate-600">Aadhaar Verification</p>
                   <AnimatedNumber 
                     value={stats.aadhaarVerificationRecords} 
-                    className="text-2xl font-bold text-slate-900"
+                    className="text-xl font-bold text-slate-900"
                   />
                 </div>
               </div>
@@ -474,9 +474,9 @@ const Dashboard: React.FC = () => {
                 <div className="text-gray-400 mb-4">
                   <ChartBarIcon className="h-16 w-16 mx-auto mb-3 opacity-50" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">No Module Access</h3>
+                <h3 className="text-base font-semibold text-gray-700 mb-2">No Module Access</h3>
                 <p className="text-gray-600 mb-4">You don't have access to any modules yet.</p>
-                <p className="text-sm text-gray-500">Contact your administrator to get module permissions and start using the system.</p>
+                <p className="text-xs text-gray-500">Contact your administrator to get module permissions and start using the system.</p>
               </div>
             </div>
           )}
@@ -574,7 +574,7 @@ const Dashboard: React.FC = () => {
                     <UserGroupIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   </div>
                   <p className="text-gray-600 font-medium">No module access granted</p>
-                  <p className="text-sm text-gray-500 mt-1">Contact your administrator for module permissions</p>
+                  <p className="text-xs text-gray-500 mt-1">Contact your administrator for module permissions</p>
                 </div>
               )}
             </div>
@@ -747,7 +747,7 @@ const Dashboard: React.FC = () => {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-xs font-medium text-slate-800">
                           {getStatusText(activity)}
                         </p>
                         <p className="text-xs text-slate-500">
@@ -771,7 +771,7 @@ const Dashboard: React.FC = () => {
                   <div className="p-3 bg-gray-100 rounded-2xl inline-block mb-3">
                     <ClockIcon className="h-6 w-6 text-gray-400" />
                   </div>
-                  <p className="text-sm text-gray-500">No recent activity</p>
+                  <p className="text-xs text-gray-500">No recent activity</p>
                   <p className="text-xs text-gray-400 mt-1">Upload documents to see activity here</p>
                 </div>
               )}

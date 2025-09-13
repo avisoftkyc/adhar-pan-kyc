@@ -293,10 +293,10 @@ const AadhaarVerificationRecords: React.FC = () => {
               </div>
             </div>
           </div>
-          <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6 animate-pulse">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4 animate-pulse">
             📋 Verification Records
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             🔍 View your complete Aadhaar verification history with detailed information and status tracking
           </p>
           
@@ -307,7 +307,7 @@ const AadhaarVerificationRecords: React.FC = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <ArrowLeftIcon className="w-6 h-6 mr-3 relative z-10" />
-            <span className="relative z-10 text-lg">Back to Verification</span>
+            <span className="relative z-10 text-base">Back to Verification</span>
           </button>
         </div>
 
@@ -324,7 +324,7 @@ const AadhaarVerificationRecords: React.FC = () => {
                 placeholder="Search by Aadhaar Number, Name, Address, District, State, PIN Code, or Care Of..."
                 value={searchTerm}
                 onChange={handleSearchInputChange}
-                className="block w-full pl-12 pr-12 py-4 border border-gray-300 rounded-2xl text-lg font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl text-base font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
               />
               {searchTerm && (
                 <button
@@ -353,7 +353,7 @@ const AadhaarVerificationRecords: React.FC = () => {
             {isSearching && (
               <div className="flex items-center space-x-2 text-blue-600">
                 <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                <span className="text-sm font-medium">Searching...</span>
+                <span className="text-xs font-medium">Searching...</span>
               </div>
             )}
           </div>
@@ -364,11 +364,11 @@ const AadhaarVerificationRecords: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 {/* Status Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Status</label>
                   <select
                     value={filters.status}
                     onChange={(e) => handleFilterChange({ ...filters, status: e.target.value })}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                   >
                     <option value="">All Status</option>
                     <option value="verified">Verified</option>
@@ -380,33 +380,33 @@ const AadhaarVerificationRecords: React.FC = () => {
 
                 {/* Date From Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date From</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Date From</label>
                   <input
                     type="date"
                     value={filters.dateFrom}
                     onChange={(e) => handleFilterChange({ ...filters, dateFrom: e.target.value })}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                   />
                 </div>
 
                 {/* Date To Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date To</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Date To</label>
                   <input
                     type="date"
                     value={filters.dateTo}
                     onChange={(e) => handleFilterChange({ ...filters, dateTo: e.target.value })}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                   />
                 </div>
 
                 {/* Sort By Filter */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sort By</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">Sort By</label>
                   <select
                     value={filters.sortBy}
                     onChange={(e) => handleFilterChange({ ...filters, sortBy: e.target.value })}
-                    className="block w-full px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm"
                   >
                     <option value="createdAt">Date Created</option>
                     <option value="name">Name</option>
@@ -449,22 +449,22 @@ const AadhaarVerificationRecords: React.FC = () => {
           {(searchTerm || filters.status || filters.dateFrom || filters.dateTo) && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
               {searchTerm && (
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   🔍 Search: "{searchTerm}"
                 </span>
               )}
               {filters.status && (
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   📊 Status: {filters.status}
                 </span>
               )}
               {filters.dateFrom && (
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                   📅 From: {filters.dateFrom}
                 </span>
               )}
               {filters.dateTo && (
-                <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                   📅 To: {filters.dateTo}
                 </span>
               )}
@@ -500,8 +500,8 @@ const AadhaarVerificationRecords: React.FC = () => {
               </div>
               {searchTerm ? (
                 <>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">No records found for "{searchTerm}"</h3>
-                  <p className="text-lg text-gray-500 mb-8">Try searching with different keywords or clear the search to see all records.</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">No records found for "{searchTerm}"</h3>
+                  <p className="text-base text-gray-500 mb-6">Try searching with different keywords or clear the search to see all records.</p>
                   <button
                     onClick={clearSearch}
                     className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
@@ -515,8 +515,8 @@ const AadhaarVerificationRecords: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">No verification records found</h3>
-                  <p className="text-lg text-gray-500 mb-8">You haven't performed any Aadhaar verifications yet.</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">No verification records found</h3>
+                  <p className="text-base text-gray-500 mb-6">You haven't performed any Aadhaar verifications yet.</p>
                   <button
                     onClick={() => navigate('/aadhaar-verification')}
                     className="group relative inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"

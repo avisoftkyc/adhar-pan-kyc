@@ -162,7 +162,7 @@ router.get('/records', protect, async (req, res) => {
 // Single Aadhaar verification endpoint - Send OTP
 router.post('/verify-single', protect, async (req, res) => {
   try {
-    const { aadhaarNumber, location, dummyField1, dummyField2, consentAccepted } = req.body;
+    const { aadhaarNumber, location, dynamicFields = [], consentAccepted } = req.body;
 
     if (!aadhaarNumber || !location) {
       return res.status(400).json({
@@ -189,7 +189,7 @@ router.post('/verify-single', protect, async (req, res) => {
 
     // Send OTP using Sandbox API
     const startTime = Date.now();
-    const otpResult = await verifyAadhaar(aadhaarNumber, location, dummyField1, dummyField2);
+    const otpResult = await verifyAadhaar(aadhaarNumber, location, dynamicFields);
     
     logger.info("OTP sent successfully - returning transaction ID:", {
       transactionId: otpResult.details.transactionId,
@@ -203,8 +203,7 @@ router.post('/verify-single', protect, async (req, res) => {
       data: {
         aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
         location: location.trim(),
-        dummyField1: dummyField1.trim(),
-        dummyField2: dummyField2.trim(),
+        dynamicFields: dynamicFields,
         otpSent: true,
         transactionId: otpResult.details.transactionId,
         apiResponse: otpResult.details.apiResponse,

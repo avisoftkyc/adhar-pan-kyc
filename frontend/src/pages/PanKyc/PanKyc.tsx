@@ -756,10 +756,10 @@ const PanKyc: React.FC = () => {
               </div>
             </div>
             
-            <h3 className="text-4xl font-bold bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4 animate-pulse">
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-3 animate-pulse">
               Verifying Records
             </h3>
-            <p className="text-gray-300 text-xl mb-8">Please wait while we verify {selectedRecords.length} selected records...</p>
+            <p className="text-gray-300 text-lg mb-6">Please wait while we verify {selectedRecords.length} selected records...</p>
             
             {/* Beautiful wave progress */}
             <div className="w-80 mx-auto mb-6">
@@ -807,8 +807,8 @@ const PanKyc: React.FC = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
           <div className="relative z-10 flex items-center justify-between">
                       <div>
-              <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg">PAN KYC Verification</h1>
-              <p className="text-blue-100 mt-3 text-lg font-medium">
+              <h1 className="text-3xl font-bold tracking-tight drop-shadow-lg">PAN KYC Verification</h1>
+              <p className="text-blue-100 mt-2 text-base font-medium">
                 Upload Excel files and verify PAN details in bulk with advanced verification
               </p>
             </div>
@@ -841,7 +841,7 @@ const PanKyc: React.FC = () => {
         <nav className="flex space-x-2">
           <button
             onClick={() => handleTabChange('upload')}
-            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
+            className={`py-2 px-4 rounded-xl font-semibold text-xs transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'upload'
                 ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg border border-white/30'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
@@ -854,7 +854,7 @@ const PanKyc: React.FC = () => {
           </button>
           <button
             onClick={() => handleTabChange('single')}
-            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
+            className={`py-2 px-4 rounded-xl font-semibold text-xs transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'single'
                 ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg border border-white/30'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
@@ -882,7 +882,7 @@ const PanKyc: React.FC = () => {
               {/* File Input Area */}
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-dashed border-blue-300/50 hover:border-blue-400/70 transition-all duration-300 mb-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-semibold text-blue-800 mb-2 flex items-center justify-center">
+                  <h3 className="text-base font-semibold text-blue-800 mb-2 flex items-center justify-center">
                     <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-600" />
                     Select Excel File
                   </h3>
@@ -903,7 +903,7 @@ const PanKyc: React.FC = () => {
                       />
                       <label
                         htmlFor="file-input"
-                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-400/30"
+                        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-base rounded-xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-400/30"
                       >
                         <DocumentTextIcon className="h-6 w-6 mr-3" />
                         Choose File
@@ -911,7 +911,7 @@ const PanKyc: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="mt-3 text-sm text-blue-500/70">
+                  <p className="mt-2 text-xs text-blue-500/70">
                     Required columns: <span className="font-semibold">panNumber</span>, <span className="font-semibold">name</span>, <span className="font-semibold">dateOfBirth</span>
                   </p>
                 </div>
@@ -927,7 +927,7 @@ const PanKyc: React.FC = () => {
                         <DocumentTextIcon className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-blue-900">{selectedFile.name}</p>
+                        <p className="text-base font-semibold text-blue-900">{selectedFile.name}</p>
                         <p className="text-blue-700">
                           {(selectedFile.size / 1024).toFixed(2)} KB
                         </p>
@@ -952,8 +952,8 @@ const PanKyc: React.FC = () => {
               {uploading && (
                 <div className="bg-white/80 rounded-2xl p-6 border border-blue-200/50 mb-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-lg font-semibold text-blue-800">Uploading...</span>
-                    <span className="text-lg font-bold text-blue-600">{uploadProgress}%</span>
+                    <span className="text-base font-semibold text-blue-800">Uploading...</span>
+                    <span className="text-base font-bold text-blue-600">{uploadProgress}%</span>
                   </div>
                   <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden">
                     <div
@@ -969,7 +969,7 @@ const PanKyc: React.FC = () => {
                 <button
                   onClick={handleUpload}
                   disabled={!selectedFile || uploading}
-                  className="inline-flex items-center px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-2xl shadow-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:cursor-not-allowed"
+                  className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-base rounded-xl shadow-2xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
                   {uploading ? (
                     <>
@@ -989,7 +989,7 @@ const PanKyc: React.FC = () => {
 
           {/* Batches List */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/30 hover:shadow-3xl transition-all duration-300">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center">
+            <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
               <DocumentTextIcon className="h-7 w-7 text-emerald-500 mr-3" />
               Uploaded Documents
             </h2>
@@ -1015,7 +1015,7 @@ const PanKyc: React.FC = () => {
                 <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                   <DocumentTextIcon className="h-12 w-12 text-slate-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-600 mb-2">No Documents Yet</h3>
+                <h3 className="text-base font-semibold text-slate-600 mb-2">No Documents Yet</h3>
                 <p className="text-slate-500 mb-4">Upload your first PAN KYC document to get started</p>
                 <button className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
                   <CloudArrowUpIcon className="h-5 w-4 mr-2" />

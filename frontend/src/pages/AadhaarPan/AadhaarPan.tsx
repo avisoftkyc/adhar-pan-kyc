@@ -584,8 +584,8 @@ const AadhaarPan: React.FC = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
                     <div className="relative z-10 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight drop-shadow-lg">Aadhaar-PAN Linking</h1>
-            <p className="text-emerald-100 mt-3 text-lg font-medium">
+            <h1 className="text-3xl font-bold tracking-tight drop-shadow-lg">Aadhaar-PAN Linking</h1>
+            <p className="text-emerald-100 mt-2 text-base font-medium">
               Upload Excel files and verify Aadhaar-PAN linking in bulk with advanced verification
             </p>
           </div>
@@ -608,7 +608,7 @@ const AadhaarPan: React.FC = () => {
         <nav className="flex space-x-2">
           <button
             onClick={() => handleTabChange('upload')}
-            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
+            className={`py-2 px-4 rounded-xl font-semibold text-xs transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'upload'
                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg border border-white/30'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
@@ -616,12 +616,12 @@ const AadhaarPan: React.FC = () => {
           >
             <div className="flex items-center space-x-2">
               <CloudArrowUpIcon className="h-5 w-5" />
-              <span>Upload File</span>
+              <span>Bulk Aadhaar Status</span>
             </div>
           </button>
           <button
             onClick={() => handleTabChange('single')}
-            className={`py-3 px-6 rounded-2xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 ${
+            className={`py-2 px-4 rounded-xl font-semibold text-xs transition-all duration-300 transform hover:scale-105 ${
               activeTab === 'single'
                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg border border-white/30'
                 : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50/80'
@@ -629,7 +629,7 @@ const AadhaarPan: React.FC = () => {
           >
             <div className="flex items-center space-x-2">
               <LinkIcon className="h-5 w-5" />
-              <span>Single Linking</span>
+              <span>Aadhaar status</span>
             </div>
           </button>
         </nav>
@@ -655,10 +655,10 @@ const AadhaarPan: React.FC = () => {
                     <DocumentTextIcon className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
                     <label htmlFor="file-upload" className="cursor-pointer">
                       <div className="space-y-2">
-                        <span className="text-lg font-semibold text-emerald-700">
+                        <span className="text-base font-semibold text-emerald-700">
                           {selectedFile ? 'File Selected' : 'Choose Excel File'}
                         </span>
-                        <p className="text-sm text-emerald-600">
+                        <p className="text-xs text-emerald-600">
                           {selectedFile ? selectedFile.name : 'or drag and drop here'}
                         </p>
                         <p className="text-xs text-emerald-500">
@@ -687,7 +687,7 @@ const AadhaarPan: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-blue-900 mb-2">File Requirements</h3>
-                      <div className="text-sm text-blue-800">
+                      <div className="text-xs text-blue-800">
                         <span>Must contain columns: </span>
                         <code className="bg-blue-100 px-2 py-1 rounded">aadhaarNumber</code>
                         <span>, </span>
@@ -709,7 +709,7 @@ const AadhaarPan: React.FC = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold text-green-900">{selectedFile.name}</h3>
-                          <p className="text-sm text-green-700">
+                          <p className="text-xs text-green-700">
                             Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
@@ -735,8 +735,8 @@ const AadhaarPan: React.FC = () => {
                   <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700">Upload Progress</span>
-                        <span className="text-sm font-medium text-gray-900">{uploadProgress}%</span>
+                        <span className="text-xs font-medium text-gray-700">Upload Progress</span>
+                        <span className="text-xs font-medium text-gray-900">{uploadProgress}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                         <div 
@@ -753,7 +753,7 @@ const AadhaarPan: React.FC = () => {
                   <button
                     onClick={handleUpload}
                     disabled={!selectedFile || uploading}
-                    className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-2xl shadow-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300"
+                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-semibold rounded-xl shadow-xl text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 transition-all duration-300"
                   >
                     {uploading ? (
                       <>
@@ -768,7 +768,7 @@ const AadhaarPan: React.FC = () => {
                     )}
                   </button>
                   {!selectedFile && (
-                    <p className="text-sm text-gray-500 mt-3">
+                    <p className="text-xs text-gray-500 mt-2">
                       Please select a file to enable upload
                     </p>
                   )}
@@ -789,7 +789,7 @@ const AadhaarPan: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-slate-500 to-gray-600 rounded-xl mr-3 shadow-lg">
                   <DocumentTextIcon className="h-6 w-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Uploaded Documents</h2>
+                <h2 className="text-xl font-bold text-gray-900">Uploaded Documents</h2>
               </div>
             
               {loading ? (
@@ -804,7 +804,7 @@ const AadhaarPan: React.FC = () => {
                   <div className="w-24 h-24 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <DocumentTextIcon className="h-12 w-12 text-slate-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-700 mb-2">No Documents Yet</h3>
+                  <h3 className="text-base font-semibold text-slate-700 mb-2">No Documents Yet</h3>
                   <p className="text-slate-500 max-w-sm mx-auto">
                     Upload your first Excel file to get started with Aadhaar-PAN linking verification.
                   </p>
@@ -831,9 +831,9 @@ const AadhaarPan: React.FC = () => {
                               <DocumentTextIcon className="h-6 w-6 text-white" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">                                  {batch._id.split('_')[0]}
+                              <h3 className="font-semibold text-gray-900 text-base">                                  {batch._id.split('_')[0]}
                               </h3>
-                              <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                              <div className="flex items-center space-x-4 text-xs text-gray-600 mt-1">
                                 <span className="flex items-center space-x-1">
                                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                   <span>{batch.totalRecords} records</span>
@@ -876,7 +876,7 @@ const AadhaarPan: React.FC = () => {
                   {totalPages > 1 && (
                     <div className="bg-white rounded-2xl p-6 border border-gray-200 mt-8">
                       <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-700">
+                        <div className="text-xs text-gray-700">
                           Showing <span className="font-semibold">{indexOfFirstDocument + 1}</span> to{' '}
                           <span className="font-semibold">{Math.min(indexOfLastDocument, batches.length)}</span> of{' '}
                           <span className="font-semibold">{batches.length}</span> documents
@@ -885,17 +885,17 @@ const AadhaarPan: React.FC = () => {
                           <button
                             onClick={() => setCurrentPage(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                            className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
                           >
                             Previous
                           </button>
-                          <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-xl">
+                          <span className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 rounded-lg">
                             {currentPage} of {totalPages}
                           </span>
                           <button
                             onClick={() => setCurrentPage(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 text-sm font-medium border border-gray-300 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
+                            className="px-3 py-1.5 text-xs font-medium border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors duration-200"
                           >
                             Next
                           </button>
