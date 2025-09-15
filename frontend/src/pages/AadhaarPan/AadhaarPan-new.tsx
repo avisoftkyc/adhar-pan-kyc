@@ -15,6 +15,7 @@ import {
   ArrowDownTrayIcon,
   CheckIcon
 } from '@heroicons/react/24/outline';
+import { validateAadhaar, validatePAN, filterAadhaarInput, filterPANInput } from '../../utils/validation';
 
 interface Batch {
   _id: string;
@@ -157,43 +158,39 @@ const AadhaarPan: React.FC = () => {
   };
 
   const handleSingleVerificationFormChange = (field: string, value: string) => {
+    let filteredValue = value;
+    
+    if (field === 'aadhaarNumber') {
+      filteredValue = filterAadhaarInput(value);
+    } else if (field === 'panNumber') {
+      filteredValue = filterPANInput(value);
+    }
+    
     setSingleVerificationForm(prev => ({
       ...prev,
-      [field]: value
+      [field]: filteredValue
     }));
   };
 
   const validateSingleVerificationForm = () => {
     const { aadhaarNumber, panNumber, name } = singleVerificationForm;
     
-    if (!aadhaarNumber.trim()) {
+    // Validate Aadhaar
+    const aadhaarValidation = validateAadhaar(aadhaarNumber);
+    if (!aadhaarValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Aadhaar number is required'
+        message: aadhaarValidation.message || 'Invalid Aadhaar number'
       });
       return false;
     }
     
-    if (!/^\d{12}$/.test(aadhaarNumber.replace(/\s/g, ''))) {
+    // Validate PAN
+    const panValidation = validatePAN(panNumber);
+    if (!panValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Aadhaar number must be 12 digits'
-      });
-      return false;
-    }
-    
-    if (!panNumber.trim()) {
-      showToast({
-        type: 'error',
-        message: 'PAN number is required'
-      });
-      return false;
-    }
-    
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber.toUpperCase())) {
-      showToast({
-        type: 'error',
-        message: 'PAN number must be in format: ABCDE1234F'
+        message: panValidation.message || 'Invalid PAN number'
       });
       return false;
     }

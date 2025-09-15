@@ -99,6 +99,10 @@
     animation: shake 0.5s ease-in-out;
   }
 
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
   .animation-delay-200 {
     animation-delay: 0.2s;
   }
@@ -175,6 +179,17 @@
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 
