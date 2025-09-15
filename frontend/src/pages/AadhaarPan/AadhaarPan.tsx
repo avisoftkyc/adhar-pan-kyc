@@ -17,6 +17,7 @@ import {
   ArrowDownTrayIcon,
   CheckIcon
 } from '@heroicons/react/24/outline';
+import { validateAadhaar, validatePAN, validateName, filterAadhaarInput, filterPANInput, filterNameInput, getValidationStatus } from '../../utils/validation';
 
 interface Batch {
   _id: string;
@@ -412,55 +413,51 @@ const AadhaarPan: React.FC = () => {
 
   // Single verification form functions
   const handleSingleVerificationFormChange = (field: string, value: string) => {
+    let filteredValue = value;
+    
+    if (field === 'aadhaarNumber') {
+      filteredValue = filterAadhaarInput(value);
+    } else if (field === 'panNumber') {
+      filteredValue = filterPANInput(value);
+    } else if (field === 'name') {
+      filteredValue = filterNameInput(value);
+    }
+    
     setSingleVerificationForm(prev => ({
       ...prev,
-      [field]: value
+      [field]: filteredValue
     }));
   };
 
   const validateSingleVerificationForm = () => {
     const { aadhaarNumber, panNumber, name } = singleVerificationForm;
     
-    if (!aadhaarNumber.trim()) {
+    // Validate Aadhaar
+    const aadhaarValidation = validateAadhaar(aadhaarNumber);
+    if (!aadhaarValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Aadhaar Number is required'
+        message: aadhaarValidation.message || 'Invalid Aadhaar number'
       });
       return false;
     }
     
-    if (!panNumber.trim()) {
+    // Validate PAN
+    const panValidation = validatePAN(panNumber);
+    if (!panValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'PAN Number is required'
+        message: panValidation.message || 'Invalid PAN number'
       });
       return false;
     }
     
-    if (!name.trim()) {
+    // Validate Name
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Name is required'
-      });
-      return false;
-    }
-    
-    // Validate Aadhaar format (12 digits)
-    const aadhaarRegex = /^\d{12}$/;
-    if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
-      showToast({
-        type: 'error',
-        message: 'Aadhaar Number must be 12 digits'
-      });
-      return false;
-    }
-    
-    // Validate PAN format
-    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    if (!panRegex.test(panNumber.toUpperCase())) {
-      showToast({
-        type: 'error',
-        message: 'Invalid PAN number format'
+        message: nameValidation.message || 'Invalid name'
       });
       return false;
     }
@@ -1153,85 +1150,218 @@ const AadhaarPan: React.FC = () => {
 
       {/* Single Linking Tab Content */}
       {activeTab === 'single' && (
-        <div className="card">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Single Aadhaar-PAN Linking Verification</h2>
-
-          <div className="max-w-2xl">
-            <form onSubmit={handleSingleVerificationSubmit} className="space-y-6">
+        <div className="bg-gradient-to-br from-white via-green-50/30 to-blue-50/30 rounded-2xl shadow-xl border border-green-100/50 overflow-hidden">
+          {/* Header Section */}
+          <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-8 py-6 text-white">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <LinkIcon className="h-8 w-8 text-white" />
+              </div>
               <div>
-                <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  Aadhaar Number *
-                </label>
-                <input
-                  type="text"
-                  id="aadhaarNumber"
-                  value={singleVerificationForm.aadhaarNumber}
-                  onChange={(e) => handleSingleVerificationFormChange('aadhaarNumber', e.target.value)}
-                  placeholder="e.g., 123456789012"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  maxLength={12}
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter 12-digit Aadhaar number
-                </p>
+                <h2 className="text-2xl font-bold">Single Aadhaar-PAN Linking Verification</h2>
+                <p className="text-green-100 mt-1">Verify the linking status between Aadhaar and PAN numbers</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Section */}
+          <div className="p-8">
+            <div className="max-w-7xl mx-auto">
+              <form onSubmit={handleSingleVerificationSubmit} className="space-y-8">
+                {/* Form fields in one row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Aadhaar Number Field */}
+                <div className="group">
+                  <label htmlFor="aadhaarNumber" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                    Aadhaar Number *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      id="aadhaarNumber"
+                      value={singleVerificationForm.aadhaarNumber}
+                      onChange={(e) => handleSingleVerificationFormChange('aadhaarNumber', e.target.value)}
+                      placeholder="1234 5678 9012"
+                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-mono tracking-wider group-hover:shadow-xl ${
+                        singleVerificationForm.aadhaarNumber.length === 0 
+                          ? 'border-gray-200 focus:ring-blue-500/20 focus:border-blue-500 bg-white' 
+                          : singleVerificationForm.aadhaarNumber.length === 12 && validateAadhaar(singleVerificationForm.aadhaarNumber).isValid
+                          ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500 bg-green-50'
+                          : singleVerificationForm.aadhaarNumber.length === 12 && !validateAadhaar(singleVerificationForm.aadhaarNumber).isValid
+                          ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500 bg-red-50'
+                          : 'border-yellow-500 focus:ring-yellow-500/20 focus:border-yellow-500 bg-yellow-50'
+                      }`}
+                      maxLength={12}
+                    />
+                    {singleVerificationForm.aadhaarNumber.length > 0 && (
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        {singleVerificationForm.aadhaarNumber.length === 12 && validateAadhaar(singleVerificationForm.aadhaarNumber).isValid ? (
+                          <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                        ) : singleVerificationForm.aadhaarNumber.length === 12 && !validateAadhaar(singleVerificationForm.aadhaarNumber).isValid ? (
+                          <XCircleIcon className="w-6 h-6 text-red-500" />
+                        ) : (
+                          <ClockIcon className="w-6 h-6 text-yellow-500" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 text-xs text-center">
+                    {singleVerificationForm.aadhaarNumber.length === 0 ? (
+                      <span className="text-gray-500">Enter 12-digit Aadhaar number</span>
+                    ) : singleVerificationForm.aadhaarNumber.length === 12 && validateAadhaar(singleVerificationForm.aadhaarNumber).isValid ? (
+                      <span className="text-green-600 font-bold">✓ Valid Aadhaar format</span>
+                    ) : singleVerificationForm.aadhaarNumber.length === 12 && !validateAadhaar(singleVerificationForm.aadhaarNumber).isValid ? (
+                      <span className="text-red-600 font-bold">✗ Invalid Aadhaar format</span>
+                    ) : (
+                      <span className="text-yellow-600 font-bold">
+                        {singleVerificationForm.aadhaarNumber.length}/12 digits
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* PAN Number Field */}
+                <div className="group">
+                  <label htmlFor="panNumber" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                    PAN Number *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      id="panNumber"
+                      value={singleVerificationForm.panNumber}
+                      onChange={(e) => handleSingleVerificationFormChange('panNumber', e.target.value)}
+                      placeholder="ABCDE1234F"
+                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-mono tracking-wider group-hover:shadow-xl ${
+                        singleVerificationForm.panNumber.length === 0 
+                          ? 'border-gray-200 focus:ring-purple-500/20 focus:border-purple-500 bg-white' 
+                          : singleVerificationForm.panNumber.length === 10 && validatePAN(singleVerificationForm.panNumber).isValid
+                          ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500 bg-green-50'
+                          : singleVerificationForm.panNumber.length === 10 && !validatePAN(singleVerificationForm.panNumber).isValid
+                          ? 'border-red-500 focus:ring-red-500/20 focus:border-red-500 bg-red-50'
+                          : 'border-yellow-500 focus:ring-yellow-500/20 focus:border-yellow-500 bg-yellow-50'
+                      }`}
+                      maxLength={10}
+                      style={{ textTransform: 'uppercase' }}
+                    />
+                    {singleVerificationForm.panNumber.length > 0 && (
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        {singleVerificationForm.panNumber.length === 10 && validatePAN(singleVerificationForm.panNumber).isValid ? (
+                          <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                        ) : singleVerificationForm.panNumber.length === 10 && !validatePAN(singleVerificationForm.panNumber).isValid ? (
+                          <XCircleIcon className="w-6 h-6 text-red-500" />
+                        ) : (
+                          <ClockIcon className="w-6 h-6 text-yellow-500" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 text-xs text-center">
+                    {singleVerificationForm.panNumber.length === 0 ? (
+                      <span className="text-gray-500">Enter 10-character PAN number</span>
+                    ) : singleVerificationForm.panNumber.length === 10 && validatePAN(singleVerificationForm.panNumber).isValid ? (
+                      <span className="text-green-600 font-bold">✓ Valid PAN format</span>
+                    ) : singleVerificationForm.panNumber.length === 10 && !validatePAN(singleVerificationForm.panNumber).isValid ? (
+                      <span className="text-red-600 font-bold">✗ Invalid PAN format</span>
+                    ) : (
+                      <span className="text-yellow-600 font-bold">
+                        {singleVerificationForm.panNumber.length}/10 characters
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Name Field */}
+                <div className="group">
+                  <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></div>
+                    Full Name *
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      id="name"
+                      value={singleVerificationForm.name}
+                      onChange={(e) => handleSingleVerificationFormChange('name', e.target.value)}
+                      placeholder="Enter full name as per Aadhaar"
+                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg group-hover:shadow-xl ${
+                        singleVerificationForm.name.length === 0 
+                          ? 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white' 
+                          : validateName(singleVerificationForm.name).isValid
+                          ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500 bg-green-50'
+                          : 'border-red-500 focus:ring-red-500/20 focus:border-red-500 bg-red-50'
+                      }`}
+                    />
+                    {singleVerificationForm.name.length > 0 && (
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        {validateName(singleVerificationForm.name).isValid ? (
+                          <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                        ) : (
+                          <XCircleIcon className="w-6 h-6 text-red-500" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-2 text-xs text-center">
+                    {singleVerificationForm.name.length === 0 ? (
+                      <span className="text-gray-500">Enter full name (letters, spaces, hyphens, apostrophes only)</span>
+                    ) : validateName(singleVerificationForm.name).isValid ? (
+                      <span className="text-green-600 font-bold">✓ Valid name format</span>
+                    ) : (
+                      <span className="text-red-600 font-bold">✗ {validateName(singleVerificationForm.name).message}</span>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  PAN Number *
-                </label>
-                <input
-                  type="text"
-                  id="panNumber"
-                  value={singleVerificationForm.panNumber}
-                  onChange={(e) => handleSingleVerificationFormChange('panNumber', e.target.value)}
-                  placeholder="e.g., ABCDE1234F"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  maxLength={10}
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Enter PAN number in format: ABCDE1234F
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={singleVerificationForm.name}
-                  onChange={(e) => handleSingleVerificationFormChange('name', e.target.value)}
-                  placeholder="Enter full name as per Aadhaar"
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-
-              <div className="flex items-center space-x-4">
+              {/* Action Buttons */}
+              <div className="flex items-center justify-center space-x-6 pt-6">
                 <button
                   type="submit"
-                  disabled={singleVerificationVerifying}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={singleVerificationVerifying || !validateAadhaar(singleVerificationForm.aadhaarNumber).isValid || !validatePAN(singleVerificationForm.panNumber).isValid || !validateName(singleVerificationForm.name).isValid}
+                  className="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white font-bold text-lg rounded-xl shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 disabled:hover:scale-100 disabled:hover:translate-y-0"
                 >
-                  {singleVerificationVerifying ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <LinkIcon className="h-4 w-4 mr-2" />
-                      Verify Linking
-                    </>
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center">
+                    {singleVerificationVerifying ? (
+                      <>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                        <span>Verifying...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LinkIcon className="h-6 w-6 mr-3 group-hover:rotate-12 transition-transform duration-300" />
+                        <span>Verify Linking</span>
+                      </>
+                    )}
+                  </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={resetSingleVerificationForm}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="group inline-flex items-center justify-center px-6 py-4 border-2 border-gray-300 text-gray-700 font-bold text-lg rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-gray-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 hover:border-gray-400 hover:bg-gray-50"
                 >
+                  <svg className="h-5 w-5 mr-2 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
                   Reset Form
                 </button>
               </div>
@@ -1239,8 +1369,14 @@ const AadhaarPan: React.FC = () => {
 
             {/* Single Verification Result */}
             {singleVerificationResult && (
-              <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Verification Result</h3>
+              <div className="mt-12 bg-gradient-to-br from-white via-green-50/50 to-blue-50/50 rounded-2xl shadow-xl border border-green-100/50 overflow-hidden">
+                <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 px-8 py-4 text-white">
+                  <h3 className="text-xl font-bold flex items-center">
+                    <CheckCircleIcon className="h-6 w-6 mr-3" />
+                    Verification Result
+                  </h3>
+                </div>
+                <div className="p-8">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1286,8 +1422,10 @@ const AadhaarPan: React.FC = () => {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       )}

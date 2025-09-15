@@ -17,6 +17,7 @@ import {
   PlusIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
+import { validateAadhaar, filterAadhaarInput, getValidationStatus } from '../../utils/validation';
 
 interface VerificationStep {
   step: 'enter-details' | 'otp-verification' | 'success' | 'error';
@@ -129,10 +130,9 @@ const AadhaarVerification: React.FC = () => {
     ));
   };
 
-  // Validate Aadhaar number format
-  const validateAadhaarNumber = (number: string) => {
-    const cleaned = number.replace(/\s+/g, '').replace(/-/g, '');
-    return /^\d{12}$/.test(cleaned);
+  // Get Aadhaar validation status for UI
+  const getAadhaarValidationStatus = () => {
+    return getValidationStatus(aadhaarNumber, validateAadhaar);
   };
 
   // Format Aadhaar number for display
@@ -145,8 +145,9 @@ const AadhaarVerification: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateAadhaarNumber(aadhaarNumber)) {
-      toast.error('Please enter a valid 12-digit Aadhaar number');
+    const aadhaarValidation = validateAadhaar(aadhaarNumber);
+    if (!aadhaarValidation.isValid) {
+      toast.error(aadhaarValidation.message || 'Please enter a valid Aadhaar number');
       return;
     }
 
@@ -361,16 +362,50 @@ const AadhaarVerification: React.FC = () => {
                           <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                           Aadhaar Number *
                       </label>
-                      <input
-                        type="text"
-                        id="aadhaarNumber"
-                        value={aadhaarNumber}
-                        onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, '').slice(0, 12))}
-                        placeholder="1234 5678 9012"
-                          className="w-full px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 text-base font-medium transition-all duration-300 group-hover:border-blue-300 group-hover:shadow-lg"
-                        maxLength={12}
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          id="aadhaarNumber"
+                          value={aadhaarNumber}
+                          onChange={(e) => setAadhaarNumber(filterAadhaarInput(e.target.value))}
+                          placeholder="1234 5678 9012"
+                          className={`w-full px-3 py-3 pr-10 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 text-base font-medium transition-all duration-300 group-hover:shadow-lg ${
+                            aadhaarNumber.length === 0 
+                              ? 'border-gray-200 focus:border-blue-500' 
+                              : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'valid'
+                              ? 'border-green-500 focus:border-green-500 bg-green-50'
+                              : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'invalid'
+                              ? 'border-red-500 focus:border-red-500 bg-red-50'
+                              : 'border-yellow-500 focus:border-yellow-500 bg-yellow-50'
+                          }`}
+                          maxLength={12}
+                          required
+                        />
+                        {aadhaarNumber.length > 0 && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            {aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'valid' ? (
+                              <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                            ) : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'invalid' ? (
+                              <XCircleIcon className="w-5 h-5 text-red-500" />
+                            ) : (
+                              <ClockIcon className="w-5 h-5 text-yellow-500" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-center">
+                        {aadhaarNumber.length === 0 ? (
+                          <span className="text-gray-500">Enter 12-digit Aadhaar number</span>
+                        ) : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'valid' ? (
+                          <span className="text-green-600 font-medium">✓ Valid Aadhaar format</span>
+                        ) : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'invalid' ? (
+                          <span className="text-red-600 font-medium">✗ Invalid Aadhaar format</span>
+                        ) : (
+                          <span className="text-yellow-600 font-medium">
+                            {aadhaarNumber.length}/12 digits
+                          </span>
+                        )}
+                      </div>
                       </div>
 
                       {/* Location Field with Plus Icon */}
@@ -529,7 +564,7 @@ const AadhaarVerification: React.FC = () => {
                     
                     <button
                       type="submit"
-                      disabled={isLoading || !validateAadhaarNumber(aadhaarNumber) || !location.trim() || !consentAccepted}
+                      disabled={isLoading || !validateAadhaar(aadhaarNumber).isValid || !location.trim() || !consentAccepted}
                       className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

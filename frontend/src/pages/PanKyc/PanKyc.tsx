@@ -14,6 +14,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
+import { validatePAN, validateDateOfBirth, filterPANInput, filterDateInput, getValidationStatus } from '../../utils/validation';
 
 interface Batch {
   _id: string;
@@ -590,20 +591,43 @@ const PanKyc: React.FC = () => {
 
   // Single KYC form functions
   const handleSingleKycFormChange = (field: string, value: string) => {
-    setSingleKycForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'panNumber') {
+      const filteredValue = filterPANInput(value);
+      setSingleKycForm(prev => ({
+        ...prev,
+        [field]: filteredValue
+      }));
+    } else if (field === 'dateOfBirth') {
+      const filteredValue = filterDateInput(value);
+      setSingleKycForm(prev => ({
+        ...prev,
+        [field]: filteredValue
+      }));
+    } else {
+      setSingleKycForm(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
+  };
+
+  // Function to validate PAN format
+  const isValidPANFormat = (pan: string) => {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    return panRegex.test(pan);
   };
 
   const validateSingleKycForm = () => {
-    if (!singleKycForm.panNumber.trim()) {
+    // Validate PAN
+    const panValidation = validatePAN(singleKycForm.panNumber);
+    if (!panValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'PAN Number is required'
+        message: panValidation.message || 'Invalid PAN number'
       });
       return false;
     }
+    
     if (!singleKycForm.name.trim()) {
       showToast({
         type: 'error',
@@ -611,20 +635,13 @@ const PanKyc: React.FC = () => {
       });
       return false;
     }
-    if (!singleKycForm.dateOfBirth.trim()) {
-      showToast({
-        type: 'error',
-        message: 'Date of Birth is required'
-      });
-      return false;
-    }
     
-    // Validate PAN format (basic validation)
-    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    if (!panRegex.test(singleKycForm.panNumber.toUpperCase())) {
+    // Validate Date of Birth
+    const dobValidation = validateDateOfBirth(singleKycForm.dateOfBirth);
+    if (!dobValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Please enter a valid PAN number (e.g., ABCDE1234F)'
+        message: dobValidation.message || 'Invalid date of birth'
       });
       return false;
     }
@@ -1460,19 +1477,50 @@ const PanKyc: React.FC = () => {
                   PAN Number *
                       </span>
                 </label>
-                <input
-                  type="text"
-                  id="panNumber"
-                  value={singleKycForm.panNumber}
-                  onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
-                      placeholder="ABCDE1234F"
-                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center font-mono text-lg tracking-wider"
-                  maxLength={10}
-                      style={{ textTransform: 'uppercase' }}
-                />
-                    <p className="mt-2 text-xs text-gray-500 text-center">
-                      Format: ABCDE1234F
-                </p>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="panNumber"
+                    value={singleKycForm.panNumber}
+                    onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
+                    placeholder="ABCDE1234F"
+                    className={`block w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 text-center font-mono text-lg tracking-wider ${
+                      singleKycForm.panNumber.length === 0 
+                        ? 'border-gray-200 focus:ring-blue-500 focus:border-blue-500' 
+                        : singleKycForm.panNumber.length === 10 && isValidPANFormat(singleKycForm.panNumber)
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        : singleKycForm.panNumber.length === 10 && !isValidPANFormat(singleKycForm.panNumber)
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500 bg-yellow-50'
+                    }`}
+                    maxLength={10}
+                    style={{ textTransform: 'uppercase' }}
+                  />
+                  {singleKycForm.panNumber.length > 0 && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {singleKycForm.panNumber.length === 10 && isValidPANFormat(singleKycForm.panNumber) ? (
+                        <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                      ) : singleKycForm.panNumber.length === 10 && !isValidPANFormat(singleKycForm.panNumber) ? (
+                        <XCircleIcon className="w-5 h-5 text-red-500" />
+                      ) : (
+                        <ClockIcon className="w-5 h-5 text-yellow-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-2 text-xs text-center">
+                  {singleKycForm.panNumber.length === 0 ? (
+                    <span className="text-gray-500">Format: ABCDE1234F</span>
+                  ) : singleKycForm.panNumber.length === 10 && isValidPANFormat(singleKycForm.panNumber) ? (
+                    <span className="text-green-600 font-medium">✓ Valid PAN format</span>
+                  ) : singleKycForm.panNumber.length === 10 && !isValidPANFormat(singleKycForm.panNumber) ? (
+                    <span className="text-red-600 font-medium">✗ Invalid PAN format</span>
+                  ) : (
+                    <span className="text-yellow-600 font-medium">
+                      {singleKycForm.panNumber.length}/10 characters
+                    </span>
+                  )}
+                </div>
               </div>
 
                   {/* Name Field */}
@@ -1501,25 +1549,57 @@ const PanKyc: React.FC = () => {
                   Date of Birth *
                       </span>
                 </label>
-                <input
-                  type="text"
-                  id="dateOfBirth"
-                  value={singleKycForm.dateOfBirth}
-                  onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-center font-mono"
-                />
-                    <p className="mt-2 text-xs text-gray-500 text-center">
-                      Format: DD/MM/YYYY
-                </p>
-                  </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="dateOfBirth"
+                    value={singleKycForm.dateOfBirth}
+                    onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
+                    placeholder="DD-MM-YYYY"
+                    className={`block w-full px-4 py-3 pr-10 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 text-center font-mono ${
+                      singleKycForm.dateOfBirth.length === 0 
+                        ? 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500' 
+                        : singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        : singleKycForm.dateOfBirth.length === 10 && !validateDateOfBirth(singleKycForm.dateOfBirth).isValid
+                        ? 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                        : 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500 bg-yellow-50'
+                    }`}
+                    maxLength={10}
+                  />
+                  {singleKycForm.dateOfBirth.length > 0 && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
+                        <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                      ) : singleKycForm.dateOfBirth.length === 10 && !validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
+                        <XCircleIcon className="w-5 h-5 text-red-500" />
+                      ) : (
+                        <ClockIcon className="w-5 h-5 text-yellow-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-center">
+                  {singleKycForm.dateOfBirth.length === 0 ? (
+                    <span className="text-gray-500">Format: DD-MM-YYYY</span>
+                  ) : singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
+                    <span className="text-green-600 font-medium">✓ Valid date format</span>
+                  ) : singleKycForm.dateOfBirth.length === 10 && !validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
+                    <span className="text-red-600 font-medium">✗ Invalid date format</span>
+                  ) : (
+                    <span className="text-yellow-600 font-medium">
+                      {singleKycForm.dateOfBirth.length}/10 characters
+                    </span>
+                  )}
+                </div>
+              </div>
               </div>
 
                 {/* Action Buttons - Below Form */}
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   type="submit"
-                  disabled={singleKycVerifying}
+                  disabled={singleKycVerifying || !validatePAN(singleKycForm.panNumber).isValid || !singleKycForm.name.trim() || !validateDateOfBirth(singleKycForm.dateOfBirth).isValid}
                     className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-w-[200px]"
                 >
                   {singleKycVerifying ? (
