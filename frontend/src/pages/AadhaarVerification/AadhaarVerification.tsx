@@ -37,6 +37,13 @@ const AadhaarVerification: React.FC = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [canResend, setCanResend] = useState(false);
   const [dynamicFields, setDynamicFields] = useState<Array<{id: string, label: string, value: string}>>([]);
+
+  // Email validation function
+  const isValidEmail = (email: string): boolean => {
+    if (!email) return true; // Empty is valid (not required)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
   const [showFieldDropdown, setShowFieldDropdown] = useState(false);
 
   // Predefined field options
@@ -125,9 +132,57 @@ const AadhaarVerification: React.FC = () => {
 
   // Update dynamic field value
   const updateDynamicField = (id: string, value: string) => {
-    setDynamicFields(dynamicFields.map(field => 
-      field.id === id ? { ...field, value } : field
-    ));
+    setDynamicFields(dynamicFields.map(field => {
+      if (field.id === id) {
+        // Filter input based on field type
+        let filteredValue = value;
+        
+        // Emp Code should only accept numbers
+        if (field.label === 'Emp Code') {
+          filteredValue = value.replace(/[^0-9]/g, '');
+        }
+        
+        // Phone No should only accept numbers, +, -, spaces, and parentheses
+        if (field.label === 'Phone No') {
+          // First, remove all non-numeric characters except + at the beginning
+          let cleanedValue = value.replace(/[^0-9+]/g, '');
+          
+          // If it starts with +, keep it, otherwise remove it
+          if (cleanedValue.startsWith('+')) {
+            // For international numbers, allow the + but limit to reasonable length
+            if (cleanedValue.length > 15) {
+              cleanedValue = cleanedValue.substring(0, 15);
+            }
+          } else {
+            // For local numbers, ensure exactly 10 digits and starts with 6-9
+            cleanedValue = cleanedValue.replace(/[^0-9]/g, '');
+            if (cleanedValue.length > 10) {
+              cleanedValue = cleanedValue.substring(0, 10);
+            }
+            // If it has digits, ensure first digit is 6 or greater
+            if (cleanedValue.length > 0 && cleanedValue[0] < '6') {
+              cleanedValue = cleanedValue.substring(1);
+            }
+          }
+          
+          filteredValue = cleanedValue;
+        }
+        
+        // Email validation - allow valid email characters
+        if (field.label === 'Email') {
+          // Allow letters, numbers, @, ., -, _, and + (for email aliases)
+          filteredValue = value.replace(/[^a-zA-Z0-9@._+-]/g, '');
+          
+          // Limit length to reasonable email length
+          if (filteredValue.length > 254) {
+            filteredValue = filteredValue.substring(0, 254);
+          }
+        }
+        
+        return { ...field, value: filteredValue };
+      }
+      return field;
+    }));
   };
 
   // Get Aadhaar validation status for UI
@@ -140,6 +195,7 @@ const AadhaarVerification: React.FC = () => {
     const cleaned = number.replace(/\s+/g, '').replace(/-/g, '');
     return cleaned.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3');
   };
+
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -160,6 +216,7 @@ const AadhaarVerification: React.FC = () => {
       toast.error('Please accept the consent to proceed');
       return;
     }
+
 
     setIsLoading(true);
     try {
@@ -209,6 +266,7 @@ const AadhaarVerification: React.FC = () => {
   // Handle resend OTP
   const handleResendOtp = async () => {
     if (!canResend) return;
+    
     
     setIsLoading(true);
     try {
@@ -416,17 +474,17 @@ const AadhaarVerification: React.FC = () => {
                         <label htmlFor="location" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
                           <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
                           Location *
-                        </label>
+                      </label>
                         <div className="flex gap-2">
-                          <input
-                            type="text"
+                      <input
+                        type="text"
                             id="location"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                             placeholder="Enter location"
                             className="flex-1 px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-base font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
-                            required
-                          />
+                        required
+                      />
                           <div className="relative dropdown-container">
                             <button
                               type="button"
@@ -510,11 +568,23 @@ const AadhaarVerification: React.FC = () => {
                               </label>
                               <div className="relative">
                                 <input
-                                  type="text"
+                                  type={field.label === 'Emp Code' || field.label === 'Phone No' ? 'tel' : 
+                                        field.label === 'Email' ? 'email' : 'text'}
                                   value={field.value}
                                   onChange={(e) => updateDynamicField(field.id, e.target.value)}
-                                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                                  className="w-full px-3 py-2 pr-10 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-medium transition-all duration-300 group-hover:border-indigo-300 group-hover:shadow-lg"
+                                  placeholder={
+                                    field.label === 'Emp Code' ? 'Enter employee code (numbers only)' :
+                                    field.label === 'Phone No' ? 'Enter 10-digit phone number (starts with 6-9)' :
+                                    field.label === 'Email' ? 'Enter email address (e.g., user@example.com)' :
+                                    `Enter ${field.label.toLowerCase()}`
+                                  }
+                                  className={`w-full px-3 py-2 pr-10 border-2 rounded-lg focus:ring-4 text-sm font-medium transition-all duration-300 group-hover:shadow-lg ${
+                                    field.label === 'Email' && field.value && !isValidEmail(field.value)
+                                      ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500 bg-red-50'
+                                      : field.label === 'Email' && field.value && isValidEmail(field.value)
+                                      ? 'border-green-300 focus:ring-green-500/20 focus:border-green-500 bg-green-50'
+                                      : 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-500 group-hover:border-indigo-300'
+                                  }`}
                                 />
                                 <button
                                   type="button"
@@ -525,6 +595,23 @@ const AadhaarVerification: React.FC = () => {
                                   <TrashIcon className="w-3 h-3" />
                                 </button>
                               </div>
+                              {/* Email validation feedback */}
+                              {field.label === 'Email' && field.value && !isValidEmail(field.value) && (
+                                <p className="mt-1 text-xs text-red-600 font-medium flex items-center">
+                                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                  </svg>
+                                  Please enter a valid email address
+                                </p>
+                              )}
+                              {field.label === 'Email' && field.value && isValidEmail(field.value) && (
+                                <p className="mt-1 text-xs text-green-600 font-medium flex items-center">
+                                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                  </svg>
+                                  Valid email format
+                                </p>
+                              )}
                           </div>
                           ))}
                         </div>
