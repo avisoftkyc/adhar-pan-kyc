@@ -14,7 +14,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
-import { validatePAN, validateDateOfBirth, filterPANInput, filterDateInput, getValidationStatus } from '../../utils/validation';
+import { validatePAN, validateDateOfBirth, validateName, filterPANInput, filterDateInput, filterNameInput, getValidationStatus } from '../../utils/validation';
 
 interface Batch {
   _id: string;
@@ -603,6 +603,12 @@ const PanKyc: React.FC = () => {
         ...prev,
         [field]: filteredValue
       }));
+    } else if (field === 'name') {
+      const filteredValue = filterNameInput(value);
+      setSingleKycForm(prev => ({
+        ...prev,
+        [field]: filteredValue
+      }));
     } else {
       setSingleKycForm(prev => ({
         ...prev,
@@ -628,10 +634,12 @@ const PanKyc: React.FC = () => {
       return false;
     }
     
-    if (!singleKycForm.name.trim()) {
+    // Validate Name
+    const nameValidation = validateName(singleKycForm.name);
+    if (!nameValidation.isValid) {
       showToast({
         type: 'error',
-        message: 'Name is required'
+        message: nameValidation.message || 'Invalid name'
       });
       return false;
     }
@@ -1531,14 +1539,40 @@ const PanKyc: React.FC = () => {
                   Full Name *
                       </span>
                 </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={singleKycForm.name}
-                  onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
-                  placeholder="Enter full name as per PAN"
-                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="name"
+                    value={singleKycForm.name}
+                    onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
+                    placeholder="Enter full name as per PAN"
+                    className={`block w-full px-4 py-3 pr-12 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                      singleKycForm.name.length === 0 
+                        ? 'border-gray-200 focus:ring-purple-500 focus:border-purple-500' 
+                        : validateName(singleKycForm.name).isValid
+                        ? 'border-green-500 focus:ring-green-500 focus:border-green-500 bg-green-50'
+                        : 'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50'
+                    }`}
+                  />
+                  {singleKycForm.name.length > 0 && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {validateName(singleKycForm.name).isValid ? (
+                        <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <XCircleIcon className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-center">
+                  {singleKycForm.name.length === 0 ? (
+                    <span className="text-gray-500">Enter full name (letters, spaces, hyphens, apostrophes only)</span>
+                  ) : validateName(singleKycForm.name).isValid ? (
+                    <span className="text-green-600 font-medium">✓ Valid name format</span>
+                  ) : (
+                    <span className="text-red-600 font-medium">✗ {validateName(singleKycForm.name).message}</span>
+                  )}
+                </div>
               </div>
 
                   {/* Date of Birth Field */}
@@ -1599,7 +1633,7 @@ const PanKyc: React.FC = () => {
                 <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button
                   type="submit"
-                  disabled={singleKycVerifying || !validatePAN(singleKycForm.panNumber).isValid || !singleKycForm.name.trim() || !validateDateOfBirth(singleKycForm.dateOfBirth).isValid}
+                  disabled={singleKycVerifying || !validatePAN(singleKycForm.panNumber).isValid || !validateName(singleKycForm.name).isValid || !validateDateOfBirth(singleKycForm.dateOfBirth).isValid}
                     className="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-xl shadow-xl hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-w-[200px]"
                 >
                   {singleKycVerifying ? (

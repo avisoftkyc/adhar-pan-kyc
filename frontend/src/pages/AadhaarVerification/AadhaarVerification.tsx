@@ -173,7 +173,7 @@ const AadhaarVerification: React.FC = () => {
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           location: location.trim(),
           dynamicFields: dynamicFields.map(field => ({
-            id: field.id,
+            label: field.label,
             value: field.value.trim()
           })),
           consentAccepted: consentAccepted
@@ -222,7 +222,7 @@ const AadhaarVerification: React.FC = () => {
           aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
           location: location.trim(),
           dynamicFields: dynamicFields.map(field => ({
-            id: field.id,
+            label: field.label,
             value: field.value.trim()
           })),
           consentAccepted: true
@@ -268,7 +268,10 @@ const AadhaarVerification: React.FC = () => {
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           otp: otp.trim(),
           transactionId: transactionId,
-          dynamicFields: dynamicFields
+          dynamicFields: dynamicFields.map(field => ({
+            label: field.label,
+            value: field.value.trim()
+          }))
         })
       });
 

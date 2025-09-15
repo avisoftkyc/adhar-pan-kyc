@@ -97,6 +97,22 @@ const AadhaarVerificationRecords: React.FC = () => {
     sortOrder: 'desc'
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [dynamicFieldLabels, setDynamicFieldLabels] = useState<string[]>([]);
+
+  // Extract unique dynamic field labels from records
+  const extractDynamicFieldLabels = (records: VerificationRecord[]) => {
+    const labels = new Set<string>();
+    records.forEach(record => {
+      if (record.dynamicFields && record.dynamicFields.length > 0) {
+        record.dynamicFields.forEach(field => {
+          if (field.label) {
+            labels.add(field.label);
+          }
+        });
+      }
+    });
+    return Array.from(labels).sort();
+  };
 
   // Load verification records
   const loadRecords = async (page: number = 1, search: string = '', currentFilters = filters) => {
@@ -131,6 +147,9 @@ const AadhaarVerificationRecords: React.FC = () => {
           hasNext: data.pagination.hasNext,
           hasPrev: data.pagination.hasPrev
         });
+        // Extract and set dynamic field labels
+        const labels = extractDynamicFieldLabels(data.data);
+        setDynamicFieldLabels(labels);
       } else {
         toast.error(data.message || 'Failed to load verification records');
       }
@@ -639,12 +658,22 @@ const AadhaarVerificationRecords: React.FC = () => {
                           Photo
                         </span>
                       </th>
-                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
-                        <span className="flex items-center">
-                          <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
-                          Dynamic Fields
-                        </span>
-                      </th>
+                      {/* Dynamic Field Headers */}
+                      {dynamicFieldLabels.map((label, index) => (
+                        <th key={label} className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                          <span className="flex items-center">
+                            <span className={`w-2 h-2 rounded-full mr-2 ${
+                              index % 6 === 0 ? 'bg-orange-500' :
+                              index % 6 === 1 ? 'bg-pink-500' :
+                              index % 6 === 2 ? 'bg-blue-500' :
+                              index % 6 === 3 ? 'bg-green-500' :
+                              index % 6 === 4 ? 'bg-purple-500' :
+                              'bg-indigo-500'
+                            }`}></span>
+                            {label}
+                          </span>
+                        </th>
+                      ))}
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
                         <span className="flex items-center">
                           <span className="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>
@@ -728,23 +757,24 @@ const AadhaarVerificationRecords: React.FC = () => {
                             </span>
                           )}
                         </td>
-                        <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
-                          <div className="max-w-xs">
-                            {record.dynamicFields && record.dynamicFields.length > 0 ? (
-                              <div className="space-y-1">
-                                {record.dynamicFields.map((field: any, idx: number) => (
-                                  <div key={idx} className="flex items-center space-x-2">
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                      {field.label}: {field.value}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="text-gray-400 text-xs">-</span>
-                            )}
-                          </div>
-                        </td>
+                        {/* Dynamic Field Columns */}
+                        {dynamicFieldLabels.map((label, index) => {
+                          const field = record.dynamicFields?.find(f => f.label === label);
+                          return (
+                            <td key={label} className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
+                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                index % 6 === 0 ? 'bg-orange-100 text-orange-800' :
+                                index % 6 === 1 ? 'bg-pink-100 text-pink-800' :
+                                index % 6 === 2 ? 'bg-blue-100 text-blue-800' :
+                                index % 6 === 3 ? 'bg-green-100 text-green-800' :
+                                index % 6 === 4 ? 'bg-purple-100 text-purple-800' :
+                                'bg-indigo-100 text-indigo-800'
+                              }`}>
+                                {field?.value || '-'}
+                              </span>
+                            </td>
+                          );
+                        })}
                         <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
                           <button
                             onClick={() => handleViewDetails(record)}
