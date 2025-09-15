@@ -35,7 +35,19 @@ const AadhaarVerification: React.FC = () => {
   const [transactionId, setTransactionId] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [canResend, setCanResend] = useState(false);
-  const [dynamicFields, setDynamicFields] = useState<Array<{id: string, value: string}>>([]);
+  const [dynamicFields, setDynamicFields] = useState<Array<{id: string, label: string, value: string}>>([]);
+  const [showFieldDropdown, setShowFieldDropdown] = useState(false);
+
+  // Predefined field options
+  const fieldOptions = [
+    { value: 'empCode', label: 'Emp Code' },
+    { value: 'location', label: 'Location' },
+    { value: 'branch', label: 'Branch' },
+    { value: 'plantName', label: 'Plant Name' },
+    { value: 'phoneNo', label: 'Phone No' },
+    { value: 'email', label: 'Email' },
+    { value: 'otherDetails', label: 'Other Details' }
+  ];
 
   // Countdown timer effect for resend OTP
   useEffect(() => {
@@ -60,13 +72,49 @@ const AadhaarVerification: React.FC = () => {
     };
   }, [resendCooldown]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Don't close if clicking on the dropdown button or dropdown content
+      if (showFieldDropdown && !target.closest('.dropdown-container')) {
+        setShowFieldDropdown(false);
+      }
+    };
+
+    if (showFieldDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFieldDropdown]);
+
   // Add dynamic field
-  const addDynamicField = () => {
+  const addDynamicField = (fieldType: string) => {
+    console.log('Adding field type:', fieldType);
+    const selectedOption = fieldOptions.find(option => option.value === fieldType);
+    if (!selectedOption) {
+      console.log('Option not found for:', fieldType);
+      return;
+    }
+
+    // Check if this field type is already added
+    const existingField = dynamicFields.find(field => field.label === selectedOption.label);
+    if (existingField) {
+      toast.error(`${selectedOption.label} field already exists`);
+      return;
+    }
+
     const newField = {
       id: `field_${Date.now()}`,
+      label: selectedOption.label,
       value: ''
     };
+    console.log('Adding new field:', newField);
     setDynamicFields([...dynamicFields, newField]);
+    setShowFieldDropdown(false);
   };
 
   // Remove dynamic field
@@ -114,7 +162,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -209,7 +257,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,7 +266,8 @@ const AadhaarVerification: React.FC = () => {
         body: JSON.stringify({
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           otp: otp.trim(),
-          transactionId: transactionId
+          transactionId: transactionId,
+          dynamicFields: dynamicFields
         })
       });
 
@@ -254,7 +303,7 @@ const AadhaarVerification: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-visible">
       {/* Subtle Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
@@ -262,7 +311,7 @@ const AadhaarVerification: React.FC = () => {
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ overflow: 'visible' }}>
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-8">
@@ -296,7 +345,7 @@ const AadhaarVerification: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           {/* Main Verification Area */}
           <div>
-            <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 lg:p-12 transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 lg:p-12 transform hover:scale-[1.02] transition-transform duration-300" style={{ overflow: 'visible' }}>
               {/* Step 1: Enter Details */}
               {currentStep.step === 'enter-details' && (
                 <div>
@@ -305,7 +354,7 @@ const AadhaarVerification: React.FC = () => {
                   </h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Form Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ overflow: 'visible' }}>
                       {/* Aadhaar Number Field */}
                       <div className="group">
                         <label htmlFor="aadhaarNumber" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
@@ -340,38 +389,93 @@ const AadhaarVerification: React.FC = () => {
                             className="flex-1 px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-base font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
                             required
                           />
-                          <button
-                            type="button"
-                            onClick={addDynamicField}
-                            className="group flex items-center justify-center px-3 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                            title="Add additional field"
-                          >
-                            <PlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                          </button>
+                          <div className="relative dropdown-container">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                console.log('Plus button clicked, current state:', showFieldDropdown);
+                                setShowFieldDropdown(!showFieldDropdown);
+                              }}
+                              className={`group flex items-center justify-center px-3 py-3 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
+                                showFieldDropdown 
+                                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600' 
+                                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600'
+                              } text-white`}
+                              title="Add additional field"
+                            >
+                              <PlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+                            </button>
+                            
+                            {/* Dropdown Menu */}
+                            {showFieldDropdown && (
+                              <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999]" 
+                                   style={{ 
+                                     zIndex: 9999,
+                                     position: 'absolute',
+                                     top: '100%',
+                                     right: '0',
+                                     marginTop: '8px'
+                                   }}>
+                                <div className="py-2">
+                                  {/* Dropdown Header */}
+                                  <div className="px-4 py-2 border-b border-gray-100">
+                                    <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+                                      Select to add additional field
+                                    </h4>
+                                  </div>
+                                  {fieldOptions.map((option) => {
+                                    const isAlreadyAdded = dynamicFields.some(field => field.label === option.label);
+                                    return (
+                                      <button
+                                        key={option.value}
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          console.log('Dropdown option clicked:', option.value);
+                                          addDynamicField(option.value);
+                                        }}
+                                        disabled={isAlreadyAdded}
+                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200 ${
+                                          isAlreadyAdded 
+                                            ? 'text-gray-400 cursor-not-allowed' 
+                                            : 'text-gray-700 hover:text-indigo-600'
+                                        }`}
+                                      >
+                                        {option.label}
+                                        {isAlreadyAdded && <span className="text-xs text-gray-400 ml-2">(Added)</span>}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
+
 
                     {/* Dynamic Fields */}
                     {dynamicFields.length > 0 && (
                       <div className="mt-6">
                         <h3 className="text-base font-bold text-gray-700 mb-3 flex items-center">
                           <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                          Additional Fields
+                          Additional Fields ({dynamicFields.length})
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {dynamicFields.map((field, index) => (
                             <div key={field.id} className="group relative">
                               <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center">
                                 <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-                                Field {index + 1}
+                                {field.label}
                               </label>
                               <div className="relative">
                                 <input
                                   type="text"
                                   value={field.value}
                                   onChange={(e) => updateDynamicField(field.id, e.target.value)}
-                                  placeholder={`Additional field ${index + 1}`}
+                                  placeholder={`Enter ${field.label.toLowerCase()}`}
                                   className="w-full px-3 py-2 pr-10 border-2 border-gray-200 rounded-lg focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-medium transition-all duration-300 group-hover:border-indigo-300 group-hover:shadow-lg"
                                 />
                                 <button
@@ -406,7 +510,7 @@ const AadhaarVerification: React.FC = () => {
                           ✅ Aadhaar Consent Declaration *
                           </label>
                         <div className="text-gray-600 mt-1 text-xs space-y-2">
-                          <p className="font-semibold">I hereby voluntarily provide my Aadhaar details to Metalman Auto Limited for the purpose of employee verification, statutory compliance, and internal record maintenance.</p>
+                          <p className="font-semibold">I hereby voluntarily provide my Aadhaar details to {user?.branding?.companyName || 'the Company'} for the purpose of employee verification, statutory compliance, and internal record maintenance.</p>
                           
                           <p className="font-semibold">I confirm and acknowledge that:</p>
                           
@@ -414,7 +518,7 @@ const AadhaarVerification: React.FC = () => {
                             <li>My Aadhaar information will be used only for official and lawful purposes, including identity verification and compliance with applicable laws.</li>
                             <li>The company shall ensure the confidentiality and security of my Aadhaar details, in accordance with the Aadhaar Act, 2016 and relevant data protection regulations.</li>
                             <li>I am submitting this information willingly and without any coercion or undue pressure.</li>
-                            <li>I authorize Metalman Auto Limited to use, store, and process the provided Aadhaar details solely for the purposes stated above.</li>
+                            <li>I authorize {user?.branding?.companyName || 'the Company'} to use, store, and process the provided Aadhaar details solely for the purposes stated above.</li>
                             <li>The information I have provided is true and correct to the best of my knowledge.</li>
                           </ul>
                           

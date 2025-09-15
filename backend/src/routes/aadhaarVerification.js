@@ -224,7 +224,7 @@ router.post('/verify-single', protect, async (req, res) => {
 // OTP verification endpoint
 router.post('/verify-otp', protect, async (req, res) => {
   try {
-    const { aadhaarNumber, otp, transactionId } = req.body;
+    const { aadhaarNumber, otp, transactionId, dynamicFields = [] } = req.body;
 
     if (!aadhaarNumber || !otp || !transactionId) {
       return res.status(400).json({
@@ -289,6 +289,7 @@ router.post('/verify-otp', protect, async (req, res) => {
       pinCode: addressData.pinCode || apiData.pinCode || '',
       careOf: apiData.care_of || '', // Add care_of field
       photo: apiData.photo || '', // Add photo field
+      dynamicFields: dynamicFields, // Store the dynamic fields from the request
       status: apiData.status === 'VALID' ? 'verified' : 'rejected',
       verificationDetails: {
         apiResponse: otpResult,

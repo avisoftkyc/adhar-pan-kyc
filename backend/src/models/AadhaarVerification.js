@@ -55,6 +55,16 @@ const AadhaarVerificationSchema = new mongoose.Schema({
     type: String,
     encrypted: true,
   },
+  dynamicFields: [{
+    label: {
+      type: String,
+      required: true,
+    },
+    value: {
+      type: String,
+      required: true,
+    }
+  }],
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected', 'invalid', 'error'],
@@ -168,10 +178,26 @@ AadhaarVerificationSchema.pre('save', function(next) {
   // Only encrypt if this is a new document or if fields have been modified
   if (this.isNew || this.isModified()) {
     // Encrypt sensitive fields
-    const fieldsToEncrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'verificationDetails'];
+    const fieldsToEncrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'dynamicFields', 'verificationDetails'];
     
     fieldsToEncrypt.forEach(field => {
-      if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
+      if (field === 'dynamicFields') {
+        // Handle dynamicFields array specially
+        if (this[field] && Array.isArray(this[field]) && this[field].length > 0) {
+          try {
+            const algorithm = 'aes-256-cbc';
+            const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+            const iv = crypto.randomBytes(16);
+            const cipher = crypto.createCipheriv(algorithm, key, iv);
+            let encrypted = cipher.update(JSON.stringify(this[field]), 'utf8', 'hex');
+            encrypted += cipher.final('hex');
+            this[field] = iv.toString('hex') + ':' + encrypted;
+          } catch (error) {
+            console.error(`Error encrypting field ${field}:`, error);
+            // Don't fail the save if encryption fails
+          }
+        }
+      } else if (this[field] && typeof this[field] === 'string' && this[field].trim() !== '') {
         // Skip encryption if already encrypted (new format with IV or old hex format)
         const isAlreadyEncrypted = this[field].includes(':') || /^[0-9a-fA-F]+$/.test(this[field]);
         
@@ -229,10 +255,65 @@ AadhaarVerificationSchema.methods.decryptData = function() {
   }
 
   const decrypted = this.toObject();
-  const fieldsToDecrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'verificationDetails'];
+  const fieldsToDecrypt = ['aadhaarNumber', 'name', 'dateOfBirth', 'gender', 'address', 'pinCode', 'state', 'district', 'careOf', 'photo', 'dynamicFields', 'verificationDetails'];
 
   fieldsToDecrypt.forEach(field => {
-    if (decrypted[field] && typeof decrypted[field] === 'string') {
+    if (field === 'dynamicFields') {
+      // Handle dynamicFields array specially
+      if (decrypted[field] && typeof decrypted[field] === 'string') {
+        // Check if the field looks like encrypted data
+        const isEncrypted = decrypted[field].includes(':') || 
+                           (decrypted[field].length > 20 && /^[0-9a-fA-F]+$/.test(decrypted[field]));
+        
+        if (isEncrypted) {
+          try {
+            let currentValue = decrypted[field];
+            
+            // Keep decrypting until we get plain text (handle double encryption)
+            let attempts = 0;
+            const maxAttempts = 3; // Prevent infinite loops
+            
+            while (attempts < maxAttempts && currentValue.includes(':')) {
+              // New format with IV
+              const algorithm = 'aes-256-cbc';
+              const key = crypto.scryptSync(encryptionKey, 'salt', 32);
+              const [ivHex, encrypted] = currentValue.split(':');
+              const iv = Buffer.from(ivHex, 'hex');
+              const decipher = crypto.createDecipheriv(algorithm, key, iv);
+              let decryptedField = decipher.update(encrypted, 'hex', 'utf8');
+              decryptedField += decipher.final('utf8');
+              currentValue = decryptedField;
+              attempts++;
+            }
+            
+            // If still encrypted (old format), try deprecated method
+            if (attempts < maxAttempts && /^[0-9a-fA-F]+$/.test(currentValue)) {
+              try {
+                const decipher = crypto.createDecipher('aes-256-cbc', encryptionKey);
+                let decryptedField = decipher.update(currentValue, 'hex', 'utf8');
+                decryptedField += decipher.final('utf8');
+                currentValue = decryptedField;
+              } catch (oldError) {
+                // If old method fails, mark as encrypted
+                currentValue = '[ENCRYPTED]';
+              }
+            }
+            
+            // Try to parse as JSON array
+            if (currentValue !== '[ENCRYPTED]' && currentValue.startsWith('[')) {
+              decrypted[field] = JSON.parse(currentValue);
+            } else {
+              decrypted[field] = currentValue;
+            }
+          } catch (error) {
+            decrypted[field] = '[ENCRYPTED]';
+          }
+        }
+      } else if (decrypted[field] === null || decrypted[field] === undefined) {
+        // Handle null/undefined values (empty fields)
+        decrypted[field] = [];
+      }
+    } else if (decrypted[field] && typeof decrypted[field] === 'string') {
       // Check if the field looks like encrypted data
       const isEncrypted = decrypted[field].includes(':') || 
                          (decrypted[field].length > 20 && /^[0-9a-fA-F]+$/.test(decrypted[field]));

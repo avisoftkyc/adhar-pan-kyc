@@ -36,6 +36,10 @@ interface VerificationRecord {
     district?: string;
   careOf?: string;
   photo?: string;
+  dynamicFields?: Array<{
+    label: string;
+    value: string;
+  }>;
   verificationDetails?: {
     apiResponse?: any;
     verificationDate?: string;
@@ -110,7 +114,7 @@ const AadhaarVerificationRecords: React.FC = () => {
       if (currentFilters.sortBy) params.append('sortBy', currentFilters.sortBy);
       if (currentFilters.sortOrder) params.append('sortOrder', currentFilters.sortOrder);
       
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records?${params.toString()}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         }
@@ -637,6 +641,12 @@ const AadhaarVerificationRecords: React.FC = () => {
                       </th>
                       <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
                         <span className="flex items-center">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                          Dynamic Fields
+                        </span>
+                      </th>
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
                           <span className="w-2 h-2 bg-rose-500 rounded-full mr-2"></span>
                           Actions
                         </span>
@@ -719,6 +729,23 @@ const AadhaarVerificationRecords: React.FC = () => {
                           )}
                         </td>
                         <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
+                          <div className="max-w-xs">
+                            {record.dynamicFields && record.dynamicFields.length > 0 ? (
+                              <div className="space-y-1">
+                                {record.dynamicFields.map((field: any, idx: number) => (
+                                  <div key={idx} className="flex items-center space-x-2">
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                      {field.label}: {field.value}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400 text-xs">-</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
                           <button
                             onClick={() => handleViewDetails(record)}
                             className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
@@ -796,6 +823,20 @@ const AadhaarVerificationRecords: React.FC = () => {
                           )}
                         </span>
                       </div>
+                      {record.dynamicFields && record.dynamicFields.length > 0 && (
+                        <div>
+                          <span className="text-gray-500">Dynamic Fields:</span>
+                          <div className="mt-1 space-y-1">
+                            {record.dynamicFields.map((field: any, idx: number) => (
+                              <div key={idx} className="flex items-center space-x-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                  {field.label}: {field.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Address Section */}
@@ -1027,6 +1068,21 @@ const AadhaarVerificationRecords: React.FC = () => {
                               alt="Aadhaar Photo" 
                               className="w-24 h-32 object-cover border rounded"
                             />
+                          </div>
+                        </div>
+                      )}
+                      {selectedRecord.dynamicFields && selectedRecord.dynamicFields.length > 0 && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Dynamic Fields</label>
+                          <div className="mt-1 space-y-2">
+                            {selectedRecord.dynamicFields.map((field: any, idx: number) => (
+                              <div key={idx} className="flex items-center space-x-2">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                  <span className="font-semibold">{field.label}:</span>
+                                  <span className="ml-1">{field.value}</span>
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
