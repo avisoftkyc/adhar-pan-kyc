@@ -659,7 +659,7 @@ const AadhaarPan: React.FC = () => {
                           {selectedFile ? selectedFile.name : 'or drag and drop here'}
                         </p>
                         <p className="text-xs text-emerald-500">
-                          Supports .xlsx and .xls files
+                          Supports .xlsx and .xls formats
                         </p>
                       </div>
                     </label>
@@ -684,7 +684,7 @@ const AadhaarPan: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-blue-900 mb-2">File Requirements</h3>
-                      <div className="text-xs text-blue-800">
+                      <div className="text-xs text-blue-800 mb-3">
                         <span>Must contain columns: </span>
                         <code className="bg-blue-100 px-2 py-1 rounded">aadhaarNumber</code>
                         <span>, </span>
@@ -692,6 +692,47 @@ const AadhaarPan: React.FC = () => {
                         <span>, </span>
                         <code className="bg-blue-100 px-2 py-1 rounded">name</code>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Create sample Excel content for Aadhaar-PAN linking
+                          const sampleData = [
+                            ['aadhaarNumber', 'panNumber', 'name'],
+                            ['123456789012', 'ABCDE1234F', 'John Doe'],
+                            ['987654321098', 'FGHIJ5678K', 'Jane Smith'],
+                            ['456789123456', 'LMNOP9012Q', 'Bob Johnson']
+                          ];
+                          
+                          // Convert to Excel format (XLSX)
+                          const xlsxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
+<Worksheet ss:Name="Sheet1">
+<Table>
+${sampleData.map(row => 
+  `<Row>${row.map(cell => `<Cell><Data ss:Type="String">${cell}</Data></Cell>`).join('')}</Row>`
+).join('')}
+</Table>
+</Worksheet>
+</Workbook>`;
+                          
+                          // Create and download file
+                          const blob = new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', 'sample_aadhaar_pan.xlsx');
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                        }}
+                        className="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download Sample
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1165,14 +1206,14 @@ const AadhaarPan: React.FC = () => {
           </div>
 
           {/* Form Section */}
-          <div className="p-8">
-            <div className="max-w-7xl mx-auto">
-              <form onSubmit={handleSingleVerificationSubmit} className="space-y-8">
+          <div className="p-4">
+            <div className="max-w-6xl mx-auto">
+              <form onSubmit={handleSingleVerificationSubmit} className="space-y-4">
                 {/* Form fields in one row */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Aadhaar Number Field */}
                 <div className="group">
-                  <label htmlFor="aadhaarNumber" className="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                  <label htmlFor="aadhaarNumber" className="block text-sm font-bold text-gray-700 mb-2 flex items-center">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                     Aadhaar Number *
                   </label>
@@ -1188,7 +1229,7 @@ const AadhaarPan: React.FC = () => {
                       value={singleVerificationForm.aadhaarNumber}
                       onChange={(e) => handleSingleVerificationFormChange('aadhaarNumber', e.target.value)}
                       placeholder="1234 5678 9012"
-                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-mono tracking-wider group-hover:shadow-xl ${
+                      className={`block w-full pl-12 pr-12 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-base font-mono tracking-wider ${
                         singleVerificationForm.aadhaarNumber.length === 0 
                           ? 'border-gray-200 focus:ring-blue-500/20 focus:border-blue-500 bg-white' 
                           : singleVerificationForm.aadhaarNumber.length === 12 && validateAadhaar(singleVerificationForm.aadhaarNumber).isValid
@@ -1244,7 +1285,7 @@ const AadhaarPan: React.FC = () => {
                       value={singleVerificationForm.panNumber}
                       onChange={(e) => handleSingleVerificationFormChange('panNumber', e.target.value)}
                       placeholder="ABCDE1234F"
-                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg font-mono tracking-wider group-hover:shadow-xl ${
+                      className={`block w-full pl-12 pr-12 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all duration-300 text-base font-mono tracking-wider ${
                         singleVerificationForm.panNumber.length === 0 
                           ? 'border-gray-200 focus:ring-purple-500/20 focus:border-purple-500 bg-white' 
                           : singleVerificationForm.panNumber.length === 10 && validatePAN(singleVerificationForm.panNumber).isValid
@@ -1301,7 +1342,7 @@ const AadhaarPan: React.FC = () => {
                       value={singleVerificationForm.name}
                       onChange={(e) => handleSingleVerificationFormChange('name', e.target.value)}
                       placeholder="Enter full name as per Aadhaar"
-                      className={`block w-full pl-12 pr-12 py-4 border-2 rounded-xl shadow-lg focus:outline-none focus:ring-4 transition-all duration-300 text-lg group-hover:shadow-xl ${
+                      className={`block w-full pl-12 pr-12 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 text-base ${
                         singleVerificationForm.name.length === 0 
                           ? 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white' 
                           : validateName(singleVerificationForm.name).isValid

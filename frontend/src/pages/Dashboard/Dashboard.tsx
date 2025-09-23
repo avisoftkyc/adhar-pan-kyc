@@ -247,7 +247,7 @@ const Dashboard: React.FC = () => {
             Welcome back, {user?.branding?.displayName || user?.name || 'User'}! 👋
           </h1>
           <p className="mt-2 text-slate-600 font-medium">
-            Here's what's happening with your KYC Aadhaar System today
+            Here's what's happening with your AVIHR IDSYS today
           </p>
         </div>
 

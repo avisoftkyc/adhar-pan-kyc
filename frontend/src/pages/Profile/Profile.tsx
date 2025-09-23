@@ -170,19 +170,19 @@ const Profile = () => {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+                <h3 className="text-base font-medium text-gray-900 mb-3">Personal Information</h3>
                 {successMessage && (
                   <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md">
                     {successMessage}
                   </div>
                 )}
-                <form onSubmit={handleProfileUpdate} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleProfileUpdate} className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Full Name
@@ -191,7 +191,7 @@ const Profile = () => {
                         type="text"
                         value={profileForm.name}
                         onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                         required
                       />
                     </div>
@@ -217,7 +217,7 @@ const Profile = () => {
                           ...profileForm,
                           profile: { ...profileForm.profile, phone: e.target.value }
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                     </div>
                     <div>
@@ -231,7 +231,7 @@ const Profile = () => {
                           ...profileForm,
                           profile: { ...profileForm.profile, company: e.target.value }
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                     </div>
                     <div>
@@ -245,7 +245,7 @@ const Profile = () => {
                           ...profileForm,
                           profile: { ...profileForm.profile, designation: e.target.value }
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                     </div>
                     <div className="md:col-span-2">
@@ -259,7 +259,7 @@ const Profile = () => {
                           profile: { ...profileForm.profile, address: e.target.value }
                         })}
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                     </div>
                   </div>
@@ -315,7 +315,7 @@ const Profile = () => {
                           type="password"
                           value={passwordForm.currentPassword}
                           onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                           required
                         />
                       </div>
@@ -327,7 +327,7 @@ const Profile = () => {
                           type="password"
                           value={passwordForm.newPassword}
                           onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                           required
                         />
                       </div>
@@ -339,7 +339,7 @@ const Profile = () => {
                           type="password"
                           value={passwordForm.confirmPassword}
                           onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
                           required
                         />
                       </div>

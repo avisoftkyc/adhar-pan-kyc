@@ -241,11 +241,11 @@ const ResetPassword: React.FC = () => {
             </p>
           </div>
 
-          <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] p-10 shadow-2xl shadow-purple-500/20 border border-white/50 transform hover:scale-[1.02] transition-all duration-500">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="bg-white/95 backdrop-blur-2xl rounded-2xl p-6 shadow-xl shadow-purple-500/20 border border-white/50 transform hover:scale-[1.01] transition-all duration-500">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* New Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-3">
+                <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
                   New Password
                 </label>
                 <div className="relative group">
@@ -272,7 +272,7 @@ const ResetPassword: React.FC = () => {
 
               {/* Confirm Password Field */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-3">
+                <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-2">
                   Confirm New Password
                 </label>
                 <div className="relative group">
