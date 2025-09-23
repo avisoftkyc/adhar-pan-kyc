@@ -2513,13 +2513,13 @@ const Admin: React.FC = () => {
       {/* Create/Edit User Modal */}
       {(showCreateUser || editingUser) && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <div className="relative top-10 mx-auto p-4 border w-80 shadow-lg rounded-md bg-white">
+            <div className="mt-2">
+              <h3 className="text-base font-medium text-gray-900 mb-3">
                 {editingUser ? 'Edit User' : 'Create New User'}
               </h3>
               
-              <form onSubmit={editingUser ? handleUpdateUser : handleCreateUser} className="space-y-4">
+              <form onSubmit={editingUser ? handleUpdateUser : handleCreateUser} className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input
@@ -2527,7 +2527,7 @@ const Admin: React.FC = () => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
                 
@@ -2538,7 +2538,7 @@ const Admin: React.FC = () => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
                 
@@ -2551,7 +2551,7 @@ const Admin: React.FC = () => {
                     required={!editingUser}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
                 
@@ -2560,7 +2560,7 @@ const Admin: React.FC = () => {
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -2572,7 +2572,7 @@ const Admin: React.FC = () => {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                   >
                     <option value="active">Active</option>
                     <option value="suspended">Suspended</option>
@@ -3000,7 +3000,7 @@ const Admin: React.FC = () => {
                         min="1"
                         max="3650"
                         defaultValue={selectedUserForArchival.archivalSettings?.panKyc?.retentionPeriodDays || 365}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                         placeholder="365"
                       />
                     </div>
@@ -3011,7 +3011,7 @@ const Admin: React.FC = () => {
                         min="1"
                         max="30"
                         defaultValue={selectedUserForArchival.archivalSettings?.panKyc?.warningPeriodDays || 7}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                         placeholder="7"
                       />
                     </div>
@@ -3037,7 +3037,7 @@ const Admin: React.FC = () => {
                         min="1"
                         max="3650"
                         defaultValue={selectedUserForArchival.archivalSettings?.aadhaarPan?.retentionPeriodDays || 365}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                         placeholder="365"
                       />
                     </div>
@@ -3048,7 +3048,7 @@ const Admin: React.FC = () => {
                         min="1"
                         max="30"
                         defaultValue={selectedUserForArchival.archivalSettings?.aadhaarPan?.warningPeriodDays || 7}
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                         placeholder="7"
                       />
                     </div>

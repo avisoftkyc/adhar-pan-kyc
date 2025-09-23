@@ -20,6 +20,8 @@ import AadhaarVerification from './pages/AadhaarVerification/AadhaarVerification
 import AadhaarVerificationRecords from './pages/AadhaarVerification/AadhaarVerificationRecords';
 import ProfileWrapper from './pages/Profile/ProfileWrapper';
 import Admin from './pages/Admin/Admin';
+import TermsAndConditions from './pages/Legal/TermsAndConditions';
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 
 import NotFound from './pages/NotFound/NotFound';
 
@@ -99,6 +101,10 @@ const AppContent: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          
+          {/* Legal Pages - Public Routes */}
+          <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
           {/* Protected Routes */}
           <Route path="/" element={

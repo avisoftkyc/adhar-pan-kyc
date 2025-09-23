@@ -7,13 +7,10 @@ import {
   CheckCircleIcon, 
   XCircleIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
   ArrowPathIcon,
   DocumentTextIcon,
-  TableCellsIcon,
   UserIcon,
   CalendarIcon,
-  MapPinIcon,
   PlusIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
@@ -373,33 +370,33 @@ const AadhaarVerification: React.FC = () => {
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ overflow: 'visible' }}>
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ overflow: 'visible' }}>
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-8">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300"></div>
-              <div className="relative p-4 bg-white rounded-full shadow-2xl border-4 border-white/50 transform group-hover:scale-110 transition-transform duration-300">
-                <IdentificationIcon className="w-12 h-12 text-blue-600" />
+              <div className="relative p-3 bg-white rounded-full shadow-xl border-4 border-white/50 transform group-hover:scale-105 transition-transform duration-300">
+                <IdentificationIcon className="w-8 h-8 text-blue-600" />
               </div>
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4 animate-pulse">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             Aadhaar Verification
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base text-gray-600 mb-6 max-w-2xl mx-auto">
             🔐 Secure OTP-based verification with real-time validation and comprehensive data retrieval
           </p>
           
           {/* Navigation Buttons */}
-          <div className="flex justify-center space-x-6">
+          <div className="flex justify-center space-x-4">
           <button
             onClick={() => navigate('/aadhaar-verification-records')}
-              className="group relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
+              className="group relative inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
           >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <DocumentTextIcon className="w-6 h-6 mr-3 relative z-10" />
-              <span className="relative z-10 text-lg">View Records</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <DocumentTextIcon className="w-5 h-5 mr-2 relative z-10" />
+              <span className="relative z-10 text-base">View Records</span>
           </button>
           </div>
         </div>
@@ -407,16 +404,16 @@ const AadhaarVerification: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           {/* Main Verification Area */}
           <div>
-            <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-3xl shadow-2xl p-8 lg:p-12 transform hover:scale-[1.02] transition-transform duration-300" style={{ overflow: 'visible' }}>
+            <div className="bg-white/95 backdrop-blur-lg border border-white/50 rounded-2xl shadow-xl p-4 lg:p-6 transform hover:scale-[1.01] transition-transform duration-300" style={{ overflow: 'visible' }}>
               {/* Step 1: Enter Details */}
               {currentStep.step === 'enter-details' && (
                 <div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-8 text-center">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3 text-center">
                     ✨ Enter Aadhaar Details
                   </h2>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-3">
                     {/* Form Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ overflow: 'visible' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ overflow: 'visible' }}>
                       {/* Aadhaar Number Field */}
                       <div className="group">
                         <label htmlFor="aadhaarNumber" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
@@ -430,7 +427,7 @@ const AadhaarVerification: React.FC = () => {
                           value={aadhaarNumber}
                           onChange={(e) => setAadhaarNumber(filterAadhaarInput(e.target.value))}
                           placeholder="1234 5678 9012"
-                          className={`w-full px-3 py-3 pr-10 border-2 rounded-xl focus:ring-4 focus:ring-blue-500/20 text-base font-medium transition-all duration-300 group-hover:shadow-lg ${
+                          className={`w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base font-medium transition-all duration-300 ${
                             aadhaarNumber.length === 0 
                               ? 'border-gray-200 focus:border-blue-500' 
                               : aadhaarNumber.length === 12 && getAadhaarValidationStatus().status === 'valid'
@@ -482,7 +479,7 @@ const AadhaarVerification: React.FC = () => {
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                             placeholder="Enter location"
-                            className="flex-1 px-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 text-base font-medium transition-all duration-300 group-hover:border-purple-300 group-hover:shadow-lg"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-base font-medium transition-all duration-300"
                         required
                       />
                           <div className="relative dropdown-container">
@@ -578,7 +575,7 @@ const AadhaarVerification: React.FC = () => {
                                     field.label === 'Email' ? 'Enter email address (e.g., user@example.com)' :
                                     `Enter ${field.label.toLowerCase()}`
                                   }
-                                  className={`w-full px-3 py-2 pr-10 border-2 rounded-lg focus:ring-4 text-sm font-medium transition-all duration-300 group-hover:shadow-lg ${
+                                  className={`w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 text-sm font-medium transition-all duration-300 ${
                                     field.label === 'Email' && field.value && !isValidEmail(field.value)
                                       ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500 bg-red-50'
                                       : field.label === 'Email' && field.value && isValidEmail(field.value)
@@ -677,16 +674,16 @@ const AadhaarVerification: React.FC = () => {
               {/* Step 2: OTP Verification */}
               {currentStep.step === 'otp-verification' && (
                 <div>
-                  <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-8 text-center">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4 text-center">
                     📱 Enter OTP
                   </h2>
-                  <p className="text-xl text-gray-600 mb-10 text-center max-w-2xl mx-auto">
+                  <p className="text-base text-gray-600 mb-6 text-center max-w-xl mx-auto">
                     🔐 We have sent a 6-digit OTP to your registered mobile number. Please enter it below to complete the verification.
                   </p>
                   
-                  <form onSubmit={handleOtpVerification} className="space-y-8">
+                  <form onSubmit={handleOtpVerification} className="space-y-3">
                     <div className="group">
-                      <label htmlFor="otp" className="block text-lg font-bold text-gray-700 mb-4 text-center">
+                      <label htmlFor="otp" className="block text-base font-bold text-gray-700 mb-2 text-center">
                         <span className="w-3 h-3 bg-green-500 rounded-full mr-2 inline-block"></span>
                         OTP Code *
                       </label>
@@ -696,7 +693,7 @@ const AadhaarVerification: React.FC = () => {
                         value={otp}
                         onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                         placeholder="123456"
-                        className="w-full px-6 py-6 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 text-2xl text-center tracking-widest font-bold transition-all duration-300 group-hover:border-green-300 group-hover:shadow-lg"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 text-lg text-center tracking-widest font-bold transition-all duration-300"
                         maxLength={6}
                         required
                       />
@@ -725,7 +722,7 @@ const AadhaarVerification: React.FC = () => {
                     </button>
                   </form>
                   
-                  <div className="mt-8 text-center space-y-4">
+                  <div className="mt-6 text-center space-y-3">
                       <button
                       onClick={() => setCurrentStep({ step: 'enter-details' })}
                       className="group inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
@@ -734,14 +731,14 @@ const AadhaarVerification: React.FC = () => {
                       Back to form
                       </button>
                     
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-2xl border-2 border-yellow-100">
-                      <p className="text-lg font-semibold text-gray-700 mb-4 text-center">
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-100">
+                      <p className="text-base font-semibold text-gray-700 mb-3 text-center">
                         📱 Didn't receive the OTP?
                       </p>
                       <button
                         onClick={handleResendOtp}
                         disabled={!canResend || isLoading}
-                        className={`group relative w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform ${
+                        className={`group relative w-full px-4 py-3 rounded-lg font-bold text-base transition-all duration-300 transform ${
                           canResend && !isLoading
                             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-500/20'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'

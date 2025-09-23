@@ -1,5 +1,6 @@
 const PanKyc = require('../models/PanKyc');
 const AadhaarPan = require('../models/AadhaarPan');
+const AadhaarVerification = require('../models/AadhaarVerification');
 const User = require('../models/User');
 const logger = require('../utils/logger');
 
@@ -13,6 +14,19 @@ const getActivityType = (status, module) => {
       case 'pending':
         return 'verification_pending';
       case 'failed':
+      case 'invalid':
+      case 'error':
+        return 'verification_failed';
+      default:
+        return 'document_uploaded';
+    }
+  } else if (module === 'aadhaar-verification') {
+    switch (status) {
+      case 'verified':
+        return 'verification_success';
+      case 'pending':
+        return 'verification_pending';
+      case 'rejected':
       case 'invalid':
       case 'error':
         return 'verification_failed';
@@ -116,7 +130,63 @@ const getDashboardStats = async (req, res) => {
       }
     ]);
 
-    // Get recent activity with more dynamic data (last 15 records from both modules)
+    // Get Aadhaar Verification statistics (excluding pending records)
+    const aadhaarVerificationStats = await AadhaarVerification.aggregate([
+      { $match: { userId: userId, status: { $ne: 'pending' } } },
+      {
+        $group: {
+          _id: null,
+          totalRecords: { $sum: 1 },
+          verifiedRecords: {
+            $sum: {
+              $cond: [
+                { $eq: ['$status', 'verified'] },
+                1,
+                0
+              ]
+            }
+          },
+          rejectedRecords: {
+            $sum: {
+              $cond: [
+                { $eq: ['$status', 'rejected'] },
+                1,
+                0
+              ]
+            }
+          },
+          invalidRecords: {
+            $sum: {
+              $cond: [
+                { $eq: ['$status', 'invalid'] },
+                1,
+                0
+              ]
+            }
+          },
+          errorRecords: {
+            $sum: {
+              $cond: [
+                { $eq: ['$status', 'error'] },
+                1,
+                0
+              ]
+            }
+          },
+          pendingRecords: {
+            $sum: {
+              $cond: [
+                { $eq: ['$status', 'pending'] },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
+    // Get recent activity with more dynamic data (last 15 records from all modules)
     const recentPanKyc = await PanKyc.find({ userId: userId })
       .sort({ updatedAt: -1 }) // Sort by updatedAt for more dynamic results
       .limit(8)
@@ -127,6 +197,12 @@ const getDashboardStats = async (req, res) => {
       .sort({ updatedAt: -1 }) // Sort by updatedAt for more dynamic results
       .limit(8)
       .select('batchId status createdAt updatedAt processedAt name aadhaarNumber panNumber')
+      .lean();
+
+    const recentAadhaarVerification = await AadhaarVerification.find({ userId: userId })
+      .sort({ updatedAt: -1 }) // Sort by updatedAt for more dynamic results
+      .limit(8)
+      .select('batchId status createdAt updatedAt processedAt name aadhaarNumber')
       .lean();
 
     // Combine and enhance recent activity with more dynamic information
@@ -148,6 +224,15 @@ const getDashboardStats = async (req, res) => {
         identifier: record.aadhaarNumber || record.panNumber || record.batchId,
         lastActivity: record.updatedAt || record.processedAt || record.createdAt,
         activityType: getActivityType(record.status, 'aadhaar-pan')
+      })),
+      ...recentAadhaarVerification.map(record => ({
+        ...record,
+        module: 'Aadhaar Verification',
+        type: 'aadhaar-verification',
+        displayName: record.name || 'Unknown',
+        identifier: record.aadhaarNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'aadhaar-verification')
       }))
     ]
     .sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity))
@@ -168,16 +253,27 @@ const getDashboardStats = async (req, res) => {
       pendingRecords: 0
     };
 
+    const aadhaarVerificationData = aadhaarVerificationStats[0] || {
+      totalRecords: 0,
+      verifiedRecords: 0,
+      rejectedRecords: 0,
+      invalidRecords: 0,
+      errorRecords: 0,
+      pendingRecords: 0
+    };
+
     // Calculate totals (pending records are already excluded from the aggregation)
     // PAN KYC total = verified + failed (no pending)
     // Aadhaar-PAN total = linked + not-linked (no pending)
-    const totalRecords = panKycData.totalRecords + aadhaarPanData.totalRecords;
-    const totalVerified = panKycData.verifiedRecords + aadhaarPanData.linkedRecords;
+    // Aadhaar Verification total = verified + rejected + invalid + error (no pending)
+    const totalRecords = panKycData.totalRecords + aadhaarPanData.totalRecords + aadhaarVerificationData.totalRecords;
+    const totalVerified = panKycData.verifiedRecords + aadhaarPanData.linkedRecords + aadhaarVerificationData.verifiedRecords;
 
     const stats = {
       totalRecords,
       panKycRecords: panKycData.totalRecords,
       aadhaarPanRecords: aadhaarPanData.totalRecords,
+      aadhaarVerificationRecords: aadhaarVerificationData.totalRecords,
       verifiedRecords: totalVerified,
       panKyc: {
         total: panKycData.totalRecords,
@@ -191,13 +287,22 @@ const getDashboardStats = async (req, res) => {
         notLinked: aadhaarPanData.notLinkedRecords,
         pending: aadhaarPanData.pendingRecords
       },
+      aadhaarVerification: {
+        total: aadhaarVerificationData.totalRecords,
+        verified: aadhaarVerificationData.verifiedRecords,
+        rejected: aadhaarVerificationData.rejectedRecords,
+        invalid: aadhaarVerificationData.invalidRecords,
+        error: aadhaarVerificationData.errorRecords,
+        pending: aadhaarVerificationData.pendingRecords
+      },
       recentActivity
     };
 
     logger.info(`Dashboard stats fetched for user ${userId}:`, {
       totalRecords,
       panKycRecords: panKycData.totalRecords,
-      aadhaarPanRecords: aadhaarPanData.totalRecords
+      aadhaarPanRecords: aadhaarPanData.totalRecords,
+      aadhaarVerificationRecords: aadhaarVerificationData.totalRecords
     });
 
     res.json({
@@ -353,6 +458,12 @@ const getRecentActivity = async (req, res) => {
       .select('batchId status createdAt updatedAt processedAt name aadhaarNumber panNumber')
       .lean();
 
+    const recentAadhaarVerification = await AadhaarVerification.find({ userId: userId })
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .select('batchId status createdAt updatedAt processedAt name aadhaarNumber')
+      .lean();
+
     // Combine and enhance recent activity
     const recentActivity = [
       ...recentPanKyc.map(record => ({
@@ -372,6 +483,15 @@ const getRecentActivity = async (req, res) => {
         identifier: record.aadhaarNumber || record.panNumber || record.batchId,
         lastActivity: record.updatedAt || record.processedAt || record.createdAt,
         activityType: getActivityType(record.status, 'aadhaar-pan')
+      })),
+      ...recentAadhaarVerification.map(record => ({
+        ...record,
+        module: 'Aadhaar Verification',
+        type: 'aadhaar-verification',
+        displayName: record.name || 'Unknown',
+        identifier: record.aadhaarNumber || record.batchId,
+        lastActivity: record.updatedAt || record.processedAt || record.createdAt,
+        activityType: getActivityType(record.status, 'aadhaar-verification')
       }))
     ]
     .sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity))

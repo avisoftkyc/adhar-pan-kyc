@@ -405,10 +405,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Footer */}
         <footer className="fixed bottom-4 right-4 z-50">
-          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg px-3 py-2 shadow-lg">
-            <p className="text-xs text-gray-600 font-medium">
-              Powered by <span className="text-blue-600 font-semibold">@ AVI HR Software Pvt Ltd</span>
-            </p>
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg px-4 py-3 shadow-lg">
+            <div className="flex items-center space-x-4">
+              <p className="text-xs text-gray-600 font-medium">
+                Powered by <span className="text-blue-600 font-semibold">@ AVI HR Software Pvt Ltd</span>
+              </p>
+              <div className="flex items-center space-x-3 text-xs">
+                <a 
+                  href="/terms-and-conditions" 
+                  className="text-gray-500 hover:text-blue-600 transition-colors duration-200"
+                >
+                  Terms
+                </a>
+                <span className="text-gray-300">|</span>
+                <a 
+                  href="/privacy-policy" 
+                  className="text-gray-500 hover:text-blue-600 transition-colors duration-200"
+                >
+                  Privacy
+                </a>
+              </div>
+            </div>
           </div>
         </footer>
       </div>

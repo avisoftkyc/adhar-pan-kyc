@@ -294,13 +294,13 @@ const AadhaarPan: React.FC = () => {
         </div>
 
         {/* Single Aadhaar-PAN Linking Verification */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white/30">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Single Aadhaar-PAN Linking Verification</h2>
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border border-white/30">
+          <div className="max-w-xl mx-auto">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">Single Aadhaar-PAN Linking Verification</h2>
             
-            <form onSubmit={handleSingleVerificationSubmit} className="space-y-6">
+            <form onSubmit={handleSingleVerificationSubmit} className="space-y-4">
               <div>
-                <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="aadhaarNumber" className="block text-sm font-medium text-gray-700 mb-1">
                   Aadhaar Number *
                 </label>
                 <input
@@ -309,7 +309,7 @@ const AadhaarPan: React.FC = () => {
                   value={singleVerificationForm.aadhaarNumber}
                   onChange={(e) => handleSingleVerificationFormChange('aadhaarNumber', e.target.value)}
                   placeholder="e.g., 123456789012"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                   maxLength={12}
                 />
                 <p className="mt-1 text-sm text-gray-500">
@@ -318,7 +318,7 @@ const AadhaarPan: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-1">
                   PAN Number *
                 </label>
                 <input
@@ -327,7 +327,7 @@ const AadhaarPan: React.FC = () => {
                   value={singleVerificationForm.panNumber}
                   onChange={(e) => handleSingleVerificationFormChange('panNumber', e.target.value)}
                   placeholder="e.g., ABCDE1234F"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                   maxLength={10}
                 />
                 <p className="mt-1 text-sm text-gray-500">
@@ -345,7 +345,7 @@ const AadhaarPan: React.FC = () => {
                   value={singleVerificationForm.name}
                   onChange={(e) => handleSingleVerificationFormChange('name', e.target.value)}
                   placeholder="Enter full name as per Aadhaar"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                 />
               </div>
 

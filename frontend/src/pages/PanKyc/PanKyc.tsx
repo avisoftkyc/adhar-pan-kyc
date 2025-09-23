@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
@@ -14,7 +14,35 @@ import {
   TrashIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
-import { validatePAN, validateDateOfBirth, validateName, filterPANInput, filterDateInput, filterNameInput, getValidationStatus } from '../../utils/validation';
+import { validatePAN, validateDateOfBirth, validateName, filterPANInput, filterNameInput } from '../../utils/validation';
+
+// Auto-format date input function
+const autoFormatDateInput = (inputValue: string): string => {
+  // Remove any non-digit characters
+  const digitsOnly = inputValue.replace(/[^0-9]/g, '');
+  
+  let formattedValue = '';
+  
+  if (digitsOnly.length >= 2) {
+    formattedValue = digitsOnly.substring(0, 2);
+    if (digitsOnly.length >= 4) {
+      formattedValue += '-' + digitsOnly.substring(2, 4);
+      if (digitsOnly.length >= 8) {
+        formattedValue += '-' + digitsOnly.substring(4, 8);
+      } else if (digitsOnly.length > 4) {
+        // Handle partial year input
+        formattedValue += '-' + digitsOnly.substring(4);
+      }
+    } else if (digitsOnly.length > 2) {
+      // Handle partial month input
+      formattedValue += '-' + digitsOnly.substring(2);
+    }
+  } else {
+    formattedValue = digitsOnly;
+  }
+  
+  return formattedValue;
+};
 
 interface Batch {
   _id: string;
@@ -39,16 +67,6 @@ interface BatchDetail {
   };
 }
 
-interface Record {
-  _id: string;
-  panNumber: string;
-  name: string;
-  fatherName?: string;
-  dateOfBirth?: string;
-  status: 'pending' | 'verified' | 'rejected' | 'error';
-  processedAt?: string;
-  verificationResult?: any;
-}
 
 const PanKyc: React.FC = () => {
   const { user } = useAuth();
@@ -115,6 +133,112 @@ const PanKyc: React.FC = () => {
   const [singleKycVerifying, setSingleKycVerifying] = useState(false);
   const [singleKycResult, setSingleKycResult] = useState<any>(null);
 
+  // Calendar state
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Calendar helper functions
+  const formatDateForInput = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const parseDateFromInput = (dateString: string): Date | null => {
+    if (!dateString || dateString.length !== 10) return null;
+    const [day, month, year] = dateString.split('-').map(Number);
+    if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+    return new Date(year, month - 1, day);
+  };
+
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const days = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 42; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      
+      const isCurrentMonth = date.getMonth() === month;
+      const isToday = date.toDateString() === today.toDateString();
+      const isSelected = selectedDate && date.toDateString() === selectedDate.toDateString();
+      const isFuture = date > today;
+      
+      days.push({
+        date,
+        isCurrentMonth,
+        isToday,
+        isSelected,
+        isFuture
+      });
+    }
+    
+    return days;
+  };
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setIsCalendarOpen(false);
+      }
+    };
+
+    if (isCalendarOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCalendarOpen]);
+
+  // Update selectedDate when dateOfBirth changes
+  useEffect(() => {
+    if (singleKycForm.dateOfBirth) {
+      const parsedDate = parseDateFromInput(singleKycForm.dateOfBirth);
+      setSelectedDate(parsedDate);
+    } else {
+      setSelectedDate(null);
+    }
+  }, [singleKycForm.dateOfBirth]);
+
+  // Handle calendar date selection
+  const handleCalendarDateSelect = (date: Date) => {
+    if (date > new Date()) return; // Don't allow future dates
+    
+    setSelectedDate(date);
+    const formattedDate = formatDateForInput(date);
+    setSingleKycForm(prev => ({
+      ...prev,
+      dateOfBirth: formattedDate
+    }));
+    setIsCalendarOpen(false);
+  };
+
+  // Navigation functions
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev);
+      if (direction === 'prev') {
+        newMonth.setMonth(prev.getMonth() - 1);
+      } else {
+        newMonth.setMonth(prev.getMonth() + 1);
+      }
+      return newMonth;
+    });
+  };
+
   // Verification popup state
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
   const [selectedRecordForVerification, setSelectedRecordForVerification] = useState<any>(null);
@@ -122,11 +246,34 @@ const PanKyc: React.FC = () => {
   // Verify selected popup state
   const [showVerifySelectedPopup, setShowVerifySelectedPopup] = useState(false);
 
+  const fetchBatches = useCallback(async () => {
+    // Prevent multiple simultaneous calls
+    if (hasFetchedBatches.current || loading) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.get('/pan-kyc/batches');
+      setBatches(response.data.data);
+      hasFetchedBatches.current = true;
+    } catch (error) {
+      console.error('Error fetching batches:', error);
+      showToast({
+        type: 'error',
+        message: 'Failed to fetch batches'
+      });
+      hasFetchedBatches.current = false; // Reset on error to allow retry
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, showToast]);
+
   useEffect(() => {
     if (!hasFetchedBatches.current) {
       fetchBatches();
     }
-  }, []);
+  }, [fetchBatches]);
 
   // Reset fetch flag when user changes
   useEffect(() => {
@@ -156,29 +303,6 @@ const PanKyc: React.FC = () => {
       setTableCurrentPage(1); // Reset to first page when search changes
     }
   }, [selectedBatch, searchTerm]);
-
-  const fetchBatches = async () => {
-    // Prevent multiple simultaneous calls
-    if (hasFetchedBatches.current || loading) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await api.get('/pan-kyc/batches');
-      setBatches(response.data.data);
-      hasFetchedBatches.current = true;
-    } catch (error) {
-      console.error('Error fetching batches:', error);
-      showToast({
-        type: 'error',
-        message: 'Failed to fetch batches'
-      });
-      hasFetchedBatches.current = false; // Reset on error to allow retry
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const refreshBatches = async () => {
     hasFetchedBatches.current = false;
@@ -598,10 +722,11 @@ const PanKyc: React.FC = () => {
         [field]: filteredValue
       }));
     } else if (field === 'dateOfBirth') {
-      const filteredValue = filterDateInput(value);
+      // Auto-format date input to DD-MM-YYYY
+      const formattedValue = autoFormatDateInput(value);
       setSingleKycForm(prev => ({
         ...prev,
-        [field]: filteredValue
+        [field]: formattedValue
       }));
     } else if (field === 'name') {
       const filteredValue = filterNameInput(value);
@@ -616,6 +741,7 @@ const PanKyc: React.FC = () => {
       }));
     }
   };
+
 
   // Function to validate PAN format
   const isValidPANFormat = (pan: string) => {
@@ -936,9 +1062,52 @@ const PanKyc: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="mt-2 text-xs text-blue-500/70">
-                    Required columns: <span className="font-semibold">panNumber</span>, <span className="font-semibold">name</span>, <span className="font-semibold">dateOfBirth</span>
-                  </p>
+                  <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <p className="text-xs text-blue-500/70">
+                      Required columns: <span className="font-semibold">panNumber</span>, <span className="font-semibold">name</span>, <span className="font-semibold">dateOfBirth</span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Create sample Excel content
+                        const sampleData = [
+                          ['panNumber', 'name', 'dateOfBirth'],
+                          ['ABCDE1234F', 'John Doe', '15-03-1990'],
+                          ['FGHIJ5678K', 'Jane Smith', '22-11-1985'],
+                          ['LMNOP9012Q', 'Bob Johnson', '08-07-1992']
+                        ];
+                        
+                        // Convert to Excel format (XLSX)
+                        const xlsxContent = `<?xml version="1.0" encoding="UTF-8"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
+<Worksheet ss:Name="Sheet1">
+<Table>
+${sampleData.map(row => 
+  `<Row>${row.map(cell => `<Cell><Data ss:Type="String">${cell}</Data></Cell>`).join('')}</Row>`
+).join('')}
+</Table>
+</Worksheet>
+</Workbook>`;
+                        
+                        // Create and download file
+                        const blob = new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', 'sample_pan_kyc.xlsx');
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        window.URL.revokeObjectURL(url);
+                      }}
+                      className="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-xs font-medium rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download Sample
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1466,7 +1635,7 @@ const PanKyc: React.FC = () => {
 
       {/* Single KYC Tab Content */}
       {activeTab === 'single' && (
-        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-3xl p-8 shadow-2xl border border-blue-100/50 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 rounded-2xl p-4 shadow-xl border border-blue-100/50 relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-200/20 rounded-full blur-3xl"></div>
@@ -1474,12 +1643,12 @@ const PanKyc: React.FC = () => {
           <div className="relative z-10">
             
             <div className="max-w-4xl mx-auto">
-              <form onSubmit={handleSingleKycSubmit} className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border border-white/30 shadow-xl">
+              <form onSubmit={handleSingleKycSubmit} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-white/30 shadow-lg">
                 {/* Form Fields Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                   {/* PAN Number Field */}
               <div>
-                    <label htmlFor="panNumber" className="block text-sm font-semibold text-gray-700 mb-3">
+                    <label htmlFor="panNumber" className="block text-sm font-semibold text-gray-700 mb-2">
                       <span className="flex items-center">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                   PAN Number *
@@ -1492,7 +1661,7 @@ const PanKyc: React.FC = () => {
                     value={singleKycForm.panNumber}
                     onChange={(e) => handleSingleKycFormChange('panNumber', e.target.value)}
                     placeholder="ABCDE1234F"
-                    className={`block w-full px-4 py-3 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 text-center font-mono text-lg tracking-wider ${
+                    className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-center font-mono text-base tracking-wider ${
                       singleKycForm.panNumber.length === 0 
                         ? 'border-gray-200 focus:ring-blue-500 focus:border-blue-500' 
                         : singleKycForm.panNumber.length === 10 && isValidPANFormat(singleKycForm.panNumber)
@@ -1546,7 +1715,7 @@ const PanKyc: React.FC = () => {
                     value={singleKycForm.name}
                     onChange={(e) => handleSingleKycFormChange('name', e.target.value)}
                     placeholder="Enter full name as per PAN"
-                    className={`block w-full px-4 py-3 pr-12 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    className={`block w-full px-3 py-2 pr-12 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 ${
                       singleKycForm.name.length === 0 
                         ? 'border-gray-200 focus:ring-purple-500 focus:border-purple-500' 
                         : validateName(singleKycForm.name).isValid
@@ -1589,8 +1758,20 @@ const PanKyc: React.FC = () => {
                     id="dateOfBirth"
                     value={singleKycForm.dateOfBirth}
                     onChange={(e) => handleSingleKycFormChange('dateOfBirth', e.target.value)}
+                    onKeyDown={(e) => {
+                      // Allow backspace, delete, arrow keys, etc.
+                      if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key)) {
+                        return;
+                      }
+                      // Allow numbers
+                      if (/[0-9]/.test(e.key)) {
+                        return;
+                      }
+                      // Prevent other characters
+                      e.preventDefault();
+                    }}
                     placeholder="DD-MM-YYYY"
-                    className={`block w-full px-4 py-3 pr-10 border-2 rounded-xl shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 text-center font-mono ${
+                    className={`block w-full px-3 py-2 pr-20 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-center font-mono ${
                       singleKycForm.dateOfBirth.length === 0 
                         ? 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500' 
                         : singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid
@@ -1601,8 +1782,21 @@ const PanKyc: React.FC = () => {
                     }`}
                     maxLength={10}
                   />
+                  
+                  {/* Calendar Button */}
+                  <button
+                    type="button"
+                    onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+
+                  {/* Validation Icon */}
                   {singleKycForm.dateOfBirth.length > 0 && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
                       {singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
                         <CheckCircleIcon className="w-5 h-5 text-green-500" />
                       ) : singleKycForm.dateOfBirth.length === 10 && !validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
@@ -1613,9 +1807,86 @@ const PanKyc: React.FC = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Calendar Dropdown */}
+                {isCalendarOpen && (
+                  <div 
+                    ref={calendarRef}
+                    className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-80"
+                  >
+                    {/* Calendar Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        type="button"
+                        onClick={() => navigateMonth('prev')}
+                        className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h3>
+                      
+                      <button
+                        type="button"
+                        onClick={() => navigateMonth('next')}
+                        className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Calendar Days */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} className="text-xs font-medium text-gray-500 text-center py-2">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1">
+                      {generateCalendarDays().map((day, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleCalendarDateSelect(day.date)}
+                          disabled={day.isFuture}
+                          className={`
+                            p-2 text-sm rounded-md transition-colors
+                            ${day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
+                            ${day.isToday ? 'bg-blue-100 text-blue-900 font-semibold' : ''}
+                            ${day.isSelected ? 'bg-indigo-500 text-white font-semibold' : ''}
+                            ${day.isFuture ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 cursor-pointer'}
+                            ${!day.isCurrentMonth ? 'opacity-50' : ''}
+                          `}
+                        >
+                          {day.date.getDate()}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Today Button */}
+                    <div className="mt-4 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => handleCalendarDateSelect(new Date())}
+                        className="px-4 py-2 text-sm bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors"
+                      >
+                        Today
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="mt-1 text-xs text-center">
                   {singleKycForm.dateOfBirth.length === 0 ? (
-                    <span className="text-gray-500">Format: DD-MM-YYYY</span>
+                    <span className="text-gray-500">Format: DD-MM-YYYY or click calendar</span>
                   ) : singleKycForm.dateOfBirth.length === 10 && validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (
                     <span className="text-green-600 font-medium">✓ Valid date format</span>
                   ) : singleKycForm.dateOfBirth.length === 10 && !validateDateOfBirth(singleKycForm.dateOfBirth).isValid ? (

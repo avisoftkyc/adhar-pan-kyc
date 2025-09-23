@@ -1124,12 +1124,6 @@ const AadhaarVerificationRecords: React.FC = () => {
                     <div className="border-t pt-4">
                       <h4 className="text-lg font-medium text-gray-900 mb-3">Verification Details</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {selectedRecord.verificationDetails.source && (
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Source</label>
-                            <p className="mt-1 text-sm text-gray-900">{selectedRecord.verificationDetails.source}</p>
-                          </div>
-                        )}
                         {selectedRecord.verificationDetails.confidence && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700">Confidence</label>

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon, CheckCircleIcon, ShieldCheckIcon, DocumentCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import logoImage from '../../logo.jpeg';
 
 interface LoginFormData {
   email: string;
@@ -78,23 +79,51 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           {/* Enhanced Header */}
           <div className="text-center">
-            <div className="mx-auto h-24 w-24 bg-gradient-to-br from-purple-500 via-indigo-500 to-cyan-400 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-purple-500/30 transform hover:scale-110 transition-transform duration-300">
-              <SparklesIcon className="h-12 w-12 text-white drop-shadow-lg" />
+            {/* AVI HR Logo */}
+            <div className="mx-auto h-20 w-20 bg-gradient-to-br from-white to-white rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/30 overflow-hidden">
+              <img 
+                src={logoImage} 
+                alt="AVI HR Logo" 
+                className="w-full h-full object-contain p-2"
+              />
             </div>
-            <h2 className="mt-8 text-6xl font-black text-white tracking-tight drop-shadow-2xl">
-              Welcome back
-            </h2>
-            <p className="mt-4 text-xl text-purple-100 font-medium drop-shadow-lg">
-              Sign in to your KYC Aadhaar System account
+            
+            {/* Product Name */}
+            <h1 className="mt-6 text-3xl font-bold text-white drop-shadow-lg">
+              AVIHR IDSYS
+            </h1>
+            
+            {/* Feature Descriptions - Horizontal with Icons */}
+            <div className="mt-6 grid grid-cols-2 gap-3 max-w-lg mx-auto">
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 group">
+                <CheckCircleIcon className="w-4 h-4 text-green-300 flex-shrink-0 group-hover:text-green-200 transition-colors duration-300" />
+                <span className="text-xs text-purple-100 font-medium group-hover:text-white transition-colors duration-300">Real-Time PAN Verification</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 group">
+                <ShieldCheckIcon className="w-4 h-4 text-blue-300 flex-shrink-0 group-hover:text-blue-200 transition-colors duration-300" />
+                <span className="text-xs text-purple-100 font-medium group-hover:text-white transition-colors duration-300">PAN-AADHAAR Link Status</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 group">
+                <DocumentCheckIcon className="w-4 h-4 text-yellow-300 flex-shrink-0 group-hover:text-yellow-200 transition-colors duration-300" />
+                <span className="text-xs text-purple-100 font-medium group-hover:text-white transition-colors duration-300">Prevent Fraudulent Documents</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 group">
+                <ExclamationTriangleIcon className="w-4 h-4 text-red-300 flex-shrink-0 group-hover:text-red-200 transition-colors duration-300" />
+                <span className="text-xs text-purple-100 font-medium group-hover:text-white transition-colors duration-300">Eliminate Incomplete Information</span>
+              </div>
+            </div>
+            
+            <p className="mt-4 text-lg text-purple-100 font-medium">
+              Sign in to your account
             </p>
           </div>
 
           {/* Enhanced Form Container */}
-          <div className="bg-white/95 backdrop-blur-2xl rounded-[2rem] p-10 shadow-2xl shadow-purple-500/20 border border-white/50 transform hover:scale-[1.02] transition-all duration-500">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="bg-white/95 backdrop-blur-2xl rounded-2xl p-6 shadow-xl shadow-purple-500/20 border border-white/50 transform hover:scale-[1.01] transition-all duration-500">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {/* Enhanced Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-3">
+                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
                   Email address
                 </label>
                 <div className="relative group">
@@ -103,7 +132,7 @@ const Login: React.FC = () => {
                     id="email"
                     type="email"
                     {...register('email')}
-                    className="block w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
+                    className="block w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-300 bg-white/80 backdrop-blur-sm hover:bg-white/90"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -198,11 +227,11 @@ const Login: React.FC = () => {
           <div className="text-center">
             <p className="text-sm text-purple-100 drop-shadow-lg">
               By signing in, you agree to our{' '}
-              <a href="#" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
+              <a href="/terms-and-conditions" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="#" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
+              <a href="/privacy-policy" className="text-purple-200 hover:text-purple-100 font-medium transition-colors duration-300 hover:underline">
                 Privacy Policy
               </a>
             </p>
