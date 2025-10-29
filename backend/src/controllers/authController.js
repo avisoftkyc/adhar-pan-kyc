@@ -40,6 +40,10 @@ const register = async (userData) => {
     // Don't fail registration if email fails
   }
 
+  // Generate session token for new user
+  user.generateSessionToken();
+  await user.save();
+
   // Generate JWT token
   const token = user.getSignedJwtToken();
 
@@ -91,6 +95,11 @@ const login = async (loginData) => {
   // Reset login attempts on successful login
   await user.resetLoginAttempts();
 
+  // Generate new session token (this invalidates previous sessions)
+  user.generateSessionToken();
+  user.lastLogin = Date.now();
+  await user.save();
+
   // Generate JWT token with appropriate expiration
   const token = user.getSignedJwtToken(rememberMe ? '30d' : '24h');
 
@@ -108,6 +117,8 @@ const login = async (loginData) => {
       profile: user.profile,
       branding: user.branding,
       preferences: user.preferences,
+      customFields: user.customFields,
+      enabledCustomFields: user.enabledCustomFields,
     },
   };
 };
@@ -134,6 +145,8 @@ const getCurrentUser = async (userId) => {
     profile: user.profile,
     branding: user.branding,
     preferences: user.preferences,
+    customFields: user.customFields,
+    enabledCustomFields: user.enabledCustomFields,
     createdAt: user.createdAt,
     lastLogin: user.lastLogin,
   };

@@ -21,7 +21,8 @@ const Profile = () => {
       company: user?.profile?.company || '',
       designation: user?.profile?.designation || '',
       address: user?.profile?.address || '',
-    }
+    },
+    customFields: user?.customFields || {}
   });
   
   
@@ -41,7 +42,8 @@ const Profile = () => {
           company: user.profile?.company || '',
           designation: user.profile?.designation || '',
           address: user.profile?.address || '',
-        }
+        },
+        customFields: user.customFields || {}
       });
     }
   }, [user]);
@@ -53,7 +55,9 @@ const Profile = () => {
     setLoading(true);
     
     try {
-      const response = await api.put('/users/profile', profileForm);
+      // Don't send customFields - only admin can edit those
+      const { customFields, ...profileData } = profileForm;
+      const response = await api.put('/users/profile', profileData);
       if (response.data.success) {
         updateUser(response.data.data);
         setSuccessMessage('Profile updated successfully!');
@@ -263,6 +267,27 @@ const Profile = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Custom Fields (Read-Only) */}
+                  {user?.customFields && Object.keys(user.customFields).length > 0 && (
+                    <div className="mt-6 border-t border-gray-200 pt-6">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-4">Additional Information (Set by Admin)</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {Object.entries(user.customFields).map(([key, value]) => (
+                          <div key={key} className="bg-gray-50 p-3 rounded-lg">
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              {key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </label>
+                            <p className="text-sm text-gray-900">{String(value || '-')}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2 italic">
+                        * These fields can only be modified by an administrator
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex justify-end">
                     <button
                       type="submit"

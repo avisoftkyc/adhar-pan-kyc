@@ -11,10 +11,10 @@ import {
   DocumentTextIcon,
   UserIcon,
   CalendarIcon,
-  PlusIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
 import { validateAadhaar, filterAadhaarInput, getValidationStatus } from '../../utils/validation';
+import CustomFieldsRenderer from '../../components/CustomFieldsRenderer';
 
 interface VerificationStep {
   step: 'enter-details' | 'otp-verification' | 'success' | 'error';
@@ -33,6 +33,7 @@ const AadhaarVerification: React.FC = () => {
   const [transactionId, setTransactionId] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [canResend, setCanResend] = useState(false);
+  const [customFields, setCustomFields] = useState<Record<string, any>>({});
   const [dynamicFields, setDynamicFields] = useState<Array<{id: string, label: string, value: string}>>([]);
 
   // Email validation function
@@ -95,32 +96,6 @@ const AadhaarVerification: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showFieldDropdown]);
-
-  // Add dynamic field
-  const addDynamicField = (fieldType: string) => {
-    console.log('Adding field type:', fieldType);
-    const selectedOption = fieldOptions.find(option => option.value === fieldType);
-    if (!selectedOption) {
-      console.log('Option not found for:', fieldType);
-      return;
-    }
-
-    // Check if this field type is already added
-    const existingField = dynamicFields.find(field => field.label === selectedOption.label);
-    if (existingField) {
-      toast.error(`${selectedOption.label} field already exists`);
-      return;
-    }
-
-    const newField = {
-      id: `field_${Date.now()}`,
-      label: selectedOption.label,
-      value: ''
-    };
-    console.log('Adding new field:', newField);
-    setDynamicFields([...dynamicFields, newField]);
-    setShowFieldDropdown(false);
-  };
 
   // Remove dynamic field
   const removeDynamicField = (id: string) => {
@@ -226,10 +201,18 @@ const AadhaarVerification: React.FC = () => {
         body: JSON.stringify({ 
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           location: location.trim(),
-          dynamicFields: dynamicFields.map(field => ({
-            label: field.label,
-            value: field.value.trim()
-          })),
+          dynamicFields: [
+            ...dynamicFields.map(field => ({
+              label: field.label,
+              value: field.value.trim()
+            })),
+            // Include custom fields
+            ...Object.entries(customFields).map(([key, value]) => ({
+              label: key,
+              value: value
+            }))
+          ],
+          customFields: customFields,
           consentAccepted: consentAccepted
         })
       });
@@ -276,10 +259,18 @@ const AadhaarVerification: React.FC = () => {
         body: JSON.stringify({
           aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
           location: location.trim(),
-          dynamicFields: dynamicFields.map(field => ({
-            label: field.label,
-            value: field.value.trim()
-          })),
+          dynamicFields: [
+            ...dynamicFields.map(field => ({
+              label: field.label,
+              value: field.value.trim()
+            })),
+            // Include custom fields
+            ...Object.entries(customFields).map(([key, value]) => ({
+              label: key,
+              value: value
+            }))
+          ],
+          customFields: customFields,
           consentAccepted: true
         })
       });
@@ -467,85 +458,7 @@ const AadhaarVerification: React.FC = () => {
                       </div>
 
                       {/* Location Field with Plus Icon */}
-                      <div className="group">
-                        <label htmlFor="location" className="block text-xs font-bold text-gray-700 mb-2 flex items-center">
-                          <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                          Location *
-                      </label>
-                        <div className="flex gap-2">
-                      <input
-                        type="text"
-                            id="location"
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            placeholder="Enter location"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-purple-500 focus:border-purple-500 text-base font-medium transition-all duration-300"
-                        required
-                      />
-                          <div className="relative dropdown-container">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                console.log('Plus button clicked, current state:', showFieldDropdown);
-                                setShowFieldDropdown(!showFieldDropdown);
-                              }}
-                              className={`group flex items-center justify-center px-3 py-3 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
-                                showFieldDropdown 
-                                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600' 
-                                  : 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600'
-                              } text-white`}
-                              title="Add additional field"
-                            >
-                              <PlusIcon className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                            </button>
-                            
-                            {/* Dropdown Menu */}
-                            {showFieldDropdown && (
-                              <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-2xl border border-gray-200 z-[9999]" 
-                                   style={{ 
-                                     zIndex: 9999,
-                                     position: 'absolute',
-                                     top: '100%',
-                                     right: '0',
-                                     marginTop: '8px'
-                                   }}>
-                                <div className="py-2">
-                                  {/* Dropdown Header */}
-                                  <div className="px-4 py-2 border-b border-gray-100">
-                                    <h4 className="text-xs font-bold text-gray-600 uppercase tracking-wide">
-                                      Select to add additional field
-                                    </h4>
-                                  </div>
-                                  {fieldOptions.map((option) => {
-                                    const isAlreadyAdded = dynamicFields.some(field => field.label === option.label);
-                                    return (
-                                      <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          e.stopPropagation();
-                                          console.log('Dropdown option clicked:', option.value);
-                                          addDynamicField(option.value);
-                                        }}
-                                        disabled={isAlreadyAdded}
-                                        className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition-colors duration-200 ${
-                                          isAlreadyAdded 
-                                            ? 'text-gray-400 cursor-not-allowed' 
-                                            : 'text-gray-700 hover:text-indigo-600'
-                                        }`}
-                                      >
-                                        {option.label}
-                                        {isAlreadyAdded && <span className="text-xs text-gray-400 ml-2">(Added)</span>}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                     
                     </div>
 
 
@@ -614,6 +527,25 @@ const AadhaarVerification: React.FC = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Custom Fields from Admin */}
+                    <div className="mt-6">
+                      <h3 className="text-base font-bold text-gray-700 mb-3 flex items-center">
+                        <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                        Custom Fields
+                      </h3>
+                      <CustomFieldsRenderer
+                        appliesTo="verification"
+                        values={customFields}
+                        onChange={(fieldName, value) => {
+                          setCustomFields({
+                            ...customFields,
+                            [fieldName]: value
+                          });
+                        }}
+                        enabledCustomFieldIds={user?.enabledCustomFields}
+                      />
+                    </div>
 
                     {/* Consent Checkbox */}
                     <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-blue-100">

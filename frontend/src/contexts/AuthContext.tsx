@@ -38,6 +38,8 @@ interface User {
     };
     theme: 'light' | 'dark';
   };
+  customFields?: Record<string, any>;
+  enabledCustomFields?: string[]; // Array of custom field IDs that this user has access to
   createdAt: string;
   lastLogin?: string;
 }

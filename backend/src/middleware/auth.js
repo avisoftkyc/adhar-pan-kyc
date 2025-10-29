@@ -14,8 +14,8 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Get user from token
-      req.user = await User.findById(decoded.id).select('-password');
+      // Get user from token (include currentSessionToken for verification)
+      req.user = await User.findById(decoded.id).select('-password +currentSessionToken');
 
       if (!req.user) {
         return res.status(401).json({
@@ -29,6 +29,15 @@ const protect = async (req, res, next) => {
         return res.status(401).json({
           success: false,
           error: 'Account is suspended',
+        });
+      }
+
+      // Verify session token matches (single session enforcement)
+      if (decoded.sessionToken && req.user.currentSessionToken && decoded.sessionToken !== req.user.currentSessionToken) {
+        logger.warn(`Session invalidated for user ${req.user.email} - logged in from another location`);
+        return res.status(401).json({
+          success: false,
+          error: 'Session expired. You have been logged in from another location.',
         });
       }
 
