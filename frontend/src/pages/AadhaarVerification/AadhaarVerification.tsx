@@ -42,18 +42,6 @@ const AadhaarVerification: React.FC = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
-  const [showFieldDropdown, setShowFieldDropdown] = useState(false);
-
-  // Predefined field options
-  const fieldOptions = [
-    { value: 'empCode', label: 'Emp Code' },
-    { value: 'location', label: 'Location' },
-    { value: 'branch', label: 'Branch' },
-    { value: 'plantName', label: 'Plant Name' },
-    { value: 'phoneNo', label: 'Phone No' },
-    { value: 'email', label: 'Email' },
-    { value: 'otherDetails', label: 'Other Details' }
-  ];
 
   // Countdown timer effect for resend OTP
   useEffect(() => {
@@ -77,25 +65,6 @@ const AadhaarVerification: React.FC = () => {
       }
     };
   }, [resendCooldown]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      // Don't close if clicking on the dropdown button or dropdown content
-      if (showFieldDropdown && !target.closest('.dropdown-container')) {
-        setShowFieldDropdown(false);
-      }
-    };
-
-    if (showFieldDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showFieldDropdown]);
 
   // Remove dynamic field
   const removeDynamicField = (id: string) => {
@@ -478,10 +447,17 @@ const AadhaarVerification: React.FC = () => {
                               </label>
                               <div className="relative">
                                 <input
-                                  type={field.label === 'Emp Code' || field.label === 'Phone No' ? 'tel' : 
+                                  type={field.label === 'Emp Code' || field.label === 'Phone No' ? 'text' : 
                                         field.label === 'Email' ? 'email' : 'text'}
+                                  inputMode={field.label === 'Emp Code' || field.label === 'Phone No' ? 'numeric' : undefined}
                                   value={field.value}
                                   onChange={(e) => updateDynamicField(field.id, e.target.value)}
+                                  onKeyPress={(e) => {
+                                    // Emp Code: Only allow numeric characters
+                                    if (field.label === 'Emp Code' && !/[0-9]/.test(e.key)) {
+                                      e.preventDefault();
+                                    }
+                                  }}
                                   placeholder={
                                     field.label === 'Emp Code' ? 'Enter employee code (numbers only)' :
                                     field.label === 'Phone No' ? 'Enter 10-digit phone number (starts with 6-9)' :
