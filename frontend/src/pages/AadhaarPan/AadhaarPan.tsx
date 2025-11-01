@@ -484,7 +484,7 @@ const AadhaarPan: React.FC = () => {
       setSingleVerificationResult(response.data.data);
       showToast({
         type: 'success',
-        message: 'Aadhaar-PAN linking verification completed'
+        message: 'Aadhaar-PAN linking verified successfully'
       });
       
     } catch (error: any) {

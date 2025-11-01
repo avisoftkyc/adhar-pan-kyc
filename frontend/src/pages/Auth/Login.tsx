@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon, CheckCircleIcon, ShieldCheckIcon, DocumentCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon, CheckCircleIcon, ShieldCheckIcon, DocumentCheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import logoImage from '../../logo.jpeg';
 
 interface LoginFormData {
@@ -79,18 +79,17 @@ const Login: React.FC = () => {
         <div className="max-w-md w-full space-y-8">
           {/* Enhanced Header */}
           <div className="text-center">
-            {/* AVI HR Logo */}
             <div className="mx-auto h-20 w-20 bg-gradient-to-br from-white to-white rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/30 overflow-hidden">
               <img 
                 src={logoImage} 
-                alt="AVI HR Logo" 
+                alt="DUMMY Logo" 
                 className="w-full h-full object-contain p-2"
               />
             </div>
             
             {/* Product Name */}
             <h1 className="mt-6 text-3xl font-bold text-white drop-shadow-lg">
-              AVIHR IDSYS
+              DUMMY IDSYS
             </h1>
             
             {/* Feature Descriptions - Horizontal with Icons */}

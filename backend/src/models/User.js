@@ -63,6 +63,10 @@ const UserSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
   },
+  currentSessionToken: {
+    type: String,
+    select: false, // Don't return this by default
+  },
   loginAttempts: {
     type: Number,
     default: 0,
@@ -116,6 +120,18 @@ const UserSchema = new mongoose.Schema({
       default: 'light',
     },
   },
+  customFields: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed,
+    default: new Map(),
+    // Stores custom field values as key-value pairs
+    // Key: fieldName, Value: field value
+  },
+  enabledCustomFields: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CustomField',
+    // Array of custom field IDs that this user has access to
+  }],
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
@@ -143,14 +159,22 @@ UserSchema.pre('save', async function(next) {
 });
 
 // Sign JWT and return
-UserSchema.methods.getSignedJwtToken = function() {
+UserSchema.methods.getSignedJwtToken = function(expiresIn = '24h') {
   return jwt.sign(
-    { id: this._id, role: this.role },
+    { id: this._id, role: this.role, sessionToken: this.currentSessionToken },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+      expiresIn: expiresIn,
     }
   );
+};
+
+// Generate session token
+UserSchema.methods.generateSessionToken = function() {
+  // Generate a unique session token
+  const sessionToken = crypto.randomBytes(32).toString('hex');
+  this.currentSessionToken = sessionToken;
+  return sessionToken;
 };
 
 // Match user entered password to hashed password in database

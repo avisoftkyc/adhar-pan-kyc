@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import CustomFieldsManager from '../../components/CustomFieldsManager';
 import { 
   UserGroupIcon, 
   ChartBarIcon, 
@@ -37,6 +38,8 @@ interface User {
     address?: string;
     gstNumber?: string;
   };
+  customFields?: Record<string, any>;
+  enabledCustomFields?: string[]; // Array of custom field IDs
   createdAt: string;
   updatedAt: string;
 }
@@ -180,6 +183,9 @@ const Admin: React.FC = () => {
   });
   const [brandingLoading, setBrandingLoading] = useState(false);
 
+  // Custom Fields
+  const [availableCustomFields, setAvailableCustomFields] = useState<any[]>([]);
+
   // Form states
   const [formData, setFormData] = useState({
     name: '',
@@ -187,7 +193,8 @@ const Admin: React.FC = () => {
     password: '',
     role: 'user',
     moduleAccess: [] as string[],
-    status: 'active'
+    status: 'active',
+    enabledCustomFields: [] as string[] // Array of custom field IDs
   });
 
   useEffect(() => {
@@ -208,6 +215,7 @@ const Admin: React.FC = () => {
     fetchUserStats();
     fetchApiUsageStats();
     fetchUserApiHitCounts();
+    fetchCustomFields();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
@@ -234,6 +242,19 @@ const Admin: React.FC = () => {
       });
     } finally {
       setUsersLoading(false);
+    }
+  };
+
+  const fetchCustomFields = async () => {
+    try {
+      const response = await api.get('/custom-fields', {
+        params: {
+          isActive: 'true'
+        }
+      });
+      setAvailableCustomFields(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching custom fields:', error);
     }
   };
 
@@ -469,7 +490,8 @@ const Admin: React.FC = () => {
         password: '',
         role: 'user',
         moduleAccess: [],
-        status: 'active'
+        status: 'active',
+        enabledCustomFields: []
       });
       fetchUsers();
     } catch (error: any) {
@@ -506,7 +528,8 @@ const Admin: React.FC = () => {
         password: '',
         role: 'user',
         moduleAccess: [],
-        status: 'active'
+        status: 'active',
+        enabledCustomFields: []
       });
       fetchUsers();
     } catch (error: any) {
@@ -786,7 +809,8 @@ const Admin: React.FC = () => {
       password: '',
       role: user.role,
       moduleAccess: user.moduleAccess,
-      status: user.status
+      status: user.status,
+      enabledCustomFields: user.enabledCustomFields || []
     });
   };
 
@@ -1011,6 +1035,17 @@ const Admin: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
             Data Archival
+          </button>
+          <button
+            onClick={() => setActiveTab('customFields')}
+            className={`flex items-center px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              activeTab === 'customFields'
+                ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg ring-2 ring-purple-200'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md active:scale-95'
+            }`}
+          >
+            <CogIcon className="h-5 w-5 mr-2" />
+            Custom Fields
           </button>
         </nav>
       </div>
@@ -2512,14 +2547,36 @@ const Admin: React.FC = () => {
 
       {/* Create/Edit User Modal */}
       {(showCreateUser || editingUser) && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-4 border w-80 shadow-lg rounded-md bg-white">
-            <div className="mt-2">
-              <h3 className="text-base font-medium text-gray-900 mb-3">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-3xl shadow-lg rounded-xl bg-white max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-xl">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {editingUser ? 'Edit User' : 'Create New User'}
               </h3>
-              
-              <form onSubmit={editingUser ? handleUpdateUser : handleCreateUser} className="space-y-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateUser(false);
+                  setEditingUser(null);
+                  setFormData({
+                    name: '',
+                    email: '',
+                    password: '',
+                    role: 'user',
+                    moduleAccess: [],
+                    status: 'active',
+                    enabledCustomFields: []
+                  });
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <form onSubmit={editingUser ? handleUpdateUser : handleCreateUser} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
                   <input
@@ -2579,31 +2636,53 @@ const Admin: React.FC = () => {
                   </select>
                 </div>
                 
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowCreateUser(false);
-                      setEditingUser(null);
-                      setFormData({
-                        name: '',
-                        email: '',
-                        password: '',
-                        role: 'user',
-                        moduleAccess: [],
-                        status: 'active'
-                      });
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Cancel
-                  </button>
+                {/* Custom Fields Access Control */}
+                {editingUser && availableCustomFields.length > 0 && (
+                  <div className="border-t border-gray-200 pt-4 mt-4">
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3">Enable Custom Fields for this User</h4>
+                    <p className="text-xs text-gray-500 mb-3">Select which custom fields this user can access</p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {availableCustomFields.map((field) => (
+                        <label key={field._id} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-md cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.enabledCustomFields.includes(field._id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setFormData({
+                                  ...formData,
+                                  enabledCustomFields: [...formData.enabledCustomFields, field._id]
+                                });
+                              } else {
+                                setFormData({
+                                  ...formData,
+                                  enabledCustomFields: formData.enabledCustomFields.filter(id => id !== field._id)
+                                });
+                              }
+                            }}
+                            className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm font-medium text-gray-700">{field.fieldLabel}</span>
+                          <span className="text-xs text-gray-400">({field.fieldType})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-end pt-6 border-t border-gray-200 mt-6">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
-                    {loading ? 'Saving...' : (editingUser ? 'Update' : 'Create')}
+                    {loading && (
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    )}
+                    {loading ? 'Saving...' : (editingUser ? 'Update User' : 'Create User')}
                   </button>
                 </div>
               </form>
@@ -3097,6 +3176,11 @@ const Admin: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Custom Fields Tab */}
+      {activeTab === 'customFields' && (
+        <CustomFieldsManager />
       )}
     </div>
   );

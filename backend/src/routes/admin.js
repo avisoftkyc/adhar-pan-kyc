@@ -122,7 +122,7 @@ router.get('/users/:id', protect, authorize('admin'), async (req, res) => {
 // Create new user (admin only)
 router.post('/users', protect, authorize('admin'), async (req, res) => {
   try {
-    const { name, email, password, role, moduleAccess, status } = req.body;
+    const { name, email, password, role, moduleAccess, status, enabledCustomFields } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -139,7 +139,8 @@ router.post('/users', protect, authorize('admin'), async (req, res) => {
       password,
       role: role || 'user',
       moduleAccess: moduleAccess || [],
-      status: status || 'active'
+      status: status || 'active',
+      enabledCustomFields: enabledCustomFields || []
     });
 
     await user.save();
@@ -184,7 +185,7 @@ router.post('/users', protect, authorize('admin'), async (req, res) => {
 // Update user (admin only)
 router.put('/users/:id', protect, authorize('admin'), async (req, res) => {
   try {
-    const { name, email, role, moduleAccess, status } = req.body;
+    const { name, email, role, moduleAccess, status, enabledCustomFields } = req.body;
     
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -210,7 +211,8 @@ router.put('/users/:id', protect, authorize('admin'), async (req, res) => {
       email: user.email,
       role: user.role,
       moduleAccess: user.moduleAccess,
-      status: user.status
+      status: user.status,
+      enabledCustomFields: user.enabledCustomFields
     };
 
     // Update user
@@ -219,6 +221,9 @@ router.put('/users/:id', protect, authorize('admin'), async (req, res) => {
     user.role = role || user.role;
     user.moduleAccess = moduleAccess || user.moduleAccess;
     user.status = status || user.status;
+    if (enabledCustomFields !== undefined) {
+      user.enabledCustomFields = enabledCustomFields;
+    }
 
     await user.save();
 
