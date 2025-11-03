@@ -89,7 +89,7 @@ const Login: React.FC = () => {
             
             {/* Product Name */}
             <h1 className="mt-6 text-3xl font-bold text-white drop-shadow-lg">
-              DUMMY IDSYS
+              AVIHR IDSYS
             </h1>
             
             {/* Feature Descriptions - Horizontal with Icons */}
