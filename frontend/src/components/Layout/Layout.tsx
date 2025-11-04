@@ -46,6 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const logoUrl = useMemo(() => {
     if (user?.branding?.logo && user?._id) {
       const baseUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api');
+      // Use the API endpoint to serve the logo - this ensures proper path resolution and fallback handling
       const url = `${baseUrl.replace('/api', '')}/api/admin/users/${user._id}/logo`;
       // Add cache busting parameter based on logo filename to ensure fresh image loads
       const cacheBuster = user.branding.logo.filename ? `?v=${user.branding.logo.filename}` : '';

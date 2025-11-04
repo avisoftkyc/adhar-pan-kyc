@@ -371,8 +371,11 @@ router.get('/qr-code', protect, async (req, res) => {
       const crypto = require('crypto');
       const qrCodeString = crypto.randomBytes(32).toString('hex');
       
-      // Create QR code URL
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      // Create QR code URL - use production URL in production, localhost in development
+      const frontendUrl = process.env.FRONTEND_URL || 
+        (process.env.NODE_ENV === 'production' 
+          ? 'https://adhar-pan-kyc.vercel.app' 
+          : 'http://localhost:3000');
       const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
 
       // Generate QR code image
@@ -401,8 +404,11 @@ router.get('/qr-code', protect, async (req, res) => {
       });
     }
 
-    // Return existing QR code
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Return existing QR code - use production URL in production, localhost in development
+    const frontendUrl = process.env.FRONTEND_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://adhar-pan-kyc.vercel.app' 
+        : 'http://localhost:3000');
     const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
       errorCorrectionLevel: 'H',
