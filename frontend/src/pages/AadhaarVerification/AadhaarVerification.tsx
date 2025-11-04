@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -11,30 +11,52 @@ import {
   DocumentTextIcon,
   UserIcon,
   CalendarIcon,
-  TrashIcon
+  TrashIcon,
+  CameraIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 import { validateAadhaar, filterAadhaarInput, getValidationStatus } from '../../utils/validation';
 import CustomFieldsRenderer from '../../components/CustomFieldsRenderer';
+import api from '../../services/api';
 
 interface VerificationStep {
   step: 'enter-details' | 'otp-verification' | 'success' | 'error';
   data?: any;
 }
 
+interface CustomField {
+  _id: string;
+  fieldName: string;
+  fieldLabel: string;
+  fieldType: string;
+  required: boolean;
+  isActive: boolean;
+  appliesTo: string;
+}
+
 const AadhaarVerification: React.FC = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<VerificationStep>({ step: 'enter-details' });
   const [isLoading, setIsLoading] = useState(false);
   const [aadhaarNumber, setAadhaarNumber] = useState('');
-  const [location, setLocation] = useState('');
   const [consentAccepted, setConsentAccepted] = useState(false);
   const [otp, setOtp] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [canResend, setCanResend] = useState(false);
   const [customFields, setCustomFields] = useState<Record<string, any>>({});
+  const [availableCustomFields, setAvailableCustomFields] = useState<CustomField[]>([]);
+  const [customFieldErrors, setCustomFieldErrors] = useState<Record<string, string>>({});
   const [dynamicFields, setDynamicFields] = useState<Array<{id: string, label: string, value: string}>>([]);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [uploadingSelfie, setUploadingSelfie] = useState(false);
+  const [selfieUploaded, setSelfieUploaded] = useState(false);
+  const [verificationRecordId, setVerificationRecordId] = useState<string | null>(null);
+  const [cameraMode, setCameraMode] = useState(false);
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Email validation function
   const isValidEmail = (email: string): boolean => {
@@ -42,6 +64,46 @@ const AadhaarVerification: React.FC = () => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
+
+  // Fetch available custom fields on mount
+  useEffect(() => {
+    const fetchCustomFields = async () => {
+      try {
+        // If user has no enabled custom fields, show nothing
+        if (!user?.enabledCustomFields || user.enabledCustomFields.length === 0) {
+          setAvailableCustomFields([]);
+          return;
+        }
+
+        const response = await api.get('/custom-fields', {
+          params: {
+            appliesTo: 'verification',
+            isActive: 'true'
+          }
+        });
+        
+        let fieldsToShow = response.data.data || [];
+        
+        // Filter by enabled custom field IDs
+        fieldsToShow = fieldsToShow.filter((field: CustomField) => 
+          user.enabledCustomFields?.includes(field._id)
+        );
+        
+        setAvailableCustomFields(fieldsToShow);
+      } catch (error) {
+        console.error('Error fetching custom fields:', error);
+        setAvailableCustomFields([]);
+      }
+    };
+
+    if (user) {
+      fetchCustomFields();
+    } else {
+      // If no user, reset to empty
+      setAvailableCustomFields([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.enabledCustomFields, user]);
 
   // Countdown timer effect for resend OTP
   useEffect(() => {
@@ -65,6 +127,113 @@ const AadhaarVerification: React.FC = () => {
       }
     };
   }, [resendCooldown]);
+
+  // Email validation function for custom fields
+  const isValidEmailFormat = (email: string): boolean => {
+    if (!email || typeof email !== 'string') return false;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email.trim());
+  };
+
+  // Phone number validation function (exactly 10 digits, numeric only)
+  const isValidPhoneNumber = (phone: string): boolean => {
+    if (!phone || typeof phone !== 'string') return false;
+    // Remove spaces, dashes, and other formatting characters
+    const cleaned = phone.replace(/[\s\-()]/g, '');
+    // Must be exactly 10 digits, numeric only
+    return /^\d{10}$/.test(cleaned);
+  };
+
+  // Validate that all custom fields are filled and valid (all custom fields are mandatory)
+  const areAllRequiredCustomFieldsFilled = (): boolean => {
+    if (availableCustomFields.length === 0) return true; // No custom fields, so validation passes
+    
+    // Check if ALL custom fields (not just required ones) have values and are valid
+    return availableCustomFields.every(field => {
+      const value = customFields[field.fieldName];
+      // Check if value exists and is not empty
+      if (value === undefined || value === null) return false;
+      if (typeof value === 'string' && value.trim() === '') return false;
+      if (Array.isArray(value) && value.length === 0) return false;
+      
+      // Validate email format for email-type fields
+      if (field.fieldType === 'email' && typeof value === 'string') {
+        return isValidEmailFormat(value);
+      }
+      
+      // Validate phone number format for phone-type fields
+      if (field.fieldType === 'phone' && typeof value === 'string') {
+        return isValidPhoneNumber(value);
+      }
+      
+      return true;
+    });
+  };
+
+  // Validate that all dynamic email fields have valid email format
+  const areDynamicEmailFieldsValid = (): boolean => {
+    return dynamicFields.every(field => {
+      if (field.label === 'Email' || field.label === 'email') {
+        const value = field.value?.trim();
+        // If field has a value, it must be a valid email
+        if (value && value !== '') {
+          return isValidEmail(value);
+        }
+      }
+      return true; // Non-email fields or empty email fields are valid
+    });
+  };
+
+  // Validate email format in customFields (check for email-like field names)
+  const areCustomEmailFieldsValid = (): boolean => {
+    const emailFieldNames = ['email', 'Email', 'EMAIL', 'e-mail', 'E-mail'];
+    return Object.entries(customFields).every(([fieldName, value]) => {
+      const fieldNameLower = fieldName.toLowerCase();
+      // Check if field name contains "email" or is an email-like field
+      if (emailFieldNames.includes(fieldName) || fieldNameLower.includes('email') || fieldNameLower.includes('e-mail')) {
+        const valueStr = typeof value === 'string' ? value.trim() : String(value).trim();
+        // If field has a value, it must be a valid email
+        if (valueStr && valueStr !== '') {
+          return isValidEmailFormat(valueStr);
+        }
+      }
+      return true; // Non-email fields or empty email fields are valid
+    });
+  };
+
+  // Validate phone number format in dynamic fields
+  const areDynamicPhoneFieldsValid = (): boolean => {
+    const phoneFieldLabels = ['phone', 'Phone', 'PHONE', 'phone_no', 'Phone No', 'phone_no', 'mobile', 'Mobile', 'MOBILE', 'mobile_no', 'Mobile No'];
+    return dynamicFields.every(field => {
+      const fieldLabelLower = field.label?.toLowerCase() || '';
+      // Check if field label contains "phone" or "mobile"
+      if (phoneFieldLabels.includes(field.label) || fieldLabelLower.includes('phone') || fieldLabelLower.includes('mobile')) {
+        const value = field.value?.trim();
+        // If field has a value, it must be a valid phone number
+        if (value && value !== '') {
+          return isValidPhoneNumber(value);
+        }
+      }
+      return true; // Non-phone fields or empty phone fields are valid
+    });
+  };
+
+  // Validate phone number format in customFields (check for phone-like field names)
+  const areCustomPhoneFieldsValid = (): boolean => {
+    const phoneFieldNames = ['phone', 'Phone', 'PHONE', 'phone_no', 'phoneNo', 'mobile', 'Mobile', 'MOBILE', 'mobile_no', 'mobileNo'];
+    return Object.entries(customFields).every(([fieldName, value]) => {
+      const fieldNameLower = fieldName.toLowerCase();
+      // Check if field name contains "phone" or "mobile"
+      if (phoneFieldNames.includes(fieldName) || fieldNameLower.includes('phone') || fieldNameLower.includes('mobile')) {
+        const valueStr = typeof value === 'string' ? value.trim() : String(value).trim();
+        // If field has a value, it must be a valid phone number
+        if (valueStr && valueStr !== '') {
+          return isValidPhoneNumber(valueStr);
+        }
+      }
+      return true; // Non-phone fields or empty phone fields are valid
+    });
+  };
 
   // Remove dynamic field
   const removeDynamicField = (id: string) => {
@@ -148,16 +317,139 @@ const AadhaarVerification: React.FC = () => {
       return;
     }
 
-    if (!location.trim()) {
-      toast.error('Please enter the location');
-      return;
-    }
-
     if (!consentAccepted) {
       toast.error('Please accept the consent to proceed');
       return;
     }
 
+    // Validate that all custom fields are filled and valid (all custom fields are mandatory)
+    if (!areAllRequiredCustomFieldsFilled()) {
+      const missingFields = availableCustomFields.filter(field => {
+        const value = customFields[field.fieldName];
+        if (value === undefined || value === null) return true;
+        if (typeof value === 'string' && value.trim() === '') return true;
+        if (Array.isArray(value) && value.length === 0) return true;
+        return false;
+      });
+      
+      const invalidEmailFields = availableCustomFields.filter(field => {
+        if (field.fieldType === 'email') {
+          const value = customFields[field.fieldName];
+          if (value && typeof value === 'string' && value.trim() !== '') {
+            return !isValidEmailFormat(value);
+          }
+        }
+        return false;
+      });
+
+      const invalidPhoneFields = availableCustomFields.filter(field => {
+        if (field.fieldType === 'phone') {
+          const value = customFields[field.fieldName];
+          if (value && typeof value === 'string' && value.trim() !== '') {
+            return !isValidPhoneNumber(value);
+          }
+        }
+        return false;
+      });
+      
+      if (missingFields.length > 0) {
+        const missingFieldNames = missingFields.map(f => f.fieldLabel).join(', ');
+        toast.error(`Please fill all custom fields: ${missingFieldNames}`);
+        return;
+      }
+      
+      if (invalidEmailFields.length > 0) {
+        const invalidEmailNames = invalidEmailFields.map(f => f.fieldLabel).join(', ');
+        toast.error(`Please enter a valid email address for: ${invalidEmailNames}`);
+        return;
+      }
+
+      if (invalidPhoneFields.length > 0) {
+        const invalidPhoneNames = invalidPhoneFields.map(f => f.fieldLabel).join(', ');
+        toast.error(`Please enter a valid phone number (numeric only) for: ${invalidPhoneNames}`);
+        return;
+      }
+    }
+
+    // Validate email format in dynamic fields
+    const invalidDynamicEmailFields = dynamicFields.filter(field => {
+      if (field.label === 'Email' || field.label === 'email') {
+        const value = field.value?.trim();
+        // If field has a value, it must be a valid email
+        if (value && value !== '') {
+          return !isValidEmail(value);
+        }
+      }
+      return false;
+    });
+
+    if (invalidDynamicEmailFields.length > 0) {
+      toast.error('Please enter a valid email address for the Email field');
+      return;
+    }
+
+    // Validate email format in customFields (check for email-like field names)
+    const emailFieldNames = ['email', 'Email', 'EMAIL', 'e-mail', 'E-mail'];
+    const invalidCustomEmailFields = Object.entries(customFields).filter(([fieldName, value]) => {
+      const fieldNameLower = fieldName.toLowerCase();
+      // Check if field name contains "email" or is an email-like field
+      if (emailFieldNames.includes(fieldName) || fieldNameLower.includes('email') || fieldNameLower.includes('e-mail')) {
+        const valueStr = typeof value === 'string' ? value.trim() : String(value).trim();
+        // If field has a value, it must be a valid email
+        if (valueStr && valueStr !== '') {
+          return !isValidEmailFormat(valueStr);
+        }
+      }
+      return false;
+    });
+
+    if (invalidCustomEmailFields.length > 0) {
+      const invalidFieldNames = invalidCustomEmailFields.map(([fieldName]) => fieldName).join(', ');
+      toast.error(`Please enter a valid email address for: ${invalidFieldNames}`);
+      return;
+    }
+
+    // Validate phone number format in dynamic fields
+    const phoneFieldLabels = ['phone', 'Phone', 'PHONE', 'phone_no', 'Phone No', 'phone_no', 'mobile', 'Mobile', 'MOBILE', 'mobile_no', 'Mobile No'];
+    const invalidDynamicPhoneFields = dynamicFields.filter(field => {
+      const fieldLabelLower = field.label?.toLowerCase() || '';
+      // Check if field label contains "phone" or "mobile"
+      if (phoneFieldLabels.includes(field.label) || fieldLabelLower.includes('phone') || fieldLabelLower.includes('mobile')) {
+        const value = field.value?.trim();
+        // If field has a value, it must be a valid phone number
+        if (value && value !== '') {
+          return !isValidPhoneNumber(value);
+        }
+      }
+      return false;
+    });
+
+    if (invalidDynamicPhoneFields.length > 0) {
+      const invalidFieldLabels = invalidDynamicPhoneFields.map(f => f.label).join(', ');
+      toast.error(`Please enter a valid phone number (numeric only) for: ${invalidFieldLabels}`);
+      return;
+    }
+
+    // Validate phone number format in customFields (check for phone-like field names)
+    const phoneFieldNames = ['phone', 'Phone', 'PHONE', 'phone_no', 'phoneNo', 'mobile', 'Mobile', 'MOBILE', 'mobile_no', 'mobileNo'];
+    const invalidCustomPhoneFields = Object.entries(customFields).filter(([fieldName, value]) => {
+      const fieldNameLower = fieldName.toLowerCase();
+      // Check if field name contains "phone" or "mobile"
+      if (phoneFieldNames.includes(fieldName) || fieldNameLower.includes('phone') || fieldNameLower.includes('mobile')) {
+        const valueStr = typeof value === 'string' ? value.trim() : String(value).trim();
+        // If field has a value, it must be a valid phone number
+        if (valueStr && valueStr !== '') {
+          return !isValidPhoneNumber(valueStr);
+        }
+      }
+      return false;
+    });
+
+    if (invalidCustomPhoneFields.length > 0) {
+      const invalidFieldNames = invalidCustomPhoneFields.map(([fieldName]) => fieldName).join(', ');
+      toast.error(`Please enter a valid phone number (numeric only) for: ${invalidFieldNames}`);
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -169,7 +461,6 @@ const AadhaarVerification: React.FC = () => {
         },
         body: JSON.stringify({ 
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
-          location: location.trim(),
           dynamicFields: [
             ...dynamicFields.map(field => ({
               label: field.label,
@@ -197,6 +488,7 @@ const AadhaarVerification: React.FC = () => {
           toast.success('OTP sent successfully! Please check your registered mobile number.');
         } else {
           setCurrentStep({ step: 'success', data: data.data });
+          setVerificationRecordId(data.data.recordId || null);
           toast.success('Aadhaar verification completed successfully!');
         }
       } else {
@@ -227,7 +519,6 @@ const AadhaarVerification: React.FC = () => {
         },
         body: JSON.stringify({
           aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-          location: location.trim(),
           dynamicFields: [
             ...dynamicFields.map(field => ({
               label: field.label,
@@ -294,6 +585,7 @@ const AadhaarVerification: React.FC = () => {
 
       if (data.success) {
         setCurrentStep({ step: 'success', data: data.data });
+        setVerificationRecordId(data.data.recordId || null);
         toast.success('Aadhaar verification completed successfully!');
       } else {
         setCurrentStep({ step: 'error', data: { message: data.message } });
@@ -312,14 +604,183 @@ const AadhaarVerification: React.FC = () => {
   const resetVerification = () => {
     setCurrentStep({ step: 'enter-details' });
     setAadhaarNumber('');
-    setLocation('');
     setConsentAccepted(false);
     setOtp('');
     setTransactionId('');
     setResendCooldown(0);
     setCanResend(false);
     setDynamicFields([]);
+    setSelfieFile(null);
+    setSelfiePreview(null);
+    setSelfieUploaded(false);
+    setVerificationRecordId(null);
+    closeCamera(); // Close camera if open
   };
+
+  // Open camera for selfie capture
+  const openCamera = async () => {
+    try {
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'user', // Front camera for selfie
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+
+      setVideoStream(stream);
+      setCameraMode(true);
+    } catch (error: any) {
+      console.error('Error accessing camera:', error);
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        toast.error('Camera permission denied. Please allow camera access and try again.');
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        toast.error('No camera found. Please use file upload instead.');
+      } else {
+        toast.error('Unable to access camera. Please use file upload instead.');
+      }
+      setCameraMode(false);
+    }
+  };
+
+  // Close camera
+  const closeCamera = () => {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      setVideoStream(null);
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setCameraMode(false);
+  };
+
+  // Capture image from camera
+  const captureFromCamera = () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      ctx.drawImage(videoRef.current, 0, 0);
+      
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          // Create a File from the blob
+          const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
+          setSelfieFile(file);
+          
+          // Create preview
+          setSelfiePreview(canvas.toDataURL('image/jpeg'));
+          
+          // Close camera
+          closeCamera();
+        }
+      }, 'image/jpeg', 0.9);
+    }
+  };
+
+  // Handle selfie file selection (fallback for file upload)
+  const handleSelfieSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setSelfieFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelfiePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Update video element when stream changes
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (videoElement && videoStream) {
+      videoElement.srcObject = videoStream;
+      videoElement.play().catch(err => {
+        console.error('Error playing video:', err);
+      });
+    }
+    return () => {
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
+    };
+  }, [videoStream]);
+
+  // Cleanup camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [videoStream]);
+
+  // Handle selfie upload
+  const handleSelfieUpload = async () => {
+    if (!selfieFile || !verificationRecordId) {
+      toast.error('Please select a selfie image');
+      return;
+    }
+
+    setUploadingSelfie(true);
+    try {
+      const formData = new FormData();
+      formData.append('selfie', selfieFile);
+
+      const authToken = token || localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records/${verificationRecordId}/selfie`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: formData
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSelfieUploaded(true);
+        toast.success('Selfie uploaded successfully!');
+      } else {
+        toast.error(data.message || 'Failed to upload selfie');
+      }
+    } catch (error) {
+      console.error('Error uploading selfie:', error);
+      toast.error('Failed to upload selfie. Please try again.');
+    } finally {
+      setUploadingSelfie(false);
+    }
+  };
+
+  // Check if user has selfie-upload module access
+  const hasSelfieUploadAccess = user?.role === 'admin' || (user?.moduleAccess && user.moduleAccess.includes('selfie-upload'));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-visible">
@@ -426,7 +887,6 @@ const AadhaarVerification: React.FC = () => {
                       </div>
                       </div>
 
-                      {/* Location Field with Plus Icon */}
                      
                     </div>
 
@@ -505,23 +965,58 @@ const AadhaarVerification: React.FC = () => {
                     )}
 
                     {/* Custom Fields from Admin */}
-                    <div className="mt-6">
-                      <h3 className="text-base font-bold text-gray-700 mb-3 flex items-center">
-                        <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                        Custom Fields
-                      </h3>
-                      <CustomFieldsRenderer
-                        appliesTo="verification"
-                        values={customFields}
-                        onChange={(fieldName, value) => {
-                          setCustomFields({
-                            ...customFields,
-                            [fieldName]: value
-                          });
-                        }}
-                        enabledCustomFieldIds={user?.enabledCustomFields}
-                      />
-                    </div>
+                    {availableCustomFields.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-base font-bold text-gray-700 mb-3 flex items-center">
+                          <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                          Custom Fields
+                        </h3>
+                        <CustomFieldsRenderer
+                          appliesTo="verification"
+                          values={customFields}
+                          onChange={(fieldName, value) => {
+                            setCustomFields({
+                              ...customFields,
+                              [fieldName]: value
+                            });
+                            
+                            // Validate email fields in real-time
+                            const field = availableCustomFields.find(f => f.fieldName === fieldName);
+                            if (field && field.fieldType === 'email' && typeof value === 'string') {
+                              if (value.trim() === '') {
+                                // Clear error if field is empty (will be caught by required validation)
+                                setCustomFieldErrors(prev => {
+                                  const newErrors = { ...prev };
+                                  delete newErrors[fieldName];
+                                  return newErrors;
+                                });
+                              } else if (!isValidEmailFormat(value)) {
+                                setCustomFieldErrors(prev => ({
+                                  ...prev,
+                                  [fieldName]: 'Please enter a valid email address'
+                                }));
+                              } else {
+                                // Clear error if email is valid
+                                setCustomFieldErrors(prev => {
+                                  const newErrors = { ...prev };
+                                  delete newErrors[fieldName];
+                                  return newErrors;
+                                });
+                              }
+                            } else {
+                              // Clear error for non-email fields
+                              setCustomFieldErrors(prev => {
+                                const newErrors = { ...prev };
+                                delete newErrors[fieldName];
+                                return newErrors;
+                              });
+                            }
+                          }}
+                          errors={customFieldErrors}
+                          enabledCustomFieldIds={user?.enabledCustomFields}
+                        />
+                      </div>
+                    )}
 
                     {/* Consent Checkbox */}
                     <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-blue-100">
@@ -559,7 +1054,7 @@ const AadhaarVerification: React.FC = () => {
                     
                     <button
                       type="submit"
-                      disabled={isLoading || !validateAadhaar(aadhaarNumber).isValid || !location.trim() || !consentAccepted}
+                      disabled={isLoading || !validateAadhaar(aadhaarNumber).isValid || !consentAccepted || !areAllRequiredCustomFieldsFilled() || !areDynamicEmailFieldsValid() || !areCustomEmailFieldsValid() || !areDynamicPhoneFieldsValid() || !areCustomPhoneFieldsValid() || Object.keys(customFieldErrors).length > 0}
                       className="group relative w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 hover:-translate-y-1"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -729,6 +1224,151 @@ const AadhaarVerification: React.FC = () => {
                           </>
                         )}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Selfie Upload Section */}
+                  {hasSelfieUploadAccess && verificationRecordId && (
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 mb-8 border-2 border-purple-100 shadow-xl">
+                      <h3 className="text-2xl font-bold text-purple-800 mb-4 text-center flex items-center justify-center">
+                        <CameraIcon className="w-6 h-6 mr-2" />
+                        Upload Selfie
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-6 text-center">
+                        Please upload a selfie photo to complete your verification record
+                      </p>
+
+                      {selfieUploaded ? (
+                        <div className="text-center">
+                          <div className="flex justify-center mb-4">
+                            <div className="relative">
+                              <div className="absolute inset-0 bg-green-400 rounded-full blur-lg opacity-60 animate-pulse"></div>
+                              <div className="relative p-4 bg-white rounded-full shadow-xl border-4 border-green-100">
+                                <CheckCircleIcon className="w-12 h-12 text-green-500" />
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-lg font-semibold text-green-600 mb-2">✅ Selfie uploaded successfully!</p>
+                          {selfiePreview && (
+                            <div className="mt-4 flex justify-center">
+                              <img 
+                                src={selfiePreview} 
+                                alt="Uploaded selfie" 
+                                className="max-w-xs max-h-64 rounded-lg shadow-lg border-4 border-purple-200"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {cameraMode ? (
+                            <div className="flex flex-col items-center space-y-4">
+                              <div className="relative bg-black rounded-lg overflow-hidden">
+                                <video
+                                  ref={videoRef}
+                                  autoPlay
+                                  playsInline
+                                  muted
+                                  className="max-w-md max-h-96 w-full h-auto"
+                                  style={{ transform: 'scaleX(-1)' }} // Mirror effect for selfie
+                                />
+                                <div className="absolute top-2 right-2">
+                                  <button
+                                    onClick={closeCamera}
+                                    className="bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+                                    title="Close camera"
+                                  >
+                                    <XCircleIcon className="w-6 h-6" />
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="flex space-x-4">
+                                <button
+                                  onClick={closeCamera}
+                                  className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  onClick={captureFromCamera}
+                                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors flex items-center"
+                                >
+                                  <CameraIcon className="w-5 h-5 mr-2" />
+                                  Capture
+                                </button>
+                              </div>
+                            </div>
+                          ) : selfiePreview ? (
+                            <div className="flex flex-col items-center space-y-4">
+                              <div className="relative">
+                                <img 
+                                  src={selfiePreview} 
+                                  alt="Selfie preview" 
+                                  className="max-w-xs max-h-64 rounded-lg shadow-lg border-4 border-purple-200"
+                                />
+                              </div>
+                              <div className="flex space-x-4">
+                                <button
+                                  onClick={() => {
+                                    setSelfieFile(null);
+                                    setSelfiePreview(null);
+                                  }}
+                                  className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                                >
+                                  Change Photo
+                                </button>
+                                <button
+                                  onClick={handleSelfieUpload}
+                                  disabled={uploadingSelfie}
+                                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                >
+                                  {uploadingSelfie ? (
+                                    <>
+                                      <ArrowPathIcon className="w-5 h-5 mr-2 animate-spin" />
+                                      Uploading...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <PhotoIcon className="w-5 h-5 mr-2" />
+                                      Upload Selfie
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center space-y-4">
+                              <button
+                                onClick={openCamera}
+                                className="w-full border-4 border-dashed border-purple-300 rounded-xl p-8 hover:border-purple-500 transition-colors bg-white"
+                              >
+                                <div className="flex flex-col items-center">
+                                  <CameraIcon className="w-16 h-16 text-purple-500 mb-4" />
+                                  <p className="text-lg font-semibold text-gray-700 mb-2">Open Camera</p>
+                                  <p className="text-sm text-gray-500">Capture selfie with camera</p>
+                                </div>
+                              </button>
+                              <div className="flex items-center w-full">
+                                <div className="flex-grow border-t border-gray-300"></div>
+                                <span className="px-4 text-sm text-gray-500">OR</span>
+                                <div className="flex-grow border-t border-gray-300"></div>
+                              </div>
+                              <label className="cursor-pointer w-full">
+                                <div className="border-2 border-purple-300 rounded-xl p-6 hover:border-purple-500 transition-colors bg-white text-center">
+                                  <p className="text-sm font-semibold text-gray-700 mb-1">Upload from device</p>
+                                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                                </div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleSelfieSelect}
+                                  className="hidden"
+                                />
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                   

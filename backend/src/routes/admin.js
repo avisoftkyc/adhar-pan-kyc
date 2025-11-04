@@ -9,6 +9,7 @@ const { logEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 // Configure multer for logo uploads
 const storage = multer.diskStorage({
@@ -1442,7 +1443,7 @@ router.patch('/users/:id/module-access', protect, authorize('admin'), async (req
     }
 
     // Validate module names
-    const validModules = ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification'];
+    const validModules = ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification', 'selfie-upload'];
     const invalidModules = moduleAccess.filter(module => !validModules.includes(module));
     
     if (invalidModules.length > 0) {
@@ -1747,6 +1748,28 @@ router.get('/users/:id/logo', async (req, res) => {
 
     const logoPath = user.branding.logo.path;
     
+    // Check if logo path exists
+    if (!logoPath) {
+      logger.warn(`Logo path not found for user ${req.params.id}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Logo path not found'
+      });
+    }
+    
+    // Resolve the absolute path - path is stored as relative like 'uploads/logos/logo-xxx.jpg'
+    // Route file is at backend/src/routes/admin.js, so we need to go up 2 levels to reach backend/
+    const absolutePath = path.resolve(__dirname, '..', '..', logoPath);
+    
+    // Check if file exists
+    if (!fs.existsSync(absolutePath)) {
+      logger.warn(`Logo file not found: ${absolutePath} for user ${req.params.id}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Logo file not found on server'
+      });
+    }
+    
     // Set CORS headers for image serving
     res.set({
       'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
@@ -1759,7 +1782,7 @@ router.get('/users/:id/logo', async (req, res) => {
       'Cross-Origin-Embedder-Policy': 'unsafe-none'
     });
     
-    res.sendFile(logoPath, { root: '.' });
+    res.sendFile(absolutePath);
   } catch (error) {
     logger.error('Error serving user logo:', error);
     res.status(500).json({

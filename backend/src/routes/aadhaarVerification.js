@@ -1,11 +1,44 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { protect } = require('../middleware/auth');
 const AadhaarVerification = require('../models/AadhaarVerification');
 const { logAadhaarVerificationEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 const { verifyAadhaar, simulateAadhaarVerification } = require('../services/aadhaarVerificationService');
+
+// Configure multer for selfie uploads
+const selfieStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, '../../uploads/selfies');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'selfie-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const selfieUpload = multer({
+  storage: selfieStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 
 
@@ -162,12 +195,12 @@ router.get('/records', protect, async (req, res) => {
 // Single Aadhaar verification endpoint - Send OTP
 router.post('/verify-single', protect, async (req, res) => {
   try {
-    const { aadhaarNumber, location, dynamicFields = [], consentAccepted } = req.body;
+    const { aadhaarNumber, location = '', dynamicFields = [], consentAccepted } = req.body;
 
-    if (!aadhaarNumber || !location) {
+    if (!aadhaarNumber) {
       return res.status(400).json({
         success: false,
-        message: 'Aadhaar Number and Location are required'
+        message: 'Aadhaar Number is required'
       });
     }
 
@@ -347,6 +380,186 @@ router.post('/verify-otp', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to verify OTP'
+    });
+  }
+});
+
+// Upload selfie for a verification record
+router.post('/records/:id/selfie', protect, selfieUpload.single('selfie'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No selfie file provided'
+      });
+    }
+
+    // Find the verification record
+    const verificationRecord = await AadhaarVerification.findById(id);
+    
+    if (!verificationRecord) {
+      // Clean up uploaded file if record doesn't exist
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({
+        success: false,
+        message: 'Verification record not found'
+      });
+    }
+
+    // Check if the record belongs to the user
+    if (verificationRecord.userId.toString() !== req.user.id.toString()) {
+      // Clean up uploaded file if unauthorized
+      fs.unlinkSync(req.file.path);
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to upload selfie for this record'
+      });
+    }
+
+    // Check if user has selfie-upload module access
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    if (!user || (user.role !== 'admin' && (!user.moduleAccess || !user.moduleAccess.includes('selfie-upload')))) {
+      // Clean up uploaded file if no access
+      fs.unlinkSync(req.file.path);
+      return res.status(403).json({
+        success: false,
+        message: 'Selfie upload module is not enabled for your account'
+      });
+    }
+
+    // Delete old selfie if exists
+    if (verificationRecord.selfie && verificationRecord.selfie.path) {
+      const oldPath = path.join(__dirname, '..', '..', verificationRecord.selfie.path);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    // Update verification record with selfie using findByIdAndUpdate to avoid validation issues with encrypted fields
+    await AadhaarVerification.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          selfie: {
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            path: req.file.path.replace(/^.*uploads/, 'uploads'), // Store relative path
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            uploadedAt: new Date()
+          }
+        }
+      },
+      { 
+        runValidators: false, // Skip validation for encrypted fields
+        new: true 
+      }
+    );
+
+    // Fetch the updated record to get the selfie data
+    const updatedRecord = await AadhaarVerification.findById(id);
+
+    // Log the event
+    await logAadhaarVerificationEvent('selfie_uploaded', req.user.id, {
+      recordId: id,
+      batchId: verificationRecord.batchId,
+      fileName: req.file.filename
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Selfie uploaded successfully',
+      data: {
+        recordId: id,
+        selfie: updatedRecord?.selfie
+      }
+    });
+  } catch (error) {
+    logger.error('Error uploading selfie:', error);
+    
+    // Clean up uploaded file on error
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        logger.error('Error cleaning up uploaded file:', unlinkError);
+      }
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload selfie'
+    });
+  }
+});
+
+// Get selfie for a verification record
+router.get('/records/:id/selfie', protect, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const verificationRecord = await AadhaarVerification.findById(id);
+    
+    if (!verificationRecord) {
+      return res.status(404).json({
+        success: false,
+        message: 'Verification record not found'
+      });
+    }
+
+    // Check if the record belongs to the user or user is admin
+    const User = require('../models/User');
+    const user = await User.findById(req.user.id);
+    const isAdmin = user && user.role === 'admin';
+    
+    if (!isAdmin && verificationRecord.userId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view this selfie'
+      });
+    }
+
+    if (!verificationRecord.selfie || !verificationRecord.selfie.path) {
+      return res.status(404).json({
+        success: false,
+        message: 'Selfie not found for this record'
+      });
+    }
+
+    // Resolve the absolute path
+    const absolutePath = path.resolve(__dirname, '..', '..', verificationRecord.selfie.path);
+    
+    // Check if file exists
+    if (!fs.existsSync(absolutePath)) {
+      logger.warn(`Selfie file not found: ${absolutePath} for record ${id}`);
+      return res.status(404).json({
+        success: false,
+        message: 'Selfie file not found on server'
+      });
+    }
+
+    // Set headers for image serving
+    res.set({
+      'Content-Type': verificationRecord.selfie.mimetype || 'image/jpeg',
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
+        ? 'https://yourdomain.com' 
+        : 'http://localhost:3000',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none'
+    });
+    
+    res.sendFile(absolutePath);
+  } catch (error) {
+    logger.error('Error serving selfie:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to serve selfie'
     });
   }
 });

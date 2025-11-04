@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { validatePAN, validateDateOfBirth, validateName, filterPANInput, filterNameInput } from '../../utils/validation';
 
-// Auto-format date input function
+// Auto-format date input function (DD/MM/YYYY format)
 const autoFormatDateInput = (inputValue: string): string => {
   // Remove any non-digit characters
   const digitsOnly = inputValue.replace(/[^0-9]/g, '');
@@ -26,16 +26,16 @@ const autoFormatDateInput = (inputValue: string): string => {
   if (digitsOnly.length >= 2) {
     formattedValue = digitsOnly.substring(0, 2);
     if (digitsOnly.length >= 4) {
-      formattedValue += '-' + digitsOnly.substring(2, 4);
+      formattedValue += '/' + digitsOnly.substring(2, 4);
       if (digitsOnly.length >= 8) {
-        formattedValue += '-' + digitsOnly.substring(4, 8);
+        formattedValue += '/' + digitsOnly.substring(4, 8);
       } else if (digitsOnly.length > 4) {
         // Handle partial year input
-        formattedValue += '-' + digitsOnly.substring(4);
+        formattedValue += '/' + digitsOnly.substring(4);
       }
     } else if (digitsOnly.length > 2) {
       // Handle partial month input
-      formattedValue += '-' + digitsOnly.substring(2);
+      formattedValue += '/' + digitsOnly.substring(2);
     }
   } else {
     formattedValue = digitsOnly;
@@ -144,12 +144,12 @@ const PanKyc: React.FC = () => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    return `${day}/${month}/${year}`;
   };
 
   const parseDateFromInput = (dateString: string): Date | null => {
     if (!dateString || dateString.length !== 10) return null;
-    const [day, month, year] = dateString.split('-').map(Number);
+    const [day, month, year] = dateString.split('/').map(Number);
     if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
     return new Date(year, month - 1, day);
   };
@@ -722,7 +722,7 @@ const PanKyc: React.FC = () => {
         [field]: filteredValue
       }));
     } else if (field === 'dateOfBirth') {
-      // Auto-format date input to DD-MM-YYYY
+      // Auto-format date input to DD/MM/YYYY
       const formattedValue = autoFormatDateInput(value);
       setSingleKycForm(prev => ({
         ...prev,
@@ -1072,9 +1072,9 @@ const PanKyc: React.FC = () => {
                         // Create sample Excel content
                         const sampleData = [
                           ['panNumber', 'name', 'dateOfBirth'],
-                          ['ABCDE1234F', 'John Doe', '15-03-1990'],
-                          ['FGHIJ5678K', 'Jane Smith', '22-11-1985'],
-                          ['LMNOP9012Q', 'Bob Johnson', '08-07-1992']
+                          ['ABCDE1234F', 'John Doe', '15/03/1990'],
+                          ['FGHIJ5678K', 'Jane Smith', '22/11/1985'],
+                          ['LMNOP9012Q', 'Bob Johnson', '08/07/1992']
                         ];
                         
                         // Convert to Excel format (XLSX)
@@ -1770,7 +1770,7 @@ ${sampleData.map(row =>
                       // Prevent other characters
                       e.preventDefault();
                     }}
-                    placeholder="DD-MM-YYYY"
+                    placeholder="DD/MM/YYYY"
                     className={`block w-full px-3 py-2 pr-20 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-center font-mono ${
                       singleKycForm.dateOfBirth.length === 0 
                         ? 'border-gray-200 focus:ring-indigo-500 focus:border-indigo-500' 

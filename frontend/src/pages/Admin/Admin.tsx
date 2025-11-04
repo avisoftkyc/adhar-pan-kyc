@@ -1388,7 +1388,10 @@ const Admin: React.FC = () => {
                                   key={module}
                                   className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800 mr-2"
                                 >
-                                  {module === 'pan-kyc' ? 'PAN KYC' : 'Aadhaar-PAN'}
+                                  {module === 'pan-kyc' ? 'PAN KYC' : 
+                                   module === 'aadhaar-pan' ? 'Aadhaar-PAN' : 
+                                   module === 'aadhaar-verification' ? 'Aadhaar Verification' :
+                                   module === 'selfie-upload' ? 'Selfie Upload' : module}
                                 </span>
                               ))
                             ) : (
@@ -2756,6 +2759,24 @@ const Admin: React.FC = () => {
                         className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                       />
                       <span className="ml-2 text-sm text-gray-700">Aadhaar Verification</span>
+                    </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserForModules.moduleAccess.includes('selfie-upload')}
+                        onChange={(e) => {
+                          const newModuleAccess = e.target.checked
+                            ? [...selectedUserForModules.moduleAccess, 'selfie-upload']
+                            : selectedUserForModules.moduleAccess.filter(m => m !== 'selfie-upload');
+                          setSelectedUserForModules({
+                            ...selectedUserForModules,
+                            moduleAccess: newModuleAccess
+                          });
+                        }}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Selfie Upload</span>
                     </label>
                   </div>
                 </div>

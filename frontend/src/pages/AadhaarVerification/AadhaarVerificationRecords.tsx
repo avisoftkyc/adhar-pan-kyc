@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import api from '../../services/api';
 import { 
   IdentificationIcon, 
   CheckCircleIcon, 
@@ -11,7 +12,6 @@ import {
   ArrowPathIcon,
   EyeIcon,
   CalendarIcon,
-  UserIcon,
   ArrowLeftIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -19,6 +19,118 @@ import {
   ChevronUpIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
+
+// Component to load authenticated images
+const AuthenticatedImage: React.FC<{ 
+  recordId: string; 
+  className?: string;
+  alt?: string;
+  fallback?: React.ReactNode;
+}> = ({ recordId, className, alt = 'Selfie', fallback }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let currentImageUrl: string | null = null;
+    
+    const loadImage = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+        const response = await api.get(`/aadhaar-verification/records/${recordId}/selfie`, {
+          responseType: 'blob'
+        });
+        
+        // Check if response is actually an image blob
+        const contentType = response.headers['content-type'] || '';
+        if (contentType.startsWith('image/')) {
+          // response.data is already a Blob when responseType is 'blob'
+          const url = URL.createObjectURL(response.data);
+          currentImageUrl = url;
+          setImageUrl(url);
+        } else {
+          // If not an image, it might be a JSON error response
+          // Clone the blob to read it without consuming the original
+          const blob = response.data as Blob;
+          const text = await blob.text();
+          try {
+            const jsonError = JSON.parse(text);
+            console.error('Error loading selfie:', jsonError.message || 'Unknown error');
+          } catch {
+            console.error('Error loading selfie: Invalid response format');
+          }
+          setError(true);
+        }
+      } catch (err: any) {
+        // Handle errors gracefully - 404 is expected if selfie doesn't exist
+        const status = err.response?.status;
+        if (status === 404) {
+          // Selfie not found - this is expected for records without selfies
+          setError(true);
+        } else if (status === 403) {
+          // Permission denied
+          console.warn('Permission denied to view selfie for record:', recordId);
+          setError(true);
+        } else {
+          // Other errors - log for debugging but don't spam console
+          if (err.response && err.response.data instanceof Blob) {
+            try {
+              const text = await err.response.data.text();
+              const jsonError = JSON.parse(text);
+              console.warn('Error loading selfie:', jsonError.message || 'Unknown error');
+            } catch {
+              // Ignore parsing errors
+            }
+          } else {
+            console.warn('Error loading selfie:', err.message || 'Network error');
+          }
+          setError(true);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImage();
+
+    // Cleanup object URL on unmount
+    return () => {
+      if (currentImageUrl) {
+        URL.revokeObjectURL(currentImageUrl);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recordId]);
+
+  if (loading) {
+    return (
+      <div className={`w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center ${className || ''}`}>
+        <ArrowPathIcon className="w-4 h-4 text-gray-400 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !imageUrl) {
+    if (fallback) {
+      return <>{fallback}</>;
+    }
+    return (
+      <div className={`w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center ${className || ''}`}>
+        <span className="text-xs text-gray-500">-</span>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={imageUrl} 
+      alt={alt}
+      className={className}
+      onError={() => setError(true)}
+    />
+  );
+};
 
 interface VerificationRecord {
   _id: string;
@@ -36,6 +148,14 @@ interface VerificationRecord {
     district?: string;
   careOf?: string;
   photo?: string;
+  selfie?: {
+    filename: string;
+    originalName: string;
+    path: string;
+    mimetype: string;
+    size: number;
+    uploadedAt: string;
+  };
   dynamicFields?: Array<{
     label: string;
     value: string;
@@ -658,6 +778,12 @@ const AadhaarVerificationRecords: React.FC = () => {
                           Photo
                         </span>
                       </th>
+                      <th className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
+                        <span className="flex items-center">
+                          <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+                          Selfie
+                        </span>
+                      </th>
                       {/* Dynamic Field Headers */}
                       {dynamicFieldLabels.map((label, index) => (
                         <th key={label} className="px-4 py-6 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -750,6 +876,24 @@ const AadhaarVerificationRecords: React.FC = () => {
                               src={`data:image/jpeg;base64,${record.photo}`} 
                               alt="Photo" 
                               className="w-12 h-16 object-cover rounded border-2 border-green-200 shadow-sm"
+                            />
+                          ) : (
+                            <span className="w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center">
+                              <span className="text-xs text-gray-500">-</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-6 whitespace-nowrap text-sm text-gray-900">
+                          {record.selfie ? (
+                            <AuthenticatedImage 
+                              recordId={record._id}
+                              className="w-12 h-16 object-cover rounded border-2 border-pink-200 shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                              alt="Selfie"
+                              fallback={
+                                <span className="w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center">
+                                  <span className="text-xs text-gray-500">-</span>
+                                </span>
+                              }
                             />
                           ) : (
                             <span className="w-12 h-16 bg-gray-200 rounded border-2 border-gray-300 flex items-center justify-center">
@@ -1097,6 +1241,23 @@ const AadhaarVerificationRecords: React.FC = () => {
                               src={`data:image/jpeg;base64,${selectedRecord.photo}`} 
                               alt="Aadhaar Photo" 
                               className="w-24 h-32 object-cover border rounded"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      {selectedRecord.selfie && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Selfie</label>
+                          <div className="mt-1">
+                            <AuthenticatedImage 
+                              recordId={selectedRecord._id}
+                              className="w-24 h-32 object-cover border rounded border-pink-300"
+                              alt="Selfie"
+                              fallback={
+                                <div className="w-24 h-32 bg-gray-200 border border-gray-300 rounded flex items-center justify-center">
+                                  <span className="text-xs text-gray-500">Error loading</span>
+                                </div>
+                              }
                             />
                           </div>
                         </div>
