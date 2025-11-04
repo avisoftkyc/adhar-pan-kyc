@@ -9,6 +9,7 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
+const { getAllowedOrigins, getAllowedOrigin: getCorsOrigin } = require('./utils/corsHelper');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -48,16 +49,39 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false
 }));
 
-// CORS configuration
+// CORS configuration - flexible for different deployment environments
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        'https://kyc-aadhaar-app.vercel.app',
-        'https://kyc-aadhaar-app-ashuls-projects-2dabf902.vercel.app',
-        /\.vercel\.app$/,
-        /\.netlify\.app$/
-      ] 
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: (origin, callback) => {
+    const allowedOrigins = getAllowedOrigins();
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Check if origin matches any allowed origin
+    for (const allowedOrigin of allowedOrigins) {
+      if (typeof allowedOrigin === 'string') {
+        if (origin === allowedOrigin) {
+          return callback(null, true);
+        }
+      } else if (allowedOrigin instanceof RegExp) {
+        if (allowedOrigin.test(origin)) {
+          return callback(null, true);
+        }
+      }
+    }
+    
+    // Allow origin if in development mode (for flexibility during development)
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // Log blocked origin for debugging
+    logger.warn(`CORS blocked origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Pragma'],
@@ -95,11 +119,9 @@ app.get('/api/logos/:userId', (req, res) => {
   const userId = req.params.userId;
   const logoPath = path.join(__dirname, '../uploads/logos');
   
-  // Set CORS headers for image serving
+  // Set CORS headers for image serving - use same origin logic as main CORS config
   res.set({
-    'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
-      ? 'https://yourdomain.com' 
-      : 'http://localhost:3000',
+    'Access-Control-Allow-Origin': getCorsOrigin(req.headers.origin),
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Methods': 'GET',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',

@@ -12,11 +12,19 @@ const path = require('path');
 const fs = require('fs');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
+const { getAllowedOrigin } = require('../utils/corsHelper');
 
 // Configure multer for logo uploads
+// Use absolute path to ensure consistency
+const logosDir = path.join(__dirname, '..', '..', 'uploads', 'logos');
+// Ensure the directory exists
+if (!fs.existsSync(logosDir)) {
+  fs.mkdirSync(logosDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/logos/');
+    cb(null, logosDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -1647,11 +1655,14 @@ router.post('/users/:id/logo', protect, authorize('admin'), upload.single('logo'
     const oldLogo = user.branding?.logo || null;
 
     // Update logo information
+    // Store relative path from backend directory for consistency
     if (!user.branding) user.branding = {};
+    const backendDir = path.join(__dirname, '..', '..');
+    const relativePath = path.relative(backendDir, req.file.path);
     user.branding.logo = {
       filename: req.file.filename,
       originalName: req.file.originalname,
-      path: req.file.path,
+      path: relativePath.replace(/\\/g, '/'), // Normalize path separators to forward slashes
       mimetype: req.file.mimetype,
       size: req.file.size
     };
@@ -1742,6 +1753,7 @@ router.get('/users/:id/logo', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || !user.branding?.logo) {
+      logger.warn(`Logo request for user ${req.params.id}: User or branding not found`);
       return res.status(404).json({
         success: false,
         message: 'Logo not found'
@@ -1749,6 +1761,7 @@ router.get('/users/:id/logo', async (req, res) => {
     }
 
     const logoPath = user.branding.logo.path;
+    logger.info(`Logo request for user ${req.params.id}: stored path = ${logoPath}, filename = ${user.branding.logo.filename}`);
     
     // Check if logo path exists
     if (!logoPath) {
@@ -1761,22 +1774,84 @@ router.get('/users/:id/logo', async (req, res) => {
     
     // Resolve the absolute path - path is stored as relative like 'uploads/logos/logo-xxx.jpg'
     // Route file is at backend/src/routes/admin.js, so we need to go up 2 levels to reach backend/
-    const absolutePath = path.resolve(__dirname, '..', '..', logoPath);
+    // Normalize path separators first (handle both forward slashes and backslashes)
+    const normalizedPath = logoPath.replace(/\\/g, '/');
+    let absolutePath = path.resolve(__dirname, '..', '..', normalizedPath);
+    logger.info(`Logo path resolution for user ${req.params.id}: normalized = ${normalizedPath}, absolute = ${absolutePath}`);
     
     // Check if file exists
     if (!fs.existsSync(absolutePath)) {
-      logger.warn(`Logo file not found: ${absolutePath} for user ${req.params.id}`);
-      return res.status(404).json({
-        success: false,
-        message: 'Logo file not found on server'
-      });
+      logger.warn(`Logo file not found at primary path: ${absolutePath}`);
+      // Fallback: Try to find the logo by filename if path doesn't work
+      // This handles cases where the path format changed or files were moved
+      const filename = user.branding.logo.filename;
+      const logosDir = path.join(__dirname, '..', '..', 'uploads', 'logos');
+      
+      if (filename) {
+        // First try exact filename match
+        const fallbackPath = path.join(logosDir, filename);
+        if (fs.existsSync(fallbackPath)) {
+          logger.info(`Using fallback path for logo: ${fallbackPath} for user ${req.params.id}`);
+          absolutePath = fallbackPath;
+          // Update the stored path for future requests
+          user.branding.logo.path = `uploads/logos/${filename}`;
+          await user.save().catch(err => logger.error('Failed to update logo path:', err));
+        } else {
+          // Last resort: Try to find any logo file in the directory
+          // This handles cases where the file was renamed or replaced
+          try {
+            if (fs.existsSync(logosDir)) {
+              const files = fs.readdirSync(logosDir).filter(file => 
+                file.toLowerCase().endsWith('.jpg') || 
+                file.toLowerCase().endsWith('.jpeg') || 
+                file.toLowerCase().endsWith('.png') ||
+                file.toLowerCase().endsWith('.gif')
+              );
+              
+              if (files.length > 0) {
+                // Use the most recent logo file (by filename timestamp if available, or just the first one)
+                const latestFile = files.sort().pop();
+                const latestPath = path.join(logosDir, latestFile);
+                logger.info(`Using alternative logo file: ${latestPath} for user ${req.params.id}`);
+                absolutePath = latestPath;
+                // Update the stored path and filename in database
+                user.branding.logo.path = `uploads/logos/${latestFile}`;
+                user.branding.logo.filename = latestFile;
+                await user.save().catch(err => logger.error('Failed to update logo path:', err));
+              } else {
+                logger.warn(`No logo files found in ${logosDir} for user ${req.params.id}`);
+                return res.status(404).json({
+                  success: false,
+                  message: 'Logo file not found on server'
+                });
+              }
+            } else {
+              logger.warn(`Logo directory does not exist: ${logosDir} for user ${req.params.id}`);
+              return res.status(404).json({
+                success: false,
+                message: 'Logo file not found on server'
+              });
+            }
+          } catch (err) {
+            logger.error(`Error searching for logo files: ${err.message}`);
+            return res.status(404).json({
+              success: false,
+              message: 'Logo file not found on server'
+            });
+          }
+        }
+      } else {
+        logger.warn(`Logo file not found: ${absolutePath} for user ${req.params.id}`);
+        return res.status(404).json({
+          success: false,
+          message: 'Logo file not found on server'
+        });
+      }
     }
     
     // Set CORS headers for image serving
     res.set({
-      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
-        ? 'https://yourdomain.com' 
-        : 'http://localhost:3000',
+      'Access-Control-Allow-Origin': getAllowedOrigin(req.headers.origin),
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -2257,8 +2332,11 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
       // Generate unique QR code
       const qrCodeString = crypto.randomBytes(32).toString('hex');
       
-      // Create QR code URL
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      // Create QR code URL - use production URL in production, localhost in development
+      const frontendUrl = process.env.FRONTEND_URL || 
+        (process.env.NODE_ENV === 'production' 
+          ? 'https://adhar-pan-kyc.vercel.app' 
+          : 'http://localhost:3000');
       const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
 
       // Generate QR code image
@@ -2303,8 +2381,11 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
       });
     }
 
-    // Return existing QR code
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Return existing QR code - use production URL in production, localhost in development
+    const frontendUrl = process.env.FRONTEND_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://adhar-pan-kyc.vercel.app' 
+        : 'http://localhost:3000');
     const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
       errorCorrectionLevel: 'H',
