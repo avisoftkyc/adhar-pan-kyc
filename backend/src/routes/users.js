@@ -1,6 +1,8 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
+const QRCode = require('qrcode');
+const User = require('../models/User');
 
 const { protect } = require('../middleware/auth');
 const userController = require('../controllers/userController');
@@ -337,6 +339,92 @@ router.post('/notifications/test', protect, async (req, res) => {
     res.status(400).json({
       success: false,
       error: error.message,
+    });
+  }
+});
+
+// @route   GET /api/users/qr-code
+// @desc    Get user's own QR code
+// @access  Private
+router.get('/qr-code', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has qr-code module access
+    if (!user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+      return res.status(403).json({
+        success: false,
+        message: 'QR code module is not enabled for your account'
+      });
+    }
+
+    // Generate QR code if it doesn't exist
+    if (!user.qrCode || !user.qrCode.code) {
+      // Generate unique QR code
+      const crypto = require('crypto');
+      const qrCodeString = crypto.randomBytes(32).toString('hex');
+      
+      // Create QR code URL
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
+
+      // Generate QR code image
+      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        width: 300,
+        margin: 1
+      });
+
+      // Update user with QR code
+      user.qrCode = {
+        code: qrCodeString,
+        generatedAt: new Date(),
+        isActive: true
+      };
+      await user.save();
+
+      return res.json({
+        success: true,
+        data: {
+          qrCode: qrCodeDataUrl,
+          qrCodeUrl: qrCodeUrl,
+          qrCodeString: qrCodeString
+        }
+      });
+    }
+
+    // Return existing QR code
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
+      errorCorrectionLevel: 'H',
+      type: 'image/png',
+      width: 300,
+      margin: 1
+    });
+
+    res.json({
+      success: true,
+      data: {
+        qrCode: qrCodeDataUrl,
+        qrCodeUrl: qrCodeUrl,
+        qrCodeString: user.qrCode.code
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching QR code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch QR code',
+      error: error.message
     });
   }
 });

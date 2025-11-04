@@ -18,6 +18,7 @@ import AadhaarPan from './pages/AadhaarPan/AadhaarPan';
 import AadhaarPanRecords from './pages/AadhaarPan/AadhaarPanRecords';
 import AadhaarVerification from './pages/AadhaarVerification/AadhaarVerification';
 import AadhaarVerificationRecords from './pages/AadhaarVerification/AadhaarVerificationRecords';
+import QrVerification from './pages/AadhaarVerification/QrVerification';
 import ProfileWrapper from './pages/Profile/ProfileWrapper';
 import Admin from './pages/Admin/Admin';
 import TermsAndConditions from './pages/Legal/TermsAndConditions';
@@ -105,6 +106,9 @@ const AppContent: React.FC = () => {
           {/* Legal Pages - Public Routes */}
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          
+          {/* Public QR Code Verification Route */}
+          <Route path="/verify/qr/:qrCode" element={<QrVerification />} />
 
           {/* Protected Routes */}
           <Route path="/" element={

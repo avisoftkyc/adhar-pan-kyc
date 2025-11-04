@@ -89,6 +89,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [animateStats, setAnimateStats] = useState(false);
   const [activityLoading, setActivityLoading] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState<{ qrCode: string; qrCodeUrl: string; qrCodeString: string } | null>(null);
+  const [qrCodeLoading, setQrCodeLoading] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -191,6 +193,52 @@ const Dashboard: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  // Fetch QR code if user has QR code module access
+  useEffect(() => {
+    const fetchQrCode = async () => {
+      if (!user || !user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+        return;
+      }
+
+      try {
+        setQrCodeLoading(true);
+        const response = await api.get('/users/qr-code');
+        if (response.data.success) {
+          setQrCodeData({
+            qrCode: response.data.data.qrCode,
+            qrCodeUrl: response.data.data.qrCodeUrl,
+            qrCodeString: response.data.data.qrCodeString
+          });
+        }
+      } catch (error: any) {
+        console.error('Error fetching QR code:', error);
+        // Don't show error toast as QR code might not be generated yet
+      } finally {
+        setQrCodeLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchQrCode();
+    }
+  }, [user]);
+
+  const handleDownloadQrCode = () => {
+    if (!qrCodeData) return;
+    
+    const link = document.createElement('a');
+    link.href = qrCodeData.qrCode;
+    link.download = `qr-code-${user?.name || 'user'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast({
+      message: 'QR code downloaded successfully',
+      type: 'success'
+    });
+  };
 
   const AnimatedNumber = ({ value, className }: { value: number; className?: string }) => (
     <span className={`transition-all duration-1000 ease-out ${className}`}>
@@ -579,6 +627,86 @@ const Dashboard: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* QR Code Section */}
+          {user?.moduleAccess && user.moduleAccess.includes('qr-code') && (
+            <div 
+              className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 shadow-xl border border-white/30 animate-fade-in-up"
+              style={{ animationDelay: '0.55s' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mr-3">
+                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-semibold text-slate-800">My QR Code</h2>
+                </div>
+              </div>
+              
+              {qrCodeLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : qrCodeData ? (
+                <div className="space-y-4">
+                  <div className="flex justify-center bg-gray-50 p-4 rounded-2xl">
+                    <img 
+                      src={qrCodeData.qrCode} 
+                      alt="QR Code" 
+                      className="w-48 h-48 border-4 border-white rounded-lg shadow-lg"
+                    />
+                  </div>
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100">
+                    <p className="text-xs font-medium text-slate-600 mb-2">QR Code URL:</p>
+                    <p className="text-xs font-mono text-slate-800 break-all bg-white p-2 rounded border border-indigo-200">
+                      {qrCodeData.qrCodeUrl}
+                    </p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleDownloadQrCode}
+                      className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center"
+                    >
+                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Download QR Code
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(qrCodeData.qrCodeUrl);
+                        showToast({
+                          message: 'QR Code URL copied to clipboard!',
+                          type: 'success'
+                        });
+                      }}
+                      className="flex-1 bg-white border-2 border-indigo-300 text-indigo-700 font-semibold py-3 px-4 rounded-xl hover:bg-indigo-50 transform hover:scale-105 transition-all duration-200 ease-out shadow-md hover:shadow-lg flex items-center justify-center"
+                    >
+                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy URL
+                    </button>
+                  </div>
+                  <p className="text-xs text-center text-slate-500 mt-2">
+                    Share this QR code for Aadhaar verification
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-3">
+                    <svg className="h-12 w-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-600 font-medium mb-1">QR Code not generated</p>
+                  <p className="text-xs text-gray-500">Contact your administrator to generate your QR code</p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Recent Activity */}
           <div 

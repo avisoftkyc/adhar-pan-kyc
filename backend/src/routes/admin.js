@@ -10,6 +10,8 @@ const logger = require('../utils/logger');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const QRCode = require('qrcode');
+const crypto = require('crypto');
 
 // Configure multer for logo uploads
 const storage = multer.diskStorage({
@@ -1443,7 +1445,7 @@ router.patch('/users/:id/module-access', protect, authorize('admin'), async (req
     }
 
     // Validate module names
-    const validModules = ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification', 'selfie-upload'];
+    const validModules = ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification', 'selfie-upload', 'qr-code'];
     const invalidModules = moduleAccess.filter(module => !validModules.includes(module));
     
     if (invalidModules.length > 0) {
@@ -2226,6 +2228,147 @@ router.post('/archival/scheduler/:action/:jobName', protect, authorize('admin'),
     res.status(500).json({
       success: false,
       message: 'Failed to manage scheduler job',
+      error: error.message
+    });
+  }
+});
+
+// Generate or get QR code for a user (admin only)
+router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check if user has qr-code module access
+    if (!user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+      return res.status(403).json({
+        success: false,
+        message: 'QR code module is not enabled for this user'
+      });
+    }
+
+    // Generate QR code if it doesn't exist or regenerate if requested
+    if (!user.qrCode || !user.qrCode.code || req.query.regenerate === 'true') {
+      // Generate unique QR code
+      const qrCodeString = crypto.randomBytes(32).toString('hex');
+      
+      // Create QR code URL
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
+
+      // Generate QR code image
+      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        width: 300,
+        margin: 1
+      });
+
+      // Update user with QR code
+      user.qrCode = {
+        code: qrCodeString,
+        generatedAt: new Date(),
+        isActive: true
+      };
+      await user.save();
+
+      await logEvent({
+        userId: req.user.id,
+        action: 'qr_code_generated',
+        module: 'admin',
+        resource: 'user',
+        resourceId: user._id,
+        details: `Generated QR code for user: ${user.email}`,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          qrCode: qrCodeDataUrl,
+          qrCodeUrl: qrCodeUrl,
+          qrCodeString: qrCodeString,
+          user: {
+            id: user._id,
+            email: user.email,
+            name: user.name
+          }
+        }
+      });
+    }
+
+    // Return existing QR code
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
+      errorCorrectionLevel: 'H',
+      type: 'image/png',
+      width: 300,
+      margin: 1
+    });
+
+    res.json({
+      success: true,
+      data: {
+        qrCode: qrCodeDataUrl,
+        qrCodeUrl: qrCodeUrl,
+        qrCodeString: user.qrCode.code,
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name
+        }
+      }
+    });
+  } catch (error) {
+    logger.error('Error generating QR code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate QR code',
+      error: error.message
+    });
+  }
+});
+
+// Get user by QR code (public endpoint for verification)
+router.get('/qr/:code', async (req, res) => {
+  try {
+    const user = await User.findOne({ 'qrCode.code': req.params.code, 'qrCode.isActive': true });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or inactive QR code'
+      });
+    }
+
+    // Check if user has qr-code module access
+    if (!user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+      return res.status(403).json({
+        success: false,
+        message: 'QR code module is not enabled for this user'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        userId: user._id,
+        userName: user.name,
+        hasSelfieAccess: user.moduleAccess && user.moduleAccess.includes('selfie-upload')
+      }
+    });
+  } catch (error) {
+    logger.error('Error validating QR code:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to validate QR code',
       error: error.message
     });
   }

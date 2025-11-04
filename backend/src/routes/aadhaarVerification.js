@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { protect } = require('../middleware/auth');
 const AadhaarVerification = require('../models/AadhaarVerification');
+const User = require('../models/User');
 const { logAadhaarVerificationEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 const { verifyAadhaar, simulateAadhaarVerification } = require('../services/aadhaarVerificationService');
@@ -496,6 +497,105 @@ router.post('/records/:id/selfie', protect, selfieUpload.single('selfie'), async
   }
 });
 
+// Public selfie upload for QR code flow (no auth required)
+router.post('/records/:id/selfie-public', selfieUpload.single('selfie'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No selfie file provided'
+      });
+    }
+
+    // Find the verification record
+    const verificationRecord = await AadhaarVerification.findById(id);
+    
+    if (!verificationRecord) {
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({
+        success: false,
+        message: 'Verification record not found'
+      });
+    }
+
+    // Only allow public uploads for QR code flow (batchId starts with 'qr-')
+    if (!verificationRecord.batchId || !verificationRecord.batchId.startsWith('qr-')) {
+      fs.unlinkSync(req.file.path);
+      return res.status(403).json({
+        success: false,
+        message: 'Public selfie upload only allowed for QR code verifications'
+      });
+    }
+
+    // Get user to check selfie access
+    const user = await User.findById(verificationRecord.userId);
+    if (!user || (user.role !== 'admin' && (!user.moduleAccess || !user.moduleAccess.includes('selfie-upload')))) {
+      fs.unlinkSync(req.file.path);
+      return res.status(403).json({
+        success: false,
+        message: 'Selfie upload module is not enabled for this user'
+      });
+    }
+
+    // Delete old selfie if exists
+    if (verificationRecord.selfie && verificationRecord.selfie.path) {
+      const oldPath = path.join(__dirname, '..', '..', verificationRecord.selfie.path);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    // Update verification record with selfie
+    await AadhaarVerification.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          selfie: {
+            filename: req.file.filename,
+            originalName: req.file.originalname,
+            path: req.file.path.replace(/^.*uploads/, 'uploads'),
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            uploadedAt: new Date()
+          }
+        }
+      },
+      { 
+        runValidators: false,
+        new: true 
+      }
+    );
+
+    const updatedRecord = await AadhaarVerification.findById(id);
+
+    res.json({
+      success: true,
+      message: 'Selfie uploaded successfully',
+      data: {
+        recordId: id,
+        selfie: updatedRecord?.selfie
+      }
+    });
+  } catch (error) {
+    logger.error('Error uploading selfie (public):', error);
+    
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkError) {
+        logger.error('Error cleaning up uploaded file:', unlinkError);
+      }
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to upload selfie'
+    });
+  }
+});
+
 // Get selfie for a verification record
 router.get('/records/:id/selfie', protect, async (req, res) => {
   try {
@@ -560,6 +660,213 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to serve selfie'
+    });
+  }
+});
+
+// Public verification endpoint using QR code (no auth required)
+router.post('/verify-qr/:qrCode', async (req, res) => {
+  try {
+    const { qrCode } = req.params;
+    const { aadhaarNumber, location = '', dynamicFields = [], customFields = {}, consentAccepted } = req.body;
+
+    // Find user by QR code
+    const user = await User.findOne({ 'qrCode.code': qrCode, 'qrCode.isActive': true });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or inactive QR code'
+      });
+    }
+
+    // Check if user has qr-code module access
+    if (!user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+      return res.status(403).json({
+        success: false,
+        message: 'QR code module is not enabled for this user'
+      });
+    }
+
+    if (!aadhaarNumber) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aadhaar Number is required'
+      });
+    }
+
+    if (!consentAccepted) {
+      return res.status(400).json({
+        success: false,
+        message: 'Consent is required to proceed'
+      });
+    }
+
+    // Validate Aadhaar format
+    const aadhaarRegex = /^\d{12}$/;
+    if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Aadhaar number format'
+      });
+    }
+
+    // Send OTP using Sandbox API
+    const startTime = Date.now();
+    const otpResult = await verifyAadhaar(aadhaarNumber, location, dynamicFields);
+    
+    res.json({
+      success: true,
+      message: 'OTP sent successfully',
+      data: {
+        aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+        location: location.trim(),
+        dynamicFields: dynamicFields,
+        customFields: customFields,
+        otpSent: true,
+        transactionId: otpResult.details.transactionId,
+        apiResponse: otpResult.details.apiResponse,
+        source: otpResult.details.source,
+        userId: user._id,
+        hasSelfieAccess: user.moduleAccess && user.moduleAccess.includes('selfie-upload')
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error in QR code verification:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to send OTP'
+    });
+  }
+});
+
+// Public OTP verification endpoint using QR code (no auth required)
+router.post('/verify-otp-qr/:qrCode', async (req, res) => {
+  try {
+    const { qrCode } = req.params;
+    const { aadhaarNumber, otp, transactionId, dynamicFields = [], customFields = {} } = req.body;
+
+    // Find user by QR code
+    const user = await User.findOne({ 'qrCode.code': qrCode, 'qrCode.isActive': true });
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid or inactive QR code'
+      });
+    }
+
+    // Check if user has qr-code module access
+    if (!user.moduleAccess || !user.moduleAccess.includes('qr-code')) {
+      return res.status(403).json({
+        success: false,
+        message: 'QR code module is not enabled for this user'
+      });
+    }
+
+    if (!aadhaarNumber || !otp || !transactionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aadhaar Number, OTP, and Transaction ID are required'
+      });
+    }
+
+    // Validate Aadhaar format
+    const aadhaarRegex = /^\d{12}$/;
+    if (!aadhaarRegex.test(aadhaarNumber.replace(/\s/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Aadhaar number format'
+      });
+    }
+
+    // Validate OTP format
+    if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid OTP format. Must be 6 digits.'
+      });
+    }
+
+    // Verify OTP using Sandbox API
+    const { verifyAadhaarOTP } = require('../services/aadhaarVerificationService');
+    const startTime = Date.now();
+    const verificationResult = await verifyAadhaarOTP(transactionId, otp);
+    const processingTime = Date.now() - startTime;
+
+    // Create verification record
+    const verificationRecord = new AadhaarVerification({
+      userId: user._id,
+      batchId: `qr-${Date.now()}`,
+      aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+      name: verificationResult.data.name || '',
+      dateOfBirth: verificationResult.data.date_of_birth || '',
+      gender: verificationResult.data.gender || '',
+      address: verificationResult.data.full_address || '',
+      pinCode: verificationResult.data.address?.pincode?.toString() || '',
+      state: verificationResult.data.address?.state || '',
+      district: verificationResult.data.address?.district || '',
+      careOf: verificationResult.data.care_of || '',
+      photo: verificationResult.data.photo || '',
+      dynamicFields: [
+        ...dynamicFields.map(field => ({
+          label: field.label,
+          value: field.value
+        })),
+        ...Object.entries(customFields).map(([key, value]) => ({
+          label: key,
+          value: value
+        }))
+      ],
+      status: verificationResult.status === 'VALID' ? 'verified' : 'invalid',
+      verificationDetails: {
+        apiResponse: verificationResult,
+        verifiedName: verificationResult.data.name || '',
+        verifiedDob: verificationResult.data.date_of_birth || '',
+        verifiedGender: verificationResult.data.gender || '',
+        verifiedAddress: verificationResult.data.full_address || '',
+        verificationDate: new Date(),
+        confidence: 95,
+        dataMatch: true,
+        source: verificationResult.source || 'sandbox_api',
+        transactionId: transactionId.toString()
+      },
+      processingTime: processingTime,
+      isProcessed: true,
+      processedAt: new Date()
+    });
+
+    await verificationRecord.save();
+
+    // Log the event
+    await logAadhaarVerificationEvent('otp_verification_completed', user._id, {
+      recordId: verificationRecord._id,
+      batchId: verificationRecord.batchId,
+      source: 'qr_code'
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Verification completed successfully',
+      data: {
+        recordId: verificationRecord._id,
+        aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+        name: verificationResult.data.name,
+        dateOfBirth: verificationResult.data.date_of_birth,
+        gender: verificationResult.data.gender,
+        address: verificationResult.data.full_address,
+        status: verificationResult.status,
+        processingTime: processingTime,
+        hasSelfieAccess: user.moduleAccess && user.moduleAccess.includes('selfie-upload')
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error in QR code OTP verification:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to verify OTP'
     });
   }
 });

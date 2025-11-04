@@ -182,6 +182,10 @@ const Admin: React.FC = () => {
     logoFile: null as File | null
   });
   const [brandingLoading, setBrandingLoading] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [selectedUserForQrCode, setSelectedUserForQrCode] = useState<User | null>(null);
+  const [qrCodeData, setQrCodeData] = useState<{ qrCode: string; qrCodeUrl: string; qrCodeString: string } | null>(null);
+  const [qrCodeLoading, setQrCodeLoading] = useState(false);
 
   // Custom Fields
   const [availableCustomFields, setAvailableCustomFields] = useState<any[]>([]);
@@ -604,6 +608,67 @@ const Admin: React.FC = () => {
       logoFile: null
     });
     setShowBranding(true);
+  };
+
+  const handleViewQrCode = async (user: User, regenerate = false) => {
+    setSelectedUserForQrCode(user);
+    setQrCodeLoading(true);
+    if (!showQrCode) {
+      setShowQrCode(true);
+    }
+    
+    try {
+      const url = regenerate 
+        ? `/admin/users/${user._id}/qr-code?regenerate=true`
+        : `/admin/users/${user._id}/qr-code`;
+      const response = await api.get(url);
+      if (response.data.success) {
+        setQrCodeData({
+          qrCode: response.data.data.qrCode,
+          qrCodeUrl: response.data.data.qrCodeUrl,
+          qrCodeString: response.data.data.qrCodeString
+        });
+        if (regenerate) {
+          showToast({
+            type: 'success',
+            message: 'QR code regenerated successfully',
+            duration: 4000
+          });
+        }
+      } else {
+        showToast({
+          type: 'error',
+          message: response.data.message || 'Failed to generate QR code',
+          duration: 4000
+        });
+        if (!showQrCode) {
+          setShowQrCode(false);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error fetching QR code:', error);
+      showToast({
+        type: 'error',
+        message: error.response?.data?.message || 'Failed to generate QR code',
+        duration: 4000
+      });
+      if (!showQrCode) {
+        setShowQrCode(false);
+      }
+    } finally {
+      setQrCodeLoading(false);
+    }
+  };
+
+  const handleDownloadQrCode = () => {
+    if (!qrCodeData) return;
+    
+    const link = document.createElement('a');
+    link.href = qrCodeData.qrCode;
+    link.download = `qr-code-${selectedUserForQrCode?.name || 'user'}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleUpdateBranding = async (userId: string) => {
@@ -1391,7 +1456,8 @@ const Admin: React.FC = () => {
                                   {module === 'pan-kyc' ? 'PAN KYC' : 
                                    module === 'aadhaar-pan' ? 'Aadhaar-PAN' : 
                                    module === 'aadhaar-verification' ? 'Aadhaar Verification' :
-                                   module === 'selfie-upload' ? 'Selfie Upload' : module}
+                                   module === 'selfie-upload' ? 'Selfie Upload' :
+                                   module === 'qr-code' ? 'QR Code' : module}
                                 </span>
                               ))
                             ) : (
@@ -1409,6 +1475,18 @@ const Admin: React.FC = () => {
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
                           <CogIcon className="h-5 w-5 relative z-10 group-hover:rotate-180 transition-transform duration-500 ease-in-out" />
                         </button>
+                        {user.moduleAccess && user.moduleAccess.includes('qr-code') && (
+                          <button
+                            onClick={() => handleViewQrCode(user)}
+                            className="p-3 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
+                            title="View QR Code"
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-indigo-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                            <svg className="h-5 w-5 relative z-10 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                            </svg>
+                          </button>
+                        )}
                         <button
                           onClick={() => handleManageBranding(user)}
                           className="p-3 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 hover:shadow-md relative overflow-hidden group"
@@ -2778,6 +2856,24 @@ const Admin: React.FC = () => {
                       />
                       <span className="ml-2 text-sm text-gray-700">Selfie Upload</span>
                     </label>
+                    
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserForModules.moduleAccess.includes('qr-code')}
+                        onChange={(e) => {
+                          const newModuleAccess = e.target.checked
+                            ? [...selectedUserForModules.moduleAccess, 'qr-code']
+                            : selectedUserForModules.moduleAccess.filter(m => m !== 'qr-code');
+                          setSelectedUserForModules({
+                            ...selectedUserForModules,
+                            moduleAccess: newModuleAccess
+                          });
+                        }}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">QR Code</span>
+                    </label>
                   </div>
                 </div>
                 
@@ -2905,6 +3001,68 @@ const Admin: React.FC = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQrCode && selectedUserForQrCode && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                QR Code for {selectedUserForQrCode.name}
+              </h3>
+              
+              {qrCodeLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+              ) : qrCodeData ? (
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <img 
+                      src={qrCodeData.qrCode} 
+                      alt="QR Code" 
+                      className="w-64 h-64 border-4 border-gray-200 rounded-lg p-4 bg-white"
+                    />
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">QR Code URL:</p>
+                    <p className="text-xs font-mono text-gray-800 break-all">{qrCodeData.qrCodeUrl}</p>
+                  </div>
+                  <div className="flex space-x-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowQrCode(false);
+                        setSelectedUserForQrCode(null);
+                        setQrCodeData(null);
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={handleDownloadQrCode}
+                      className="flex-1 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => handleViewQrCode(selectedUserForQrCode, true)}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Regenerate
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">Failed to load QR code</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
