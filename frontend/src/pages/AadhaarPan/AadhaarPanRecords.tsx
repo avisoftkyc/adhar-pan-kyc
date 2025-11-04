@@ -342,7 +342,7 @@ const AadhaarPanRecords: React.FC = () => {
               <CheckCircleIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Linked</p>
+              <p className="text-sm font-medium text-gray-600">Operative</p>
               <p className="text-2xl font-bold text-emerald-600">{stats.linked}</p>
             </div>
           </div>
@@ -354,7 +354,7 @@ const AadhaarPanRecords: React.FC = () => {
               <XCircleIcon className="h-6 w-6 text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-600">Not Linked</p>
+              <p className="text-sm font-medium text-gray-600">Inoperative</p>
               <p className="text-2xl font-bold text-red-600">{stats['not-linked']}</p>
             </div>
           </div>
@@ -386,8 +386,8 @@ const AadhaarPanRecords: React.FC = () => {
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
             >
               <option value="all">All Statuses</option>
-              <option value="linked">Linked</option>
-              <option value="not-linked">Not Linked</option>
+              <option value="linked">Operative</option>
+              <option value="not-linked">Inoperative</option>
             </select>
           </div>
 
@@ -484,7 +484,7 @@ const AadhaarPanRecords: React.FC = () => {
                         <div className="flex items-center">
                           {getStatusIcon(record.status)}
                           <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                            {record.status}
+                            {record.status === 'linked' ? 'Operative' : 'Inoperative'}
                           </span>
                         </div>
                         {record.errorMessage && (

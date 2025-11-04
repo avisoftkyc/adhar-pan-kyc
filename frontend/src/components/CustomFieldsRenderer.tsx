@@ -66,12 +66,20 @@ const CustomFieldsRenderer: React.FC<CustomFieldsRendererProps> = ({
       let fieldsToShow = response.data.data || [];
       
       // Filter by enabled custom field IDs if provided
-      if (enabledCustomFieldIds && enabledCustomFieldIds.length > 0) {
-        fieldsToShow = fieldsToShow.filter((field: CustomField) => 
-          enabledCustomFieldIds.includes(field._id)
-        );
-        console.log('🎯 Filtered to enabled fields:', fieldsToShow.length, 'fields');
+      if (enabledCustomFieldIds !== undefined) {
+        // If enabledCustomFieldIds is provided (even if empty array), filter by it
+        if (enabledCustomFieldIds.length === 0) {
+          // Empty array means no fields should be shown
+          fieldsToShow = [];
+        } else {
+          // Filter to only show enabled fields
+          fieldsToShow = fieldsToShow.filter((field: CustomField) => 
+            enabledCustomFieldIds.includes(field._id)
+          );
+          console.log('🎯 Filtered to enabled fields:', fieldsToShow.length, 'fields');
+        }
       }
+      // If enabledCustomFieldIds is undefined, show all fields (for backwards compatibility)
       
       setCustomFields(fieldsToShow);
     } catch (error) {

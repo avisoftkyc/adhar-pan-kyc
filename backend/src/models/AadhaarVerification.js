@@ -65,6 +65,17 @@ const AadhaarVerificationSchema = new mongoose.Schema({
       required: true,
     }
   }],
+  selfie: {
+    filename: String,
+    originalName: String,
+    path: String,
+    mimetype: String,
+    size: Number,
+    uploadedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
   status: {
     type: String,
     enum: ['pending', 'verified', 'rejected', 'invalid', 'error'],

@@ -87,17 +87,17 @@ export const validateDateOfBirth = (dob: string): ValidationResult => {
     return { isValid: false, message: 'Date of Birth is required' };
   }
   
-  const dateRegex = /^\d{2}-\d{2}-\d{4}$/;
+  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
   if (!dateRegex.test(dob)) {
-    return { isValid: false, message: 'Date must be in DD-MM-YYYY format' };
+    return { isValid: false, message: 'Date must be in DD/MM/YYYY format' };
   }
   
-  // Parse DD-MM-YYYY format
-  const [day, month, year] = dob.split('-').map(Number);
+  // Parse DD/MM/YYYY format
+  const [day, month, year] = dob.split('/').map(Number);
   const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
   const today = new Date();
   
-  // Check if the parsed date is valid (handles invalid dates like 32-13-2023)
+  // Check if the parsed date is valid (handles invalid dates like 32/13/2023)
   if (date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
     return { isValid: false, message: 'Please enter a valid date' };
   }

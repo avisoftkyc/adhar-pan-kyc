@@ -32,8 +32,22 @@ const UserSchema = new mongoose.Schema({
   },
   moduleAccess: {
     type: [String],
-    enum: ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification'],
+    enum: ['pan-kyc', 'aadhaar-pan', 'aadhaar-verification', 'selfie-upload', 'qr-code'],
     default: [],
+  },
+  qrCode: {
+    code: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    generatedAt: {
+      type: Date,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   isActive: {
     type: Boolean,
