@@ -10,6 +10,7 @@ const User = require('../models/User');
 const { logAadhaarVerificationEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 const { verifyAadhaar, simulateAadhaarVerification } = require('../services/aadhaarVerificationService');
+const { getAllowedOrigin } = require('../utils/corsHelper');
 
 // Configure multer for selfie uploads
 const selfieStorage = multer.diskStorage({
@@ -644,9 +645,7 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
     // Set headers for image serving
     res.set({
       'Content-Type': verificationRecord.selfie.mimetype || 'image/jpeg',
-      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
-        ? 'https://yourdomain.com' 
-        : 'http://localhost:3000',
+      'Access-Control-Allow-Origin': getAllowedOrigin(req.headers.origin),
       'Access-Control-Allow-Credentials': 'true',
       'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',

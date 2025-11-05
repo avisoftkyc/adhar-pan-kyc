@@ -219,15 +219,18 @@ const QrVerification: React.FC = () => {
       const formData = new FormData();
       formData.append('selfie', selfieFile);
 
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records/${verificationRecordId}/selfie-public`,
+      // Use api instance for better error handling and retry logic
+      const response = await api.post(
+        `/aadhaar-verification/records/${verificationRecordId}/selfie-public`,
+        formData,
         {
-          method: 'POST',
-          body: formData
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setSelfieUploaded(true);
@@ -294,24 +297,19 @@ const QrVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-qr/${qrCode}`,
+      // Use api instance for better error handling and retry logic
+      const response = await api.post(
+        `/aadhaar-verification/verify-qr/${qrCode}`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
-            location: '',
-            dynamicFields: [],
-            customFields: customFields,
-            consentAccepted: consentAccepted
-          })
+          aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
+          location: '',
+          dynamicFields: [],
+          customFields: customFields,
+          consentAccepted: consentAccepted
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         if (data.data.otpSent) {
@@ -352,24 +350,19 @@ const QrVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp-qr/${qrCode}`,
+      // Use api instance for better error handling and retry logic
+      const response = await api.post(
+        `/aadhaar-verification/verify-otp-qr/${qrCode}`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-            otp: otp,
-            transactionId: transactionId,
-            dynamicFields: [],
-            customFields: customFields
-          })
+          aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
+          otp: otp,
+          transactionId: transactionId,
+          dynamicFields: [],
+          customFields: customFields
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success) {
         setCurrentStep({ step: 'success', data: data.data });
