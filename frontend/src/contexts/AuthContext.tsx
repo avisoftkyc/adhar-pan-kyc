@@ -396,6 +396,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (error) => {
         const originalRequest = error.config;
 
+        // Skip handling connection errors (let retry logic in api.ts handle them)
+        // Connection errors don't have error.response
+        if (!error.response) {
+          return Promise.reject(error);
+        }
+
         // Handle 401 errors (unauthorized)
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
