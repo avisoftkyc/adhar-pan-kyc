@@ -2333,9 +2333,10 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
       const qrCodeString = crypto.randomBytes(32).toString('hex');
       
       // Create QR code URL - use production URL in production, localhost in development
+      // Priority: FRONTEND_URL env var > Custom domain > localhost
       const frontendUrl = process.env.FRONTEND_URL || 
         (process.env.NODE_ENV === 'production' 
-          ? 'https://adhar-pan-kyc.vercel.app' 
+          ? 'https://www.avihridsys.in' 
           : 'http://localhost:3000');
       const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
 
@@ -2382,9 +2383,10 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
     }
 
     // Return existing QR code - use production URL in production, localhost in development
+    // Priority: FRONTEND_URL env var > Amplify URL > Vercel URL > localhost
     const frontendUrl = process.env.FRONTEND_URL || 
       (process.env.NODE_ENV === 'production' 
-        ? 'https://adhar-pan-kyc.vercel.app' 
+        ? 'https://www.avihridsys.in' 
         : 'http://localhost:3000');
     const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {

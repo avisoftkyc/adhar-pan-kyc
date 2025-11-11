@@ -77684,3 +77684,660 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-11-11 13:58:01'
 }
+{
+  service: 'kyc-aadhaar-api',
+  userId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  action: 'login',
+  module: 'auth',
+  resource: 'user',
+  resourceId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  level: 'info',
+  message: 'Audit event logged: login in auth',
+  timestamp: '2025-11-11 17:10:56'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:56 +0000] "POST /api/auth/login HTTP/1.1" 200 1197 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:56'
+}
+{
+  message: 'Logo request for user 68c124ded5378b25a8ac62d7: stored path = uploads/logos/logo-1762240066625-862624051.jpg, filename = logo-1762240066625-862624051.jpg',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:56'
+}
+{
+  message: 'Logo path resolution for user 68c124ded5378b25a8ac62d7: normalized = uploads/logos/logo-1762240066625-862624051.jpg, absolute = /Users/ashulkumar/kyc-aadhaar-app/backend/uploads/logos/logo-1762240066625-862624051.jpg',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:56'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:56 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo?v=logo-1762240066625-862624051.jpg HTTP/1.1" 200 94889 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:56'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:57 +0000] "GET /api/users/qr-code HTTP/1.1" 200 5904 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:57'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:57 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9397 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:57'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 120,
+  panKycRecords: 76,
+  aadhaarPanRecords: 27,
+  aadhaarVerificationRecords: 17,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-11-11 17:10:57'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:57 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 7843 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:57'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:40:59 +0000] "GET /api/pan-kyc/batches HTTP/1.1" 200 693 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:10:59'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:03 +0000] "GET /api/auth/me HTTP/1.1" 200 1004 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:03'
+}
+{
+  message: 'Logo request for user 68c124ded5378b25a8ac62d7: stored path = uploads/logos/logo-1762240066625-862624051.jpg, filename = logo-1762240066625-862624051.jpg',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:03'
+}
+{
+  message: 'Logo path resolution for user 68c124ded5378b25a8ac62d7: normalized = uploads/logos/logo-1762240066625-862624051.jpg, absolute = /Users/ashulkumar/kyc-aadhaar-app/backend/uploads/logos/logo-1762240066625-862624051.jpg',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:03'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:03 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/logo?v=logo-1762240066625-862624051.jpg HTTP/1.1" 304 - "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:03'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:20 +0000] "GET /api/pan-kyc/records HTTP/1.1" 200 77445 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:20'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:27 +0000] "GET /api/users/qr-code HTTP/1.1" 200 5904 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:27'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:27 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9397 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  totalRecords: 120,
+  panKycRecords: 76,
+  aadhaarPanRecords: 27,
+  aadhaarVerificationRecords: 17,
+  level: 'info',
+  message: 'Dashboard stats fetched for user 68c124ded5378b25a8ac62d7:',
+  timestamp: '2025-11-11 17:11:27'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:27 +0000] "GET /api/dashboard/stats HTTP/1.1" 200 7843 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:27'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: new ObjectId("68c02109cff0074d71755637"),
+  action: 'login',
+  module: 'auth',
+  resource: 'user',
+  resourceId: new ObjectId("68c02109cff0074d71755637"),
+  level: 'info',
+  message: 'Audit event logged: login in auth',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "POST /api/auth/login HTTP/1.1" 200 648 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: 'Logo request for user 68c02109cff0074d71755637: stored path = undefined, filename = undefined',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: 'Logo path not found for user 68c02109cff0074d71755637',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/admin/users/68c02109cff0074d71755637/logo HTTP/1.1" 404 49 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/admin/users HTTP/1.1" 200 5310 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/custom-fields?isActive=true HTTP/1.1" 200 4214 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/admin/audit-logs HTTP/1.1" 200 32253 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/admin/api-usage-stats?days=30 HTTP/1.1" 200 1068 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:46 +0000] "GET /api/admin/user-stats?days=30 HTTP/1.1" 200 782 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:46'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:47 +0000] "GET /api/admin/stats?days=30 HTTP/1.1" 200 15194 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:47'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:54 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/qr-code HTTP/1.1" 200 6002 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:54'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: '68c02109cff0074d71755637',
+  action: 'qr_code_generated',
+  module: 'admin',
+  resource: 'user',
+  resourceId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  level: 'info',
+  message: 'Audit event logged: qr_code_generated in admin',
+  timestamp: '2025-11-11 17:11:56'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:41:56 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/qr-code?regenerate=true HTTP/1.1" 200 5978 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:11:56'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:26'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:26'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:26'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:26'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:26'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:28'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:28'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:28'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:28'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:29'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:33'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:33'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:33'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:33'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:34'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:37'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:37'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:37'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:37'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:13:38'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:02'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:02'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:02'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:02'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:03'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:35'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:35'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:35'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:35'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:14:35'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:15:41'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:15:41'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:15:41'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:15:41'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:15:42'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:47'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:47'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:47'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:47'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:48'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:46:57 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/qr-code HTTP/1.1" 200 5978 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:16:57'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: '68c02109cff0074d71755637',
+  action: 'qr_code_generated',
+  module: 'admin',
+  resource: 'user',
+  resourceId: new ObjectId("68c124ded5378b25a8ac62d7"),
+  level: 'info',
+  message: 'Audit event logged: qr_code_generated in admin',
+  timestamp: '2025-11-11 17:17:07'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:47:07 +0000] "GET /api/admin/users/68c124ded5378b25a8ac62d7/qr-code?regenerate=true HTTP/1.1" 200 5894 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:17:07'
+}
+{
+  service: 'kyc-aadhaar-api',
+  userId: '68c02109cff0074d71755637',
+  action: 'module_access_updated',
+  module: 'admin',
+  resource: 'user',
+  resourceId: new ObjectId("68c124bbd5378b25a8ac62c7"),
+  level: 'info',
+  message: 'Audit event logged: module_access_updated in admin',
+  timestamp: '2025-11-11 17:17:35'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:47:35 +0000] "PATCH /api/admin/users/68c124bbd5378b25a8ac62c7/module-access HTTP/1.1" 200 174 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:17:35'
+}
+{
+  message: '127.0.0.1 - - [11/Nov/2025:11:47:35 +0000] "GET /api/admin/users HTTP/1.1" 200 5320 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:17:35'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:15'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:15'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:15'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:15'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:15'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:19'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:19'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:19'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:19'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:20'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:44'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:44'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:44'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:44'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-02.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:44'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:50'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:50'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:50'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:50'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:25:50'
+}
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:28:22'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:28:22'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:28:22'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:28:22'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-01.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 17:28:22'
+}
