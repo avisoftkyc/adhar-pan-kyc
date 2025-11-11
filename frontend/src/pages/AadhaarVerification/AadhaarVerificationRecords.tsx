@@ -250,7 +250,15 @@ const AadhaarVerificationRecords: React.FC = () => {
       if (currentFilters.sortBy) params.append('sortBy', currentFilters.sortBy);
       if (currentFilters.sortOrder) params.append('sortOrder', currentFilters.sortOrder);
       
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/records?${params.toString()}`, {
+      // Determine API base URL
+      const getApiBaseURL = () => {
+        if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+        const isProduction = window.location.hostname !== 'localhost' && 
+                             window.location.hostname !== '127.0.0.1' &&
+                             !window.location.hostname.startsWith('192.168.');
+        return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+      };
+      const response = await fetch(`${getApiBaseURL()}/aadhaar-verification/records?${params.toString()}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         }

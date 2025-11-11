@@ -7,7 +7,8 @@ frontend:
         - npm ci
     build:
       commands:
-        - npm run build
+        - echo "Building with NODE_ENV=production"
+        - NODE_ENV=production npm run build
   artifacts:
     baseDirectory: frontend/build
     files:
