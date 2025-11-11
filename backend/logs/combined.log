@@ -75134,3 +75134,2553 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-11-05 14:10:51'
 }
+{
+  message: 'Archival process scheduled with cron expression: 0 2 * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:25'
+}
+{
+  message: 'Health check scheduled with cron expression: 0 * * * *',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:25'
+}
+{
+  message: 'Scheduler service initialized successfully',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:25'
+}
+{
+  message: 'Server running on port 3002 in development mode',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:25'
+}
+{
+  message: 'MongoDB Connected: ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:26'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:41:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:11:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:42:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:12:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:43:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:13:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:44:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:14:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:45:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:15:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:46:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:16:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:47:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:17:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:48:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:18:51'
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:49:51 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 200 9302 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:19:51'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:20:56'
+}
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619774917,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619774882,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619775036,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:01',
+  [Symbol(errorLabels)]: Set(0) {}
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:51:01 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 401 63 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:21:01'
+}
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619779950,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619780421,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619780075,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:06',
+  [Symbol(errorLabels)]: Set(0) {}
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:51:06 +0000] "POST /api/auth/refresh HTTP/1.1" 401 63 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:21:06'
+}
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619784983,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619785456,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619785112,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:11',
+  [Symbol(errorLabels)]: Set(0) {}
+}
+{
+  message: '127.0.0.1 - - [05/Nov/2025:08:51:11 +0000] "GET /api/dashboard/recent-activity HTTP/1.1" 401 63 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:21:11'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:22:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:32:35'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 14:32:47'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:06:28'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:19:40'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:24:30'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:24:41'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:40:20'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:40:30'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:56:11'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:56:21'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 15:58:00'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:00:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:15:46'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:15:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:31:13'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:31:23'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:46:37'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 16:46:48'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:02:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:02:15'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:06:27'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:21:41'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:30:45'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 17:45:56'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:01:22'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:01:33'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:07:30'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:22:42'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:38:07'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:38:18'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:53:38'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 18:53:48'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:08:32'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:08:42'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:23:58'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:24:08'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:39:30'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:39:40'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:54:56'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 19:55:02'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:09:32'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:09:43'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:25:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:25:15'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:40:31'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:40:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:56:02'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 20:56:13'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:10:33'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:10:44'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:25:59'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:26:10'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:41:25'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:41:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:56:57'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 21:57:08'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:11:36'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:11:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:27:08'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:27:18'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:42:33'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:42:43'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:58:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:58:15'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 22:59:06'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:12:39'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:28:05'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:28:13'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:43:34'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:43:47'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:59:06'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-05 23:59:16'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:13:39'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:13:49'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:29:05'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:29:15'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:44:30'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 00:44:40'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:00:01'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:00:12'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:14:41'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:14:51'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:29:11'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:29:22'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:44:37'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 01:44:48'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:00:09'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:00:20'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:15:46'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:15:56'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:31:18'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:31:28'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:46:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 02:46:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:02:16'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:02:26'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:17:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:17:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:33:14'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:33:24'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:48:46'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:48:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:59:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 03:59:14'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 06:01:01'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 06:01:12'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 07:12:09'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 07:12:19'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 08:02:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 09:03:16'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 10:04:08'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 11:05:20'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 12:06:11'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 13:07:23'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 13:31:13'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 13:31:25'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 15:39:47'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 15:39:58'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 15:45:01'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 15:45:11'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 16:00:42'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 16:00:52'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 16:05:31'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 16:52:12'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:07:52'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:08:02'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:23:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:23:53'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:39:41'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:39:52'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:46:23'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 17:46:34'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:05:35'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:05:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:21:26'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:21:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:37:16'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:37:27'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:47:25'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 18:47:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:03:16'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:03:26'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:19:06'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:19:17'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:34:57'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:35:08'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:48:26'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 19:48:37'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:06:23'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:06:34'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:22:15'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:22:25'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:38:06'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:38:16'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:49:27'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 20:49:38'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 21:33:58'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 21:34:09'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 21:49:51'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 21:50:02'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:05:20'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:05:30'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:20:53'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:21:03'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:36:20'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:36:30'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:50:53'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 22:51:04'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:06:25'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:06:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:21:59'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:22:10'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:37:33'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:37:44'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:51:56'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-06 23:52:06'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:07:24'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:07:34'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:22:50'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:23:01'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:38:17'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:38:27'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:52:57'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 00:53:08'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:08:26'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:08:36'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:24:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:24:14'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:39:35'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 01:39:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:07:59'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:09:35'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:40:16'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:25:04'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:40:18'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 02:40:29'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:10:47'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:11:21'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:42:06'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:26:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:57:32'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 03:57:52'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 04:28:25'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 04:13:26'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 04:44:04'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 04:44:25'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:14:56'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 04:59:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:15:12'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:15:23'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:30:45'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:30:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:46:15'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 05:46:28'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 06:15:21'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 06:16:38'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 06:47:21'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 06:32:09'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:17:52'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:03:04'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:18:21'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:18:32'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:33:49'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 07:33:59'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 08:04:26'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 08:43:03'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 08:55:58'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 08:56:08'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 09:14:29'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 09:14:42'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 10:00:05'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 09:45:16'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 10:15:46'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 10:15:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 11:23:19'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 10:53:32'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 11:41:36'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 11:41:47'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 12:08:19'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 12:08:32'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:03:46'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:03:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:19:18'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:19:29'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:34:44'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:34:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:50:17'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 14:50:27'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:05:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:05:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:21:14'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:21:25'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:36:41'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:36:52'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:49:19'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 15:49:29'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:04:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:04:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:17:28'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:17:38'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:32:53'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:33:04'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:48:18'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 16:48:28'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 17:51:50'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 17:52:00'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 18:52:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 18:52:53'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:27:02'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:27:12'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:42:38'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:42:48'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:58:10'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 19:58:20'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:13:36'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:13:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:29:02'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:29:12'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:44:27'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 20:44:38'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:00:00'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:00:01'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:15:27'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:15:37'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:28:20'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:28:30'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:43:45'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:43:55'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:59:17'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 21:59:27'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 22:14:53'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 22:15:04'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 22:27:38'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 22:27:48'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 23:30:35'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-07 23:30:46'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 00:30:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 00:30:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 01:31:43'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 01:31:54'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 03:32:03'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 03:32:13'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 05:21:18'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 05:21:28'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 06:01:07'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 06:01:17'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 07:28:47'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 07:28:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-08 07:29:48'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 09:34:57'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 09:48:08'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 09:48:19'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:06:32'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:06:42'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:29:31'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:29:42'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:43:29'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 10:43:39'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:09:54'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:10:05'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:40:44'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:40:55'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:41:45'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:41:58'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:42:39'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:42:50'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:43:31'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:43:41'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:44:21'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 11:44:32'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 14:11:19'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-10 14:14:19'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 13:56:30'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 13:56:40'
+}
+{
+  message: 'MongoDB disconnected',
+  level: 'warn',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 13:57:51'
+}
+{
+  message: 'MongoDB reconnected',
+  level: 'info',
+  service: 'kyc-aadhaar-api',
+  timestamp: '2025-11-11 13:58:01'
+}
