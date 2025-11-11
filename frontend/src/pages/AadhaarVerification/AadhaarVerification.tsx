@@ -453,7 +453,15 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
+      // Determine API base URL
+      const getApiBaseURL = () => {
+        if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+        const isProduction = window.location.hostname !== 'localhost' && 
+                             window.location.hostname !== '127.0.0.1' &&
+                             !window.location.hostname.startsWith('192.168.');
+        return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+      };
+      const response = await fetch(`${getApiBaseURL()}/aadhaar-verification/verify-single`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -564,7 +572,15 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
+      // Determine API base URL
+      const getApiBaseURL = () => {
+        if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+        const isProduction = window.location.hostname !== 'localhost' && 
+                             window.location.hostname !== '127.0.0.1' &&
+                             !window.location.hostname.startsWith('192.168.');
+        return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+      };
+      const response = await fetch(`${getApiBaseURL()}/aadhaar-verification/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -753,7 +769,13 @@ const AadhaarVerification: React.FC = () => {
       const authToken = token || localStorage.getItem('token') || sessionStorage.getItem('token');
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/records/${verificationRecordId}/selfie`,
+        `${(() => {
+          if (process.env.REACT_APP_API_URL) return process.env.REACT_APP_API_URL;
+          const isProduction = window.location.hostname !== 'localhost' && 
+                               window.location.hostname !== '127.0.0.1' &&
+                               !window.location.hostname.startsWith('192.168.');
+          return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+        })()}/aadhaar-verification/records/${verificationRecordId}/selfie`,
         {
           method: 'POST',
           headers: {

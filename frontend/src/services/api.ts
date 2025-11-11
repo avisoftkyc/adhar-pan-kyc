@@ -1,8 +1,33 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+// Determine API base URL
+// Priority: REACT_APP_API_URL env var > production fallback > localhost
+const getApiBaseURL = () => {
+  // If REACT_APP_API_URL is explicitly set, use it
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Check if we're in production (hosted, not localhost)
+  const isProduction = window.location.hostname !== 'localhost' && 
+                       window.location.hostname !== '127.0.0.1' &&
+                       !window.location.hostname.startsWith('192.168.');
+  
+  // Use production URL if in production, otherwise localhost
+  return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+};
+
+const apiBaseURL = getApiBaseURL();
+
+// Log the API URL being used (helpful for debugging)
+if (process.env.NODE_ENV !== 'production' || window.location.hostname === 'localhost') {
+  console.log('🔗 API Base URL:', apiBaseURL);
+  console.log('🔗 REACT_APP_API_URL:', process.env.REACT_APP_API_URL || 'Not set');
+}
+
 // Create axios instance with longer timeout for API calls
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api'),
+  baseURL: apiBaseURL,
   timeout: 60000, // 60 seconds timeout
   headers: {
     'Content-Type': 'application/json',

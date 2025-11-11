@@ -45,7 +45,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Memoize the logo URL to avoid unnecessary re-renders
   const logoUrl = useMemo(() => {
     if (user?.branding?.logo && user?._id) {
-      const baseUrl = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api');
+      // Determine API base URL - same logic as api.ts
+      const getApiBaseURL = () => {
+        if (process.env.REACT_APP_API_URL) {
+          return process.env.REACT_APP_API_URL;
+        }
+        const isProduction = window.location.hostname !== 'localhost' && 
+                             window.location.hostname !== '127.0.0.1' &&
+                             !window.location.hostname.startsWith('192.168.');
+        return isProduction ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api';
+      };
+      const baseUrl = getApiBaseURL();
       // Use the API endpoint to serve the logo - this ensures proper path resolution and fallback handling
       const url = `${baseUrl.replace('/api', '')}/api/admin/users/${user._id}/logo`;
       // Add cache busting parameter based on logo filename to ensure fresh image loads
