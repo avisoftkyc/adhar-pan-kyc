@@ -15820,3 +15820,423 @@
   service: 'kyc-aadhaar-api',
   timestamp: '2025-09-23 13:08:58'
 }
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619774917,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619774882,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619775036,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:01',
+  [Symbol(errorLabels)]: Set(0) {}
+}
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619779950,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619780421,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619780075,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:06',
+  [Symbol(errorLabels)]: Set(0) {}
+}
+{
+  service: 'kyc-aadhaar-api',
+  reason: TopologyDescription {
+    type: 'ReplicaSetNoPrimary',
+    servers: Map(3) {
+      'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619784983,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-00.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619785456,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-02.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-02.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      },
+      'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017' => ServerDescription {
+        address: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net:27017',
+        type: 'Unknown',
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: {},
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        roundTripTime: -1,
+        lastUpdateTime: 619785112,
+        lastWriteDate: 0,
+        error: MongoNetworkError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+            at connectionFailureError (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:367:20)
+            at TLSSocket.<anonymous> (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/cmap/connect.js:290:22)
+            at Object.onceWrapper (node:events:632:26)
+            at TLSSocket.emit (node:events:517:28)
+            at emitErrorNT (node:internal/streams/destroy:151:8)
+            at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+            at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+          cause: Error: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-01.idbaui6.mongodb.net
+              at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+            errno: -3008,
+            code: 'ENOTFOUND',
+            syscall: 'getaddrinfo',
+            hostname: 'ac-syu7qxj-shard-00-01.idbaui6.mongodb.net'
+          },
+          [Symbol(errorLabels)]: Set(1) { 'ResetPool' }
+        },
+        topologyVersion: null,
+        setName: null,
+        setVersion: null,
+        electionId: null,
+        logicalSessionTimeoutMinutes: null,
+        primary: null,
+        me: null,
+        '$clusterTime': null
+      }
+    },
+    stale: false,
+    compatible: true,
+    heartbeatFrequencyMS: 10000,
+    localThresholdMS: 15,
+    setName: 'atlas-mwjxq0-shard-0',
+    maxElectionId: new ObjectId("7fffffff0000000000000146"),
+    maxSetVersion: 391,
+    commonWireVersion: 0,
+    logicalSessionTimeoutMinutes: null
+  },
+  code: undefined,
+  level: 'error',
+  message: 'Token verification failed: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net',
+  stack: 'MongoServerSelectionError: getaddrinfo ENOTFOUND ac-syu7qxj-shard-00-00.idbaui6.mongodb.net\n' +
+    '    at Timeout._onTimeout (/Users/ashulkumar/kyc-aadhaar-app/backend/node_modules/mongodb/lib/sdam/topology.js:278:38)\n' +
+    '    at listOnTimeout (node:internal/timers:569:17)\n' +
+    '    at process.processTimers (node:internal/timers:512:7)',
+  timestamp: '2025-11-05 14:21:11',
+  [Symbol(errorLabels)]: Set(0) {}
+}
