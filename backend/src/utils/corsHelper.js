@@ -31,10 +31,11 @@ const getAllowedOrigins = () => {
       origins.push(normalizeOrigin(process.env.FRONTEND_URL));
     }
     
-    // Always add Vercel/Netlify regex patterns for flexibility
+    // Always add Vercel/Netlify/Amplify regex patterns for flexibility
     origins.push(
       /^https:\/\/.*\.vercel\.app$/,
-      /^https:\/\/.*\.netlify\.app$/
+      /^https:\/\/.*\.netlify\.app$/,
+      /^https:\/\/.*\.amplifyapp\.com$/
     );
     
     // Add default Vercel URLs if no custom origins specified

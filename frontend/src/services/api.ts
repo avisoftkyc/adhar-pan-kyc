@@ -1,9 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-// Create axios instance with longer timeout for Render free tier wake-up time
+// Create axios instance with longer timeout for API calls
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api'),
-  timeout: 60000, // 60 seconds to account for Render free tier wake-up time (30-60 seconds)
+  baseURL: process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api'),
+  timeout: 60000, // 60 seconds timeout
   headers: {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
@@ -57,7 +57,7 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to retry on connection errors (Render free tier sleep issue)
+// Response interceptor to retry on connection errors
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -69,7 +69,7 @@ api.interceptors.response.use(
 
     const retryCount = config._retryCount || 0;
 
-    // Retry on connection errors (Render free tier wake-up)
+    // Retry on connection errors
     if (isRetryableError(error) && retryCount < MAX_RETRIES) {
       config._retryCount = retryCount + 1;
       

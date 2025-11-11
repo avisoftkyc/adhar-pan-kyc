@@ -355,9 +355,9 @@ const AadhaarVerification: React.FC = () => {
       if (missingFields.length > 0) {
         const missingFieldNames = missingFields.map(f => f.fieldLabel).join(', ');
         toast.error(`Please fill all custom fields: ${missingFieldNames}`);
-        return;
-      }
-      
+      return;
+    }
+
       if (invalidEmailFields.length > 0) {
         const invalidEmailNames = invalidEmailFields.map(f => f.fieldLabel).join(', ');
         toast.error(`Please enter a valid email address for: ${invalidEmailNames}`);
@@ -453,7 +453,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-single`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -463,9 +463,9 @@ const AadhaarVerification: React.FC = () => {
           aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
           dynamicFields: [
             ...dynamicFields.map(field => ({
-              label: field.label,
-              value: field.value.trim()
-            })),
+            label: field.label,
+            value: field.value.trim()
+          })),
             // Include custom fields
             ...Object.entries(customFields).map(([key, value]) => ({
               label: key,
@@ -521,9 +521,9 @@ const AadhaarVerification: React.FC = () => {
           aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
           dynamicFields: [
             ...dynamicFields.map(field => ({
-              label: field.label,
-              value: field.value.trim()
-            })),
+            label: field.label,
+            value: field.value.trim()
+          })),
             // Include custom fields
             ...Object.entries(customFields).map(([key, value]) => ({
               label: key,
@@ -564,7 +564,7 @@ const AadhaarVerification: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -753,7 +753,7 @@ const AadhaarVerification: React.FC = () => {
       const authToken = token || localStorage.getItem('token') || sessionStorage.getItem('token');
       
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api')}/aadhaar-verification/records/${verificationRecordId}/selfie`,
+        `${process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? 'https://www.avihridsys.in/api' : 'http://localhost:3002/api')}/aadhaar-verification/records/${verificationRecordId}/selfie`,
         {
           method: 'POST',
           headers: {
