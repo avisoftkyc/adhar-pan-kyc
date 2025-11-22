@@ -158,6 +158,42 @@ app.get('/health', (req, res) => {
   });
 });
 
+// --- Begin: Trailing-slash normalizer (no redirect) ---
+/**
+ * Remove trailing slash for non-GET/HEAD methods so POST/PUT/PATCH/OPTIONS
+ * will not be redirected by upstreams that canonicalize URLs.
+ *
+ * NOTE: Keep root "/" intact.
+ */
+app.use((req, res, next) => {
+  try {
+    // only modify when path > 1 and ends with '/' and not GET/HEAD
+    if (req.path.length > 1 && req.path.endsWith('/') && !['GET', 'HEAD'].includes(req.method)) {
+      // strip trailing slash from req.url and req.path so express routing matches
+      // preserve query string if present
+      const originalUrl = req.url;
+      const originalPath = req.path;
+      const qsIndex = originalUrl.indexOf('?');
+      const query = qsIndex >= 0 ? originalUrl.slice(qsIndex) : '';
+      // remove single trailing slash
+      const newPath = originalPath.slice(0, -1);
+      req.url = newPath + query;
+      // for extra safety, also set req.path if your code reads it
+      req.path = newPath;
+      // optional debug log (disabled in production)
+      if (process.env.NODE_ENV !== 'production') {
+        logger.info(`[TrailingSlashFix] Rewrote ${req.method} ${originalUrl} -> ${req.url}`);
+      }
+    }
+  } catch (err) {
+    // if anything weird happens, don't break request flow
+    logger.warn('TrailingSlashFix middleware error', err);
+  }
+  next();
+});
+// --- End: Trailing-slash normalizer ---
+
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
