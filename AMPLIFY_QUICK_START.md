@@ -50,7 +50,21 @@ REACT_APP_ENVIRONMENT=production
 NODE_ENV=production
 ```
 
-📚 **See `AMPLIFY_BACKEND_SETUP.md` for detailed backend integration guide**
+#### Option C: Separate Amplify Apps (Recommended for Production) ⭐
+Deploy backend and frontend as separate Amplify projects:
+
+1. **Deploy Backend** (Lambda + API Gateway):
+```bash
+./deploy-backend-amplify.sh
+# Or see: SEPARATE_AMPLIFY_DEPLOYMENT.md
+```
+
+2. **Deploy Frontend** (separate Amplify app):
+- Create new Amplify app in Console
+- Set `REACT_APP_API_URL` to backend API Gateway URL
+- Deploy
+
+📚 **See `SEPARATE_AMPLIFY_DEPLOYMENT.md` for detailed separate deployment guide**
 
 ### 4. Deploy
 Click **"Save and deploy"** - that's it! 🚀
@@ -62,4 +76,5 @@ Click **"Save and deploy"** - that's it! 🚀
 ## Need Help?
 - Frontend deployment: See `AWS_AMPLIFY_DEPLOYMENT.md`
 - Backend integration: See `AMPLIFY_BACKEND_SETUP.md`
+- Separate deployment: See `SEPARATE_AMPLIFY_DEPLOYMENT.md`
 
