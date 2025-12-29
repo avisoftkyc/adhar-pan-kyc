@@ -9,7 +9,8 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
-const { getAllowedOrigins, getAllowedOrigin: getCorsOrigin } = require('./utils/corsHelper');
+//const { getAllowedOrigins, getAllowedOrigin: getCorsOrigin } = require('./utils/corsHelper');
+const allowedOrigins = getAllowedOrigins();
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -53,44 +54,48 @@ app.use(helmet({
 
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = getAllowedOrigins();
-    
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow server-to-server, curl, Postman
     if (!origin) {
       return callback(null, true);
     }
-    
-    // Check if origin matches any allowed origin
-    for (const allowedOrigin of allowedOrigins) {
-      if (typeof allowedOrigin === 'string') {
-        if (origin === allowedOrigin) {
-          return callback(null, true);
-        }
-      } else if (allowedOrigin instanceof RegExp) {
-        if (allowedOrigin.test(origin)) {
-          return callback(null, true);
-        }
+
+    const isAllowed = allowedOrigins.some((allowedOrigin) => {
+      if (typeof allowedOrigin === "string") {
+        return origin === allowedOrigin;
       }
-    }
-    
-    // Allow origin if in development mode (for flexibility during development)
-    if (process.env.NODE_ENV !== 'production') {
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return false;
+    });
+
+    if (isAllowed) {
       return callback(null, true);
     }
-    
-    // Log blocked origin for debugging
+
+    // 🔥 IMPORTANT FIX:
+    // Do NOT throw error — just deny silently
     logger.warn(`CORS blocked origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    return callback(null, false);
   },
+
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control', 'Pragma'],
-  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Cache-Control",
+    "Pragma"
+  ],
+  exposedHeaders: ["Content-Length"],
   optionsSuccessStatus: 200
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+// ✅ Explicit preflight handler (MANDATORY)
+app.options("*", (req, res) => {
+  res.sendStatus(200);
+});
 
 // Rate limiting
 const limiter = rateLimit({
