@@ -35,7 +35,8 @@ const getAllowedOrigins = () => {
     origins.push(
       /^https:\/\/.*\.vercel\.app$/,
       /^https:\/\/.*\.netlify\.app$/,
-      /^https:\/\/.*\.amplifyapp\.com$/
+      /^https:\/\/.*\.amplifyapp\.com$/,
+      /^https:\/\/(www\.)?avihridsys\.(in|info)$/
     );
     
     // Add default Vercel URLs if no custom origins specified

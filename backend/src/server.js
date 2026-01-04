@@ -9,7 +9,7 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
-//const { getAllowedOrigins, getAllowedOrigin: getCorsOrigin } = require('./utils/corsHelper');
+const { getAllowedOrigins, getAllowedOrigin: getCorsOrigin } = require('./utils/corsHelper');
 const allowedOrigins = getAllowedOrigins();
 
 // Import routes
