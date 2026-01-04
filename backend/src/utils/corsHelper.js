@@ -18,9 +18,18 @@ const normalizeOrigin = (url) => {
  * @returns {Array<string|RegExp>} Array of allowed origins
  */
 const getAllowedOrigins = () => {
+  const origins = [];
+  
+  // Always add avihridsys domains (works in both dev and production)
+  origins.push(
+    'https://www.avihridsys.info',
+    'https://avihridsys.info',
+    'https://www.avihridsys.in',
+    'https://avihridsys.in',
+    /^https:\/\/(www\.)?avihridsys\.(in|info)$/
+  );
+  
   if (process.env.NODE_ENV === 'production') {
-    const origins = [];
-    
     // Add environment variable origins (comma-separated)
     if (process.env.ALLOWED_ORIGINS) {
       origins.push(...process.env.ALLOWED_ORIGINS.split(',').map(origin => normalizeOrigin(origin.trim())));
@@ -35,8 +44,7 @@ const getAllowedOrigins = () => {
     origins.push(
       /^https:\/\/.*\.vercel\.app$/,
       /^https:\/\/.*\.netlify\.app$/,
-      /^https:\/\/.*\.amplifyapp\.com$/,
-      /^https:\/\/(www\.)?avihridsys\.(in|info)$/
+      /^https:\/\/.*\.amplifyapp\.com$/
     );
     
     // Add default Vercel URLs if no custom origins specified
@@ -58,7 +66,8 @@ const getAllowedOrigins = () => {
       devOrigins.push(...process.env.DEV_ALLOWED_ORIGINS.split(',').map(origin => normalizeOrigin(origin.trim())));
     }
     
-    return devOrigins;
+    // Merge with avihridsys domains
+    return [...origins, ...devOrigins];
   }
 };
 

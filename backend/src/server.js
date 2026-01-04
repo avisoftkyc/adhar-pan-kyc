@@ -61,7 +61,9 @@ app.use(cors({
 
     const isAllowed = allowedOrigins.some((allowedOrigin) => {
       if (typeof allowedOrigin === "string") {
-        return origin === allowedOrigin;
+        const normalized = origin.replace(/\/+$/, '');
+        const normalizedAllowed = allowedOrigin.replace(/\/+$/, '');
+        return normalized === normalizedAllowed;
       }
       if (allowedOrigin instanceof RegExp) {
         return allowedOrigin.test(origin);
@@ -70,12 +72,12 @@ app.use(cors({
     });
 
     if (isAllowed) {
+      logger.info(`CORS allowed origin: ${origin}`);
       return callback(null, true);
     }
 
-    // 🔥 IMPORTANT FIX:
-    // Do NOT throw error — just deny silently
-    logger.warn(`CORS blocked origin: ${origin}`);
+    // Log blocked origin for debugging
+    logger.warn(`CORS blocked origin: ${origin}. Allowed origins: ${JSON.stringify(allowedOrigins.filter(o => typeof o === 'string'))}`);
     return callback(null, false);
   },
 
