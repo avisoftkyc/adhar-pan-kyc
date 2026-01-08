@@ -125,11 +125,20 @@ const getFrontendUrl = () => {
     return url;
   }
   
-  // Second priority: Check if we're in production
-  if (process.env.NODE_ENV === 'production') {
+  // Second priority: Check multiple production indicators
+  const isProduction = 
+    process.env.NODE_ENV === 'production' ||
+    process.env.RENDER === 'true' || // Render deployment indicator
+    process.env.VERCEL === 'true' || // Vercel deployment indicator
+    process.env.RAILWAY_ENVIRONMENT === 'production' || // Railway indicator
+    !process.env.NODE_ENV || // If NODE_ENV is not set, assume production for safety
+    (typeof process.env.PORT !== 'undefined' && process.env.PORT !== '3000' && process.env.PORT !== '3002'); // Non-dev ports
+  
+  if (isProduction) {
     // Default production URL - use .info as primary
     const url = 'https://www.avihridsys.info';
-    logger.info(`QR Code: Using production URL (NODE_ENV=production): ${url}`);
+    logger.info(`QR Code: Using production URL (detected production environment): ${url}`);
+    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, PORT=${process.env.PORT}`);
     return url;
   }
   
