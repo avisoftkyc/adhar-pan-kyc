@@ -26,6 +26,28 @@ const customFieldsRoutes = require('./routes/customFields');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy - Required for Render and other reverse proxies
+// This allows Express to correctly identify client IPs from X-Forwarded-For headers
+if (process.env.TRUST_PROXY === '1' || process.env.TRUST_PROXY === 'true' || process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', true);
+  logger.info('Trust proxy enabled for reverse proxy support (Render/Vercel/etc)');
+} else if (process.env.TRUST_PROXY === 'false') {
+  app.set('trust proxy', false);
+} else {
+  // Auto-detect: if we're on Render, Vercel, or Railway, enable trust proxy
+  const isCloudPlatform = !!(
+    process.env.RENDER ||
+    process.env.RENDER_SERVICE_NAME ||
+    process.env.VERCEL ||
+    process.env.VERCEL_URL ||
+    process.env.RAILWAY_ENVIRONMENT
+  );
+  if (isCloudPlatform) {
+    app.set('trust proxy', true);
+    logger.info('Trust proxy auto-enabled (detected cloud platform)');
+  }
+}
+
 // Connect to MongoDB
 connectDB();
 
