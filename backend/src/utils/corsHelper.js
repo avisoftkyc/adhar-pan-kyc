@@ -110,9 +110,39 @@ const getAllowedOrigin = (requestOrigin) => {
   return normalizeOrigin(frontendUrl) || '*';
 };
 
+/**
+ * Get the frontend URL for QR codes and redirects
+ * Priority: FRONTEND_URL env var > Production detection > localhost
+ * @returns {string} Frontend URL
+ */
+const getFrontendUrl = () => {
+  const logger = require('./logger');
+  
+  // First priority: FRONTEND_URL environment variable
+  if (process.env.FRONTEND_URL) {
+    const url = normalizeOrigin(process.env.FRONTEND_URL);
+    logger.info(`QR Code: Using FRONTEND_URL from env: ${url}`);
+    return url;
+  }
+  
+  // Second priority: Check if we're in production
+  if (process.env.NODE_ENV === 'production') {
+    // Default production URL - use .info as primary
+    const url = 'https://www.avihridsys.info';
+    logger.info(`QR Code: Using production URL (NODE_ENV=production): ${url}`);
+    return url;
+  }
+  
+  // Development fallback
+  const url = 'http://localhost:3000';
+  logger.info(`QR Code: Using development URL: ${url}`);
+  return url;
+};
+
 module.exports = {
   getAllowedOrigins,
   getAllowedOrigin,
-  normalizeOrigin
+  normalizeOrigin,
+  getFrontendUrl
 };
 
