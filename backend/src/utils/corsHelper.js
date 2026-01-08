@@ -127,32 +127,36 @@ const getFrontendUrl = () => {
   
   // Second priority: Check multiple production indicators
   // If we're on Render, Vercel, Railway, or any cloud platform, assume production
+  // Also check if we're NOT on common localhost ports
+  const port = process.env.PORT ? parseInt(process.env.PORT) : null;
+  const isLocalPort = port === 3000 || port === 3002 || port === 5000;
+  
   const isProduction = 
     process.env.NODE_ENV === 'production' ||
     process.env.RENDER === 'true' || // Render deployment indicator
     process.env.RENDER_SERVICE_NAME || // Render service name exists
+    process.env.RENDER_SERVICE_ID || // Render service ID exists
     process.env.VERCEL === '1' || // Vercel deployment indicator
     process.env.VERCEL_URL || // Vercel URL exists
     process.env.RAILWAY_ENVIRONMENT === 'production' || // Railway indicator
     process.env.RAILWAY_ENVIRONMENT_NAME || // Railway environment name exists
     process.env.PORT === '10000' || // Render default port
-    (typeof process.env.PORT !== 'undefined' && 
-     process.env.PORT !== '3000' && 
-     process.env.PORT !== '3002' && 
-     process.env.PORT !== '5000'); // Non-dev ports (but allow 5000 for local)
+    (port && !isLocalPort); // Any port that's not a common dev port
   
-  if (isProduction) {
+  // If we can't definitively determine, but we're not on a local port, assume production
+  // This is safer than defaulting to localhost in production
+  if (isProduction || (!isLocalPort && port)) {
     // Default production URL - use .info as primary
     const url = 'https://www.avihridsys.info';
     logger.info(`QR Code: Using production URL (detected production environment): ${url}`);
-    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}`);
+    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
     return url;
   }
   
-  // Development fallback
+  // Development fallback - only use if we're definitely on a local port
   const url = 'http://localhost:3000';
   logger.info(`QR Code: Using development URL: ${url}`);
-  logger.warn(`QR Code: Production not detected! NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}`);
+  logger.warn(`QR Code: Production not detected! NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
   return url;
 };
 
