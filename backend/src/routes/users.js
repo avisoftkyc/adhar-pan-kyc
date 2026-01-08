@@ -431,11 +431,15 @@ router.get('/qr-code', protect, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching QR code:', error);
+    logger.error('Error fetching QR code:', {
+      error: error.message,
+      stack: error.stack,
+      userId: req.user?._id
+    });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch QR code',
-      error: error.message
+      error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message
     });
   }
 });
