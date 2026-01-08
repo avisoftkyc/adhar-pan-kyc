@@ -2357,16 +2357,22 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
       };
       await user.save();
 
-      await logEvent({
-        userId: req.user.id,
-        action: 'qr_code_generated',
-        module: 'admin',
-        resource: 'user',
-        resourceId: user._id,
-        details: `Generated QR code for user: ${user.email}`,
-        ipAddress: req.ip,
-        userAgent: req.get('User-Agent')
-      });
+      // Log audit event (with error handling)
+      try {
+        await logEvent({
+          userId: req.user.id,
+          action: 'qr_code_generated',
+          module: 'admin',
+          resource: 'user',
+          resourceId: user._id,
+          details: `Generated QR code for user: ${user.email}`,
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
+      } catch (auditError) {
+        // Log error but don't fail the request
+        logger.warn('Failed to log QR code generation audit event:', auditError.message);
+      }
 
       return res.json({
         success: true,
