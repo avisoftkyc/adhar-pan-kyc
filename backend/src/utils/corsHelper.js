@@ -143,20 +143,31 @@ const getFrontendUrl = () => {
     process.env.PORT === '10000' || // Render default port
     (port && !isLocalPort); // Any port that's not a common dev port
   
-  // If we can't definitively determine, but we're not on a local port, assume production
-  // This is safer than defaulting to localhost in production
-  if (isProduction || (!isLocalPort && port)) {
+  // CRITICAL: If PORT is set and it's NOT a local port, assume production
+  // This catches Render deployments even if NODE_ENV isn't set
+  // Render typically uses port 10000, but can be configured
+  if (isProduction || (port && !isLocalPort)) {
     // Default production URL - use .info as primary
     const url = 'https://www.avihridsys.info';
     logger.info(`QR Code: Using production URL (detected production environment): ${url}`);
-    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
+    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}, isProduction=${isProduction}`);
     return url;
   }
   
   // Development fallback - only use if we're definitely on a local port
-  const url = 'http://localhost:3000';
-  logger.info(`QR Code: Using development URL: ${url}`);
-  logger.warn(`QR Code: Production not detected! NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
+  // OR if PORT is not set (which shouldn't happen in production)
+  if (isLocalPort || !port) {
+    const url = 'http://localhost:3000';
+    logger.info(`QR Code: Using development URL: ${url}`);
+    logger.warn(`QR Code: Development mode detected. NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
+    return url;
+  }
+  
+  // Final fallback: if we can't determine, default to production for safety
+  // (Better to have production URL in dev than localhost in production)
+  const url = 'https://www.avihridsys.info';
+  logger.warn(`QR Code: Ambiguous environment, defaulting to production URL: ${url}`);
+  logger.warn(`QR Code: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}`);
   return url;
 };
 
