@@ -375,6 +375,10 @@ router.get('/qr-code', protect, async (req, res) => {
       const { getFrontendUrl } = require('../utils/corsHelper');
       const frontendUrl = getFrontendUrl();
       const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
+      
+      // Log for debugging
+      logger.info(`User QR Code Generation: frontendUrl=${frontendUrl}, qrCodeUrl=${qrCodeUrl}`);
+      logger.info(`User QR Code Env: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL || 'not set'}`);
 
       // Generate QR code image
       const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
@@ -406,6 +410,10 @@ router.get('/qr-code', protect, async (req, res) => {
     const { getFrontendUrl } = require('../utils/corsHelper');
     const frontendUrl = getFrontendUrl();
     const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
+    
+    // Log for debugging
+    logger.info(`User QR Code Return: frontendUrl=${frontendUrl}, qrCodeUrl=${qrCodeUrl}`);
+    logger.info(`User QR Code Env: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL || 'not set'}`);
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
       errorCorrectionLevel: 'H',
       type: 'image/png',
