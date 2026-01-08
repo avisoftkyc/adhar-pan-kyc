@@ -121,6 +121,13 @@ const getFrontendUrl = () => {
   // First priority: FRONTEND_URL environment variable
   if (process.env.FRONTEND_URL) {
     const url = normalizeOrigin(process.env.FRONTEND_URL);
+    // CRITICAL: Never allow localhost in production
+    if (url && url.includes('localhost')) {
+      logger.warn(`QR Code: FRONTEND_URL contains localhost (${url}), overriding to production URL`);
+      const productionUrl = 'https://www.avihridsys.info';
+      logger.info(`QR Code: Using production URL (override): ${productionUrl}`);
+      return productionUrl;
+    }
     logger.info(`QR Code: Using FRONTEND_URL from env: ${url}`);
     return url;
   }
@@ -130,6 +137,13 @@ const getFrontendUrl = () => {
   const url = 'https://www.avihridsys.info';
   logger.info(`QR Code: Using production URL (default): ${url}`);
   logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL || 'not set'}`);
+  
+  // Final safety check - never return localhost
+  if (url && url.includes('localhost')) {
+    logger.error(`QR Code: CRITICAL - Production URL contains localhost! This should never happen.`);
+    return 'https://www.avihridsys.info';
+  }
+  
   return url;
 };
 
