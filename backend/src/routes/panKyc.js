@@ -100,8 +100,47 @@ router.get('/batches', protect, async (req, res) => {
 // Get all records for a user
 router.get('/records', protect, async (req, res) => {
   try {
-    const records = await PanKyc.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100; // Default 100, max 1000
+    const maxLimit = 1000;
+    const actualLimit = Math.min(limit, maxLimit);
+    const skip = (page - 1) * actualLimit;
+    const search = req.query.search || '';
+    const status = req.query.status || '';
+    const sortBy = req.query.sortBy || 'createdAt';
+    const sortOrder = req.query.sortOrder || 'desc';
+
+    // Build query
+    let query = { userId: req.user.id };
+    
+    // Add search filter
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { panNumber: searchRegex },
+        { name: searchRegex },
+        { fatherName: searchRegex }
+      ];
+    }
+    
+    // Add status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Get total count for pagination
+    const totalRecords = await PanKyc.countDocuments(query);
+    const totalPages = Math.ceil(totalRecords / actualLimit);
+
+    // Build sort object
+    const sortObj = {};
+    sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Get paginated records
+    const records = await PanKyc.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(actualLimit)
       .lean();
 
     // Decrypt sensitive data for each record
@@ -111,7 +150,7 @@ router.get('/records', protect, async (req, res) => {
         const tempRecord = new PanKyc(record);
         return tempRecord.decryptData();
       } catch (error) {
-        console.error('Decryption error for record:', record._id, error.message);
+        logger.error('Decryption error for record:', record._id, error.message);
         // Return original record if decryption fails
         return record;
       }
@@ -119,7 +158,15 @@ router.get('/records', protect, async (req, res) => {
 
     res.json({
       success: true,
-      data: decryptedRecords
+      data: decryptedRecords,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+        limit: actualLimit
+      }
     });
   } catch (error) {
     logger.error('Error fetching PAN KYC records:', error);

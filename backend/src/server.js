@@ -59,25 +59,38 @@ app.use(cors({
       return callback(null, true);
     }
 
+    // Normalize origin for comparison
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+
     const isAllowed = allowedOrigins.some((allowedOrigin) => {
       if (typeof allowedOrigin === "string") {
-        const normalized = origin.replace(/\/+$/, '');
         const normalizedAllowed = allowedOrigin.replace(/\/+$/, '');
-        return normalized === normalizedAllowed;
+        const matches = normalizedOrigin === normalizedAllowed;
+        if (matches) {
+          logger.info(`CORS match (string): ${normalizedOrigin} === ${normalizedAllowed}`);
+        }
+        return matches;
       }
       if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
+        const matches = allowedOrigin.test(normalizedOrigin);
+        if (matches) {
+          logger.info(`CORS match (regex): ${normalizedOrigin} matches ${allowedOrigin}`);
+        }
+        return matches;
       }
       return false;
     });
 
     if (isAllowed) {
-      logger.info(`CORS allowed origin: ${origin}`);
+      logger.info(`✅ CORS allowed origin: ${origin}`);
       return callback(null, true);
     }
 
-    // Log blocked origin for debugging
-    logger.warn(`CORS blocked origin: ${origin}. Allowed origins: ${JSON.stringify(allowedOrigins.filter(o => typeof o === 'string'))}`);
+    // Log blocked origin for debugging with more details
+    logger.warn(`❌ CORS blocked origin: ${origin}`);
+    logger.warn(`   Normalized: ${normalizedOrigin}`);
+    logger.warn(`   Allowed origins (strings): ${JSON.stringify(allowedOrigins.filter(o => typeof o === 'string'))}`);
+    logger.warn(`   Allowed origins (regex): ${allowedOrigins.filter(o => o instanceof RegExp).map(r => r.toString()).join(', ')}`);
     return callback(null, false);
   },
 
@@ -91,13 +104,9 @@ app.use(cors({
     "Pragma"
   ],
   exposedHeaders: ["Content-Length"],
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false // Let cors middleware handle preflight
 }));
-
-// ✅ Explicit preflight handler (MANDATORY)
-app.options("*", (req, res) => {
-  res.sendStatus(200);
-});
 
 // Rate limiting
 const limiter = rateLimit({
