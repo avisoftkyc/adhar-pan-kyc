@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const QRCode = require('qrcode');
 const User = require('../models/User');
+const logger = require('../utils/logger');
 
 const { protect } = require('../middleware/auth');
 const userController = require('../controllers/userController');
