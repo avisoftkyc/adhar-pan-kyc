@@ -99,22 +99,63 @@ const PanKycRecords: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await api.get('/pan-kyc/records');
+      
+      // Use pagination to reduce load time
+      const response = await api.get('/pan-kyc/records', {
+        params: {
+          page: 1,
+          limit: 50 // Start with smaller page size
+        },
+        timeout: 45000 // 45 second timeout (less than 60s axios default)
+      });
+      
       if (response.data.success) {
         setRecords(response.data.data);
         calculateStats(response.data.data);
         hasFetchedRecords.current = true;
+        
+        // Show success message if processing took time
+        if (response.data.processingTime > 5000) {
+          showToast({
+            message: `Records loaded (took ${(response.data.processingTime / 1000).toFixed(1)}s). Consider using pagination for faster loading.`,
+            type: 'success',
+            duration: 3000
+          });
+        }
       }
     } catch (error: any) {
-      if (error.response?.status === 401) {
+      // Handle cancelled requests
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout') || error.message?.includes('canceled')) {
+        showToast({
+          message: 'Request timed out. The server may be starting up (Render free tier). Please try again in a few seconds.',
+          type: 'error',
+          duration: 5000
+        });
+        console.error('Request timeout/cancelled:', error);
+      } else if (error.response?.status === 401) {
         showToast({
           message: 'Authentication failed. Please log in again.',
           type: 'error'
         });
         console.error('Authentication error:', error);
+      } else if (error.response?.status === 504) {
+        showToast({
+          message: 'Server timeout. Try using pagination (smaller page size) or try again later.',
+          type: 'error',
+          duration: 5000
+        });
+        console.error('Server timeout:', error);
+      } else if (!error.response) {
+        // Network error - likely Render service sleeping
+        showToast({
+          message: 'Connection failed. The server may be starting up. Please wait a moment and try again.',
+          type: 'error',
+          duration: 5000
+        });
+        console.error('Network error (Render may be sleeping):', error);
       } else {
         showToast({
-          message: 'Failed to fetch records',
+          message: error.response?.data?.message || 'Failed to fetch records',
           type: 'error'
         });
         console.error('Error fetching records:', error);

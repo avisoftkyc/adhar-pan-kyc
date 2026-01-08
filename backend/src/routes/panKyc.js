@@ -99,16 +99,33 @@ router.get('/batches', protect, async (req, res) => {
 
 // Get all records for a user
 router.get('/records', protect, async (req, res) => {
+  const startTime = Date.now();
+  let requestTimeout;
+  
   try {
+    // Set a timeout to prevent hanging requests (30 seconds)
+    requestTimeout = setTimeout(() => {
+      if (!res.headersSent) {
+        logger.warn('Request timeout for /pan-kyc/records');
+        res.status(504).json({
+          success: false,
+          message: 'Request timeout. Please try again with pagination (use ?page=1&limit=50)',
+          error: 'Request took too long to process'
+        });
+      }
+    }, 30000); // 30 second timeout
+
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100; // Default 100, max 1000
-    const maxLimit = 1000;
+    const limit = parseInt(req.query.limit) || 50; // Reduced default to 50 for better performance
+    const maxLimit = 500; // Reduced max limit
     const actualLimit = Math.min(limit, maxLimit);
     const skip = (page - 1) * actualLimit;
     const search = req.query.search || '';
     const status = req.query.status || '';
     const sortBy = req.query.sortBy || 'createdAt';
     const sortOrder = req.query.sortOrder || 'desc';
+
+    logger.info(`Fetching PAN KYC records: page=${page}, limit=${actualLimit}, userId=${req.user.id}`);
 
     // Build query
     let query = { userId: req.user.id };
@@ -128,33 +145,57 @@ router.get('/records', protect, async (req, res) => {
       query.status = status;
     }
 
-    // Get total count for pagination
-    const totalRecords = await PanKyc.countDocuments(query);
+    // Get total count for pagination (with timeout protection)
+    const totalRecords = await PanKyc.countDocuments(query).maxTimeMS(5000);
     const totalPages = Math.ceil(totalRecords / actualLimit);
 
     // Build sort object
     const sortObj = {};
     sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-    // Get paginated records
+    // Get paginated records (with timeout protection)
     const records = await PanKyc.find(query)
       .sort(sortObj)
       .skip(skip)
       .limit(actualLimit)
+      .maxTimeMS(10000) // 10 second timeout for query
       .lean();
 
-    // Decrypt sensitive data for each record
-    const decryptedRecords = records.map(record => {
+    logger.info(`Found ${records.length} records, starting decryption...`);
+
+    // Decrypt sensitive data for each record (with error handling)
+    const decryptedRecords = [];
+    for (let i = 0; i < records.length; i++) {
+      const record = records[i];
       try {
         // Create a temporary PanKyc instance to use the decryptData method
         const tempRecord = new PanKyc(record);
-        return tempRecord.decryptData();
+        const decrypted = tempRecord.decryptData();
+        decryptedRecords.push(decrypted);
       } catch (error) {
-        logger.error('Decryption error for record:', record._id, error.message);
-        // Return original record if decryption fails
-        return record;
+        logger.error(`Decryption error for record ${record._id}:`, error.message);
+        // Return original record with encrypted fields marked
+        decryptedRecords.push({
+          ...record,
+          panNumber: record.panNumber ? '[ENCRYPTED]' : '',
+          name: record.name ? '[ENCRYPTED]' : '',
+          dateOfBirth: record.dateOfBirth ? '[ENCRYPTED]' : '',
+          fatherName: record.fatherName ? '[ENCRYPTED]' : ''
+        });
       }
-    });
+      
+      // Check if request is still active
+      if (req.aborted || res.headersSent) {
+        logger.warn('Request aborted during decryption');
+        return;
+      }
+    }
+
+    const processingTime = Date.now() - startTime;
+    logger.info(`Records fetched and decrypted in ${processingTime}ms`);
+
+    // Clear timeout since we're responding
+    clearTimeout(requestTimeout);
 
     res.json({
       success: true,
@@ -166,15 +207,25 @@ router.get('/records', protect, async (req, res) => {
         hasNext: page < totalPages,
         hasPrev: page > 1,
         limit: actualLimit
-      }
+      },
+      processingTime: processingTime
     });
   } catch (error) {
+    // Clear timeout on error
+    if (requestTimeout) {
+      clearTimeout(requestTimeout);
+    }
+    
     logger.error('Error fetching PAN KYC records:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch records',
-      error: error.message
-    });
+    
+    // Don't send response if already sent
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch records',
+        error: error.message
+      });
+    }
   }
 });
 
