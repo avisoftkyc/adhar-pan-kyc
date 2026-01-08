@@ -122,41 +122,29 @@ const simulateAadhaarPanLinking = async (record) => {
   const isValidName = name && name.length >= 2;
   
   let status = 'linked';
-  let details = {
-    message: 'Aadhaar-PAN linking verified successfully',
-    confidence: 95,
-    dataMatch: true
-  };
+  let details = {};
   
   if (!isValidAadhaar) {
     status = 'invalid';
     details = {
-      message: 'Invalid Aadhaar number format',
-      confidence: 0,
-      dataMatch: false
+      message: 'Invalid Aadhaar number format'
     };
   } else if (!isValidPAN) {
     status = 'invalid';
     details = {
-      message: 'Invalid PAN number format',
-      confidence: 0,
-      dataMatch: false
+      message: 'Invalid PAN number format'
     };
   } else if (!isValidName) {
     status = 'invalid';
     details = {
-      message: 'Invalid name format',
-      confidence: 0,
-      dataMatch: false
+      message: 'Invalid name format'
     };
   } else {
     // Simulate random verification failures (15% chance)
     if (Math.random() < 0.15) {
       status = 'not-linked';
       details = {
-        message: 'Aadhaar and PAN are not linked in government records',
-        confidence: 30,
-        dataMatch: false
+        message: 'Aadhaar and PAN are not linked in government records'
       };
     }
   }
@@ -834,6 +822,9 @@ router.post('/verify-single', protect, async (req, res) => {
       status: tempRecord.status
     }, req);
 
+    // Remove message, confidence, and dataMatch from verificationDetails
+    const { message, confidence, dataMatch, ...cleanVerificationDetails } = tempRecord.verificationDetails || {};
+    
     res.json({
       success: true,
       message: 'Aadhaar-PAN linking verification completed',
@@ -842,7 +833,7 @@ router.post('/verify-single', protect, async (req, res) => {
         panNumber: tempRecord.panNumber,
         name: tempRecord.name,
         status: tempRecord.status,
-        verificationDetails: tempRecord.verificationDetails,
+        verificationDetails: cleanVerificationDetails,
         processedAt: tempRecord.processedAt,
         processingTime: tempRecord.processingTime
       }
