@@ -42,7 +42,7 @@ const AuditSchema = new mongoose.Schema({
       'api_rate_limit_exceeded', 'security_alert',
       
       // Admin events
-      'admin_action', 'settings_changed', 'api_credentials_updated',
+      'admin_action', 'settings_changed', 'api_credentials_updated', 'qr_code_generated',
       
       // Archival events
       'archival_process_completed', 'archival_process_failed', 'record_marked_for_deletion',
