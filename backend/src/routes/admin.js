@@ -2336,6 +2336,10 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
       const { getFrontendUrl } = require('../utils/corsHelper');
       const frontendUrl = getFrontendUrl();
       const qrCodeUrl = `${frontendUrl}/verify/qr/${qrCodeString}`;
+      
+      // Log for debugging
+      logger.info(`Admin QR Code Generation: frontendUrl=${frontendUrl}, qrCodeUrl=${qrCodeUrl}`);
+      logger.info(`Admin QR Code Env: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL}`);
 
       // Generate QR code image
       const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
@@ -2383,6 +2387,10 @@ router.get('/users/:id/qr-code', protect, authorize('admin'), async (req, res) =
     const { getFrontendUrl } = require('../utils/corsHelper');
     const frontendUrl = getFrontendUrl();
     const qrCodeUrl = `${frontendUrl}/verify/qr/${user.qrCode.code}`;
+    
+    // Log for debugging
+    logger.info(`Admin QR Code Return: frontendUrl=${frontendUrl}, qrCodeUrl=${qrCodeUrl}`);
+    logger.info(`Admin QR Code Env: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL}`);
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
       errorCorrectionLevel: 'H',
       type: 'image/png',

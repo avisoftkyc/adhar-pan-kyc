@@ -129,34 +129,39 @@ const getFrontendUrl = () => {
   // If we're on Render, Vercel, Railway, or any cloud platform, assume production
   // Also check if we're NOT on common localhost ports
   const port = process.env.PORT ? parseInt(process.env.PORT) : null;
-  const isLocalPort = port === 3000 || port === 3002 || port === 5000;
+  const isLocalPort = port === 3000 || port === 3002;
+  // Note: PORT 5000 is also considered local for backward compatibility, but if PORT is set to anything else, assume production
+  
+  // Check for Render-specific environment variables (Render sets these automatically)
+  const isRender = !!(
+    process.env.RENDER ||
+    process.env.RENDER_SERVICE_NAME ||
+    process.env.RENDER_SERVICE_ID ||
+    process.env.RENDER_EXTERNAL_URL
+  );
   
   const isProduction = 
     process.env.NODE_ENV === 'production' ||
-    process.env.RENDER === 'true' || // Render deployment indicator
-    process.env.RENDER_SERVICE_NAME || // Render service name exists
-    process.env.RENDER_SERVICE_ID || // Render service ID exists
+    isRender || // Any Render indicator
     process.env.VERCEL === '1' || // Vercel deployment indicator
     process.env.VERCEL_URL || // Vercel URL exists
     process.env.RAILWAY_ENVIRONMENT === 'production' || // Railway indicator
     process.env.RAILWAY_ENVIRONMENT_NAME || // Railway environment name exists
-    process.env.PORT === '10000' || // Render default port
-    (port && !isLocalPort); // Any port that's not a common dev port
+    (port && port !== 3000 && port !== 3002 && port !== 5000); // Any port that's not a common dev port
   
-  // CRITICAL: If PORT is set and it's NOT a local port, assume production
-  // This catches Render deployments even if NODE_ENV isn't set
-  // Render typically uses port 10000, but can be configured
-  if (isProduction || (port && !isLocalPort)) {
+  // CRITICAL: If we're on Render OR PORT is set to a non-local value, use production
+  // Render deployments should ALWAYS use production URL
+  if (isProduction || isRender || (port && port !== 3000 && port !== 3002 && port !== 5000)) {
     // Default production URL - use .info as primary
     const url = 'https://www.avihridsys.info';
     logger.info(`QR Code: Using production URL (detected production environment): ${url}`);
-    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}, isProduction=${isProduction}`);
+    logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, isRender=${isRender}, RENDER=${process.env.RENDER}, RENDER_SERVICE_NAME=${process.env.RENDER_SERVICE_NAME}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}, isProduction=${isProduction}`);
     return url;
   }
   
-  // Development fallback - only use if we're definitely on a local port
-  // OR if PORT is not set (which shouldn't happen in production)
-  if (isLocalPort || !port) {
+  // Development fallback - only use if we're definitely on a local port (3000 or 3002)
+  // AND PORT is explicitly set to one of those values
+  if (isLocalPort) {
     const url = 'http://localhost:3000';
     logger.info(`QR Code: Using development URL: ${url}`);
     logger.warn(`QR Code: Development mode detected. NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, isLocalPort=${isLocalPort}`);
@@ -165,9 +170,10 @@ const getFrontendUrl = () => {
   
   // Final fallback: if we can't determine, default to production for safety
   // (Better to have production URL in dev than localhost in production)
+  // This catches cases where PORT might not be set but we're still in production
   const url = 'https://www.avihridsys.info';
-  logger.warn(`QR Code: Ambiguous environment, defaulting to production URL: ${url}`);
-  logger.warn(`QR Code: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}`);
+  logger.warn(`QR Code: Ambiguous environment, defaulting to production URL for safety: ${url}`);
+  logger.warn(`QR Code: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, isRender=${isRender}`);
   return url;
 };
 
