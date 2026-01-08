@@ -124,7 +124,7 @@ const getFrontendUrl = () => {
     // CRITICAL: Never allow localhost in production
     if (url && url.includes('localhost')) {
       logger.warn(`QR Code: FRONTEND_URL contains localhost (${url}), overriding to production URL`);
-      const productionUrl = 'https://www.avihridsys.info';
+      const productionUrl = 'https://www.avihridsys.in';
       logger.info(`QR Code: Using production URL (override): ${productionUrl}`);
       return productionUrl;
     }
@@ -134,14 +134,14 @@ const getFrontendUrl = () => {
   
   // Always use production URL - never localhost
   // This ensures QR codes always work in production, even if env vars aren't set
-  const url = 'https://www.avihridsys.info';
+  const url = 'https://www.avihridsys.in';
   logger.info(`QR Code: Using production URL (default): ${url}`);
   logger.info(`QR Code: NODE_ENV=${process.env.NODE_ENV}, PORT=${process.env.PORT}, FRONTEND_URL=${process.env.FRONTEND_URL || 'not set'}`);
   
   // Final safety check - never return localhost
   if (url && url.includes('localhost')) {
     logger.error(`QR Code: CRITICAL - Production URL contains localhost! This should never happen.`);
-    return 'https://www.avihridsys.info';
+    return 'https://www.avihridsys.in';
   }
   
   return url;
