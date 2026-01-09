@@ -247,24 +247,125 @@ router.get('/batches', protect, async (req, res) => {
 
 // Get all records for a user
 router.get('/records', protect, async (req, res) => {
+  const startTime = Date.now();
+  let requestTimeout;
+  
   try {
-    const records = await AadhaarPan.find({ userId: req.user.id })
-      .sort({ createdAt: -1 })
+    // Set a timeout to prevent hanging requests (30 seconds)
+    requestTimeout = setTimeout(() => {
+      if (!res.headersSent) {
+        logger.warn('Request timeout for /aadhaar-pan/records');
+        res.status(504).json({
+          success: false,
+          message: 'Request timeout. Please try again with pagination (use ?page=1&limit=50)',
+          error: 'Request took too long to process'
+        });
+      }
+    }, 30000); // 30 second timeout
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50; // Default to 50 for better performance
+    const maxLimit = 500; // Max limit
+    const actualLimit = Math.min(limit, maxLimit);
+    const skip = (page - 1) * actualLimit;
+    const search = req.query.search || '';
+    const status = req.query.status || '';
+    const sortBy = req.query.sortBy || 'createdAt';
+    const sortOrder = req.query.sortOrder || 'desc';
+
+    logger.info(`Fetching Aadhaar-PAN records: page=${page}, limit=${actualLimit}, userId=${req.user.id}`);
+
+    // Build query
+    let query = { userId: req.user.id };
+    
+    // Add search filter
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { panNumber: searchRegex },
+        { aadhaarNumber: searchRegex },
+        { name: searchRegex }
+      ];
+    }
+    
+    // Add status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Get total count for pagination (with timeout protection)
+    const totalRecords = await AadhaarPan.countDocuments(query).maxTimeMS(5000);
+    const totalPages = Math.ceil(totalRecords / actualLimit);
+
+    // Build sort object
+    const sortObj = {};
+    sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
+
+    // Get paginated records (with timeout protection)
+    const records = await AadhaarPan.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(actualLimit)
+      .maxTimeMS(10000) // 10 second timeout for query
       .lean();
+
+    logger.info(`Found ${records.length} records, starting decryption...`);
+
+    // Decrypt sensitive data in parallel for better performance
+    const decryptedRecords = await Promise.all(
+      records.map(async (record) => {
+        try {
+          // Create a temporary AadhaarPan instance to use the decryptData method
+          const tempRecord = new AadhaarPan(record);
+          return tempRecord.decryptData();
+        } catch (error) {
+          logger.error(`Decryption error for record ${record._id}:`, error.message);
+          // Return original record with encrypted fields marked
+          return {
+            ...record,
+            panNumber: record.panNumber ? '[ENCRYPTED]' : '',
+            aadhaarNumber: record.aadhaarNumber ? '[ENCRYPTED]' : '',
+            name: record.name ? '[ENCRYPTED]' : ''
+          };
+        }
+      })
+    );
+
+    const processingTime = Date.now() - startTime;
+    logger.info(`Records fetched and decrypted in ${processingTime}ms`);
+
+    // Clear timeout since we're responding
+    clearTimeout(requestTimeout);
 
     res.json({
       success: true,
-      data: records
+      data: decryptedRecords,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalRecords: totalRecords,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+        limit: actualLimit
+      },
+      processingTime: processingTime
     });
   } catch (error) {
+    // Clear timeout on error
+    if (requestTimeout) {
+      clearTimeout(requestTimeout);
+    }
+    
     logger.error('Error fetching Aadhaar-PAN records:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch records',
-      error: error.message,
-            sandboxApiResponse: error.sandboxApiResponse,
-            sandboxApiStatus: error.sandboxApiStatus
-    });
+    
+    // Don't send response if already sent
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch records',
+        error: error.message
+      });
+    }
   }
 });
 

@@ -163,33 +163,26 @@ router.get('/records', protect, async (req, res) => {
 
     logger.info(`Found ${records.length} records, starting decryption...`);
 
-    // Decrypt sensitive data for each record (with error handling)
-    const decryptedRecords = [];
-    for (let i = 0; i < records.length; i++) {
-      const record = records[i];
-      try {
-        // Create a temporary PanKyc instance to use the decryptData method
-        const tempRecord = new PanKyc(record);
-        const decrypted = tempRecord.decryptData();
-        decryptedRecords.push(decrypted);
-      } catch (error) {
-        logger.error(`Decryption error for record ${record._id}:`, error.message);
-        // Return original record with encrypted fields marked
-        decryptedRecords.push({
-          ...record,
-          panNumber: record.panNumber ? '[ENCRYPTED]' : '',
-          name: record.name ? '[ENCRYPTED]' : '',
-          dateOfBirth: record.dateOfBirth ? '[ENCRYPTED]' : '',
-          fatherName: record.fatherName ? '[ENCRYPTED]' : ''
-        });
-      }
-      
-      // Check if request is still active
-      if (req.aborted || res.headersSent) {
-        logger.warn('Request aborted during decryption');
-        return;
-      }
-    }
+    // Decrypt sensitive data in parallel for better performance
+    const decryptedRecords = await Promise.all(
+      records.map(async (record) => {
+        try {
+          // Create a temporary PanKyc instance to use the decryptData method
+          const tempRecord = new PanKyc(record);
+          return tempRecord.decryptData();
+        } catch (error) {
+          logger.error(`Decryption error for record ${record._id}:`, error.message);
+          // Return original record with encrypted fields marked
+          return {
+            ...record,
+            panNumber: record.panNumber ? '[ENCRYPTED]' : '',
+            name: record.name ? '[ENCRYPTED]' : '',
+            dateOfBirth: record.dateOfBirth ? '[ENCRYPTED]' : '',
+            fatherName: record.fatherName ? '[ENCRYPTED]' : ''
+          };
+        }
+      })
+    );
 
     const processingTime = Date.now() - startTime;
     logger.info(`Records fetched and decrypted in ${processingTime}ms`);

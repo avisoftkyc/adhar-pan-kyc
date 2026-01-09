@@ -48,8 +48,10 @@ const selfieUpload = multer({
 router.get('/records', protect, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const limit = parseInt(req.query.limit) || 50; // Increased default to 50 for better UX
+    const maxLimit = 500; // Max limit
+    const actualLimit = Math.min(limit, maxLimit);
+    const skip = (page - 1) * actualLimit;
     const search = req.query.search || '';
     const status = req.query.status || '';
     const dateFrom = req.query.dateFrom || '';
@@ -111,44 +113,47 @@ router.get('/records', protect, async (req, res) => {
       console.log('Search query built:', JSON.stringify(searchQuery, null, 2));
     }
 
-    // Get total count for pagination
-    const totalRecords = await AadhaarVerification.countDocuments(searchQuery);
-    const totalPages = Math.ceil(totalRecords / limit);
+    // Get total count for pagination (with timeout protection)
+    const totalRecords = await AadhaarVerification.countDocuments(searchQuery).maxTimeMS(5000);
+    const totalPages = Math.ceil(totalRecords / actualLimit);
 
     // Build sort object
     const sortObj = {};
     sortObj[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-    // Get paginated records
+    // Get paginated records (with timeout protection)
     const records = await AadhaarVerification.find(searchQuery)
       .sort(sortObj)
       .skip(skip)
       .limit(limit)
+      .maxTimeMS(10000) // 10 second timeout for query
       .lean();
 
-    // Decrypt sensitive data for each record
-    const decryptedRecords = records.map(record => {
-      try {
-        // Create a temporary AadhaarVerification instance to use the decryptData method
-        const tempRecord = new AadhaarVerification(record);
-        const decryptedRecord = tempRecord.decryptData();
-        
-        // Extract care_of from API response if careOf field is encrypted or missing
-        if ((decryptedRecord.careOf === '[ENCRYPTED]' || !decryptedRecord.careOf) && 
-            decryptedRecord.verificationDetails && 
-            decryptedRecord.verificationDetails.apiResponse && 
-            decryptedRecord.verificationDetails.apiResponse.data && 
-            decryptedRecord.verificationDetails.apiResponse.data.care_of) {
-          decryptedRecord.careOf = decryptedRecord.verificationDetails.apiResponse.data.care_of;
+    // Decrypt sensitive data in parallel for better performance
+    const decryptedRecords = await Promise.all(
+      records.map(async (record) => {
+        try {
+          // Create a temporary AadhaarVerification instance to use the decryptData method
+          const tempRecord = new AadhaarVerification(record);
+          const decryptedRecord = tempRecord.decryptData();
+          
+          // Extract care_of from API response if careOf field is encrypted or missing
+          if ((decryptedRecord.careOf === '[ENCRYPTED]' || !decryptedRecord.careOf) && 
+              decryptedRecord.verificationDetails && 
+              decryptedRecord.verificationDetails.apiResponse && 
+              decryptedRecord.verificationDetails.apiResponse.data && 
+              decryptedRecord.verificationDetails.apiResponse.data.care_of) {
+            decryptedRecord.careOf = decryptedRecord.verificationDetails.apiResponse.data.care_of;
+          }
+          
+          return decryptedRecord;
+        } catch (error) {
+          logger.error('Decryption error for record:', record._id, error.message);
+          // Return original record if decryption fails
+          return record;
         }
-        
-        return decryptedRecord;
-      } catch (error) {
-        console.error('Decryption error for record:', record._id, error.message);
-        // Return original record if decryption fails
-        return record;
-      }
-    });
+      })
+    );
 
     const responseData = {
       success: true,
@@ -159,7 +164,7 @@ router.get('/records', protect, async (req, res) => {
         totalRecords: totalRecords,
         hasNext: page < totalPages,
         hasPrev: page > 1,
-        limit: limit
+        limit: actualLimit
       }
     };
     
