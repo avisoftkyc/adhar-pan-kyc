@@ -453,18 +453,37 @@ const QrVerification: React.FC = () => {
                 </div>
               )}
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="consent"
-                  checked={consentAccepted}
-                  onChange={(e) => setConsentAccepted(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                  required
-                />
-                <label htmlFor="consent" className="ml-2 block text-sm text-gray-700">
-                  I consent to Aadhaar verification
-                </label>
+              {/* Consent Checkbox */}
+              <div className="flex items-start bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-blue-100">
+                <div className="flex items-center h-5 mt-1">
+                  <input
+                    id="consent"
+                    type="checkbox"
+                    checked={consentAccepted}
+                    onChange={(e) => setConsentAccepted(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-white border-2 border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                    required
+                  />
+                </div>
+                <div className="ml-3 flex-1">
+                  <label htmlFor="consent" className="font-bold text-gray-700 cursor-pointer block mb-2">
+                    ✅ Aadhaar Consent Declaration *
+                  </label>
+                  <div className="text-gray-600 text-xs space-y-1.5 leading-relaxed">
+                    <p className="font-semibold">
+                      I hereby voluntarily provide my Aadhaar details to AVI HR SOFTWARE PVT LTD for the purpose of employee verification, statutory compliance, and internal record maintenance.
+                    </p>
+                    <p className="font-semibold mt-2">I confirm and acknowledge that:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>My Aadhaar information will be used only for official and lawful purposes, including identity verification and compliance with applicable laws.</li>
+                      <li>The company shall ensure the confidentiality and security of my Aadhaar details, in accordance with the Aadhaar Act, 2016 and relevant data protection regulations.</li>
+                      <li>I am submitting this information willingly and without any coercion or undue pressure.</li>
+                      <li>I authorize AVI HR SOFTWARE PVT LTD to use, store, and process the provided Aadhaar details solely for the purposes stated above.</li>
+                      <li>The information I have provided is true and correct to the best of my knowledge.</li>
+                      <li>I have read and understood the above declaration and provide my consent.</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
               <button
