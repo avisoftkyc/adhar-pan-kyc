@@ -712,18 +712,48 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
       // If none found, try to search for the file by filename in the selfies directory
       if (!absolutePath || !fs.existsSync(absolutePath)) {
         try {
-          const files = fs.readdirSync(selfiesDir);
-          const matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
-          if (matchingFile) {
-            absolutePath = path.join(selfiesDir, matchingFile);
-            logger.info(`Found selfie by filename search: ${absolutePath}`);
+          if (fs.existsSync(selfiesDir)) {
+            const files = fs.readdirSync(selfiesDir);
+            logger.info(`Searching ${files.length} files in selfies directory for: ${filename} or ${path.basename(storedPath)}`);
+            
+            // Try exact matches first
+            let matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
+            
+            // If no exact match, try partial matches (filename contains stored filename or vice versa)
+            if (!matchingFile) {
+              const baseFilename = path.basename(storedPath);
+              const filenameWithoutExt = path.parse(filename).name;
+              const storedFilenameWithoutExt = path.parse(baseFilename).name;
+              
+              matchingFile = files.find(f => {
+                const fWithoutExt = path.parse(f).name;
+                return f === filename || 
+                       f === baseFilename ||
+                       fWithoutExt === filenameWithoutExt ||
+                       fWithoutExt === storedFilenameWithoutExt ||
+                       f.includes(filenameWithoutExt) ||
+                       filenameWithoutExt.includes(fWithoutExt) ||
+                       f.includes(storedFilenameWithoutExt) ||
+                       storedFilenameWithoutExt.includes(fWithoutExt);
+              });
+            }
+            
+            if (matchingFile) {
+              absolutePath = path.join(selfiesDir, matchingFile);
+              logger.info(`Found selfie by filename search: ${absolutePath}`);
+            } else {
+              // Log available files for debugging
+              logger.warn(`No matching file found. Available files (first 20): ${files.slice(0, 20).join(', ')}`);
+              // Last resort: use the most likely path
+              absolutePath = path.join(selfiesDir, filename);
+              logger.warn(`No existing path found, using: ${absolutePath}`);
+            }
           } else {
-            // Last resort: use the most likely path
+            logger.error(`Selfies directory does not exist: ${selfiesDir}`);
             absolutePath = path.join(selfiesDir, filename);
-            logger.warn(`No existing path found, using: ${absolutePath}`);
           }
         } catch (err) {
-          logger.error(`Error searching selfies directory: ${err.message}`);
+          logger.error(`Error searching selfies directory: ${err.message}`, err);
           absolutePath = path.join(selfiesDir, filename);
         }
       }
@@ -864,18 +894,48 @@ router.get('/records/:id/selfie-public', async (req, res) => {
       // If none found, try to search for the file by filename in the selfies directory
       if (!absolutePath || !fs.existsSync(absolutePath)) {
         try {
-          const files = fs.readdirSync(selfiesDir);
-          const matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
-          if (matchingFile) {
-            absolutePath = path.join(selfiesDir, matchingFile);
-            logger.info(`Found selfie by filename search (public): ${absolutePath}`);
+          if (fs.existsSync(selfiesDir)) {
+            const files = fs.readdirSync(selfiesDir);
+            logger.info(`Searching ${files.length} files in selfies directory (public) for: ${filename} or ${path.basename(storedPath)}`);
+            
+            // Try exact matches first
+            let matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
+            
+            // If no exact match, try partial matches (filename contains stored filename or vice versa)
+            if (!matchingFile) {
+              const baseFilename = path.basename(storedPath);
+              const filenameWithoutExt = path.parse(filename).name;
+              const storedFilenameWithoutExt = path.parse(baseFilename).name;
+              
+              matchingFile = files.find(f => {
+                const fWithoutExt = path.parse(f).name;
+                return f === filename || 
+                       f === baseFilename ||
+                       fWithoutExt === filenameWithoutExt ||
+                       fWithoutExt === storedFilenameWithoutExt ||
+                       f.includes(filenameWithoutExt) ||
+                       filenameWithoutExt.includes(fWithoutExt) ||
+                       f.includes(storedFilenameWithoutExt) ||
+                       storedFilenameWithoutExt.includes(fWithoutExt);
+              });
+            }
+            
+            if (matchingFile) {
+              absolutePath = path.join(selfiesDir, matchingFile);
+              logger.info(`Found selfie by filename search (public): ${absolutePath}`);
+            } else {
+              // Log available files for debugging
+              logger.warn(`No matching file found (public). Available files (first 20): ${files.slice(0, 20).join(', ')}`);
+              // Last resort: use the most likely path
+              absolutePath = path.join(selfiesDir, filename);
+              logger.warn(`No existing path found (public), using: ${absolutePath}`);
+            }
           } else {
-            // Last resort: use the most likely path
+            logger.error(`Selfies directory does not exist (public): ${selfiesDir}`);
             absolutePath = path.join(selfiesDir, filename);
-            logger.warn(`No existing path found (public), using: ${absolutePath}`);
           }
         } catch (err) {
-          logger.error(`Error searching selfies directory (public): ${err.message}`);
+          logger.error(`Error searching selfies directory (public): ${err.message}`, err);
           absolutePath = path.join(selfiesDir, filename);
         }
       }
