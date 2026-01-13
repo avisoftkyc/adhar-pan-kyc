@@ -682,17 +682,20 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
       absolutePath = storedPath;
     } else {
       // Handle relative paths - try multiple possible locations
+      // storedPath format should be: uploads/selfies/filename or uploads/selfies/selfie-xxx.jpg
       const possiblePaths = [
-        // First try: direct path resolution
+        // First try: resolve from backend directory (most common case)
         path.resolve(__dirname, '..', '..', storedPath),
-        // Second try: construct from selfies directory + filename
+        // Second try: construct from selfies directory + filename (if storedPath is just filename)
         path.join(selfiesDir, filename),
-        // Third try: if storedPath already includes selfies, use it directly
+        // Third try: if storedPath already includes selfies, extract filename and use it
         path.join(selfiesDir, path.basename(storedPath)),
         // Fourth try: resolve from project root
         path.resolve(process.cwd(), storedPath),
         // Fifth try: resolve from project root with selfies
-        path.resolve(process.cwd(), 'uploads', 'selfies', filename)
+        path.resolve(process.cwd(), 'uploads', 'selfies', filename),
+        // Sixth try: if storedPath is just the filename without directory
+        storedPath.startsWith('uploads/') ? path.resolve(__dirname, '..', '..', storedPath) : path.join(selfiesDir, storedPath)
       ];
       
       logger.info(`Trying possible paths: ${JSON.stringify(possiblePaths)}`);
@@ -706,10 +709,23 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
         }
       }
       
-      // If none found, use the most likely path (selfiesDir + filename)
-      if (!absolutePath) {
-        absolutePath = path.join(selfiesDir, filename);
-        logger.warn(`No existing path found, using: ${absolutePath}`);
+      // If none found, try to search for the file by filename in the selfies directory
+      if (!absolutePath || !fs.existsSync(absolutePath)) {
+        try {
+          const files = fs.readdirSync(selfiesDir);
+          const matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
+          if (matchingFile) {
+            absolutePath = path.join(selfiesDir, matchingFile);
+            logger.info(`Found selfie by filename search: ${absolutePath}`);
+          } else {
+            // Last resort: use the most likely path
+            absolutePath = path.join(selfiesDir, filename);
+            logger.warn(`No existing path found, using: ${absolutePath}`);
+          }
+        } catch (err) {
+          logger.error(`Error searching selfies directory: ${err.message}`);
+          absolutePath = path.join(selfiesDir, filename);
+        }
       }
     }
     
