@@ -365,10 +365,17 @@ const QrVerification: React.FC = () => {
       const data = response.data;
 
       if (data.success) {
-        setCurrentStep({ step: 'success', data: data.data });
-        setVerificationRecordId(data.data.recordId || null);
-        setHasSelfieAccess(data.data.hasSelfieAccess || false);
-        toast.success('Aadhaar verification completed successfully!');
+        // Check if verification was actually successful (status should be 'verified')
+        if (data.data && data.data.status === 'rejected') {
+          // Verification failed even though API call succeeded
+          setCurrentStep({ step: 'error', data: { message: 'Aadhaar verification failed. Please check your details and try again.' } });
+          toast.error('Aadhaar verification failed');
+        } else {
+          setCurrentStep({ step: 'success', data: data.data });
+          setVerificationRecordId(data.data.recordId || null);
+          setHasSelfieAccess(data.data.hasSelfieAccess || false);
+          toast.success('Aadhaar verification completed successfully!');
+        }
       } else {
         setCurrentStep({ step: 'error', data: { message: data.message } });
         toast.error(data.message || 'OTP verification failed');

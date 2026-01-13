@@ -607,9 +607,16 @@ const AadhaarVerification: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        setCurrentStep({ step: 'success', data: data.data });
-        setVerificationRecordId(data.data.recordId || null);
-        toast.success('Aadhaar verification completed successfully!');
+        // Check if verification was actually successful (status should be 'verified')
+        if (data.data && data.data.status === 'rejected') {
+          // Verification failed even though API call succeeded
+          setCurrentStep({ step: 'error', data: { message: 'Aadhaar verification failed. Please check your details and try again.' } });
+          toast.error('Aadhaar verification failed');
+        } else {
+          setCurrentStep({ step: 'success', data: data.data });
+          setVerificationRecordId(data.data.recordId || null);
+          toast.success('Aadhaar verification completed successfully!');
+        }
       } else {
         setCurrentStep({ step: 'error', data: { message: data.message } });
         toast.error(data.message || 'OTP verification failed');
@@ -1241,9 +1248,21 @@ const AadhaarVerification: React.FC = () => {
                         {currentStep.data.verificationDetails && (
                           <>
                             <div className="flex items-center bg-white/50 p-3 rounded-xl">
-                              <CheckCircleIcon className="w-5 h-5 mr-3 text-green-600" />
+                              {currentStep.data.status === 'verified' ? (
+                                <CheckCircleIcon className="w-5 h-5 mr-3 text-green-600" />
+                              ) : (
+                                <XCircleIcon className="w-5 h-5 mr-3 text-red-600" />
+                              )}
                               <span className="font-bold text-gray-700">Status:</span>
-                              <span className="ml-2 text-lg font-bold text-green-600 capitalize">{currentStep.data.status}</span>
+                              <span className={`ml-2 text-lg font-bold capitalize ${
+                                currentStep.data.status === 'verified' 
+                                  ? 'text-green-600' 
+                                  : currentStep.data.status === 'rejected'
+                                  ? 'text-red-600'
+                                  : 'text-gray-600'
+                              }`}>
+                                {currentStep.data.status === 'rejected' ? 'Failed' : currentStep.data.status}
+                              </span>
                             </div>
                             <div className="flex items-center bg-white/50 p-3 rounded-xl">
                               <ClockIcon className="w-5 h-5 mr-3 text-orange-600" />
