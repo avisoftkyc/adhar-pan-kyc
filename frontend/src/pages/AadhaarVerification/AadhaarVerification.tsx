@@ -580,22 +580,28 @@ const AadhaarVerification: React.FC = () => {
                              !window.location.hostname.startsWith('192.168.');
         return isProduction ? 'https://adhar-pan-kyc-1.onrender.com/api' : 'http://localhost:3002/api';
       };
+      // Prepare payload with customFields
+      const payload = {
+        aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
+        otp: otp.trim(),
+        transactionId: transactionId,
+        dynamicFields: dynamicFields.map(field => ({
+          label: field.label,
+          value: field.value.trim()
+        })),
+        customFields: customFields || {} // Ensure customFields is always included, even if empty
+      };
+      
+      console.log('Verify OTP payload:', payload);
+      console.log('Custom fields being sent:', customFields);
+      
       const response = await fetch(`${getApiBaseURL()}/aadhaar-verification/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          aadhaarNumber: aadhaarNumber.replace(/\s+/g, '').replace(/-/g, ''),
-          otp: otp.trim(),
-          transactionId: transactionId,
-          dynamicFields: dynamicFields.map(field => ({
-            label: field.label,
-            value: field.value.trim()
-          })),
-          customFields: customFields
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json();
