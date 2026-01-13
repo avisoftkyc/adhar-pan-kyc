@@ -898,37 +898,87 @@ router.get('/records/:id/selfie-public', async (req, res) => {
             const files = fs.readdirSync(selfiesDir);
             logger.info(`Searching ${files.length} files in selfies directory (public) for: ${filename} or ${path.basename(storedPath)}`);
             
-            // Try exact matches first
-            let matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
+            logger.info(`[Record ${id}] [PUBLIC] Looking for: filename="${filename}", storedPath="${storedPath}", basename="${path.basename(storedPath)}"`);
             
-            // If no exact match, try partial matches (filename contains stored filename or vice versa)
+            // Try exact matches first
+            let matchingFile = files.find(f => {
+              const match = f === filename || f === path.basename(storedPath);
+              if (match) logger.info(`[Record ${id}] [PUBLIC] Exact match found: ${f}`);
+              return match;
+            });
+            
+            // If no exact match, try to extract unique identifier from filename
+            // Selfie filenames are like: selfie-1768271325411-85889526.jpg
+            // Extract the timestamp and random number parts
+            if (!matchingFile && filename) {
+              const filenameParts = filename.match(/selfie-(\d+)-(\d+)\./);
+              if (filenameParts) {
+                const timestamp = filenameParts[1];
+                const randomNum = filenameParts[2];
+                logger.info(`[Record ${id}] [PUBLIC] Trying to match by timestamp=${timestamp}, random=${randomNum}`);
+                
+                matchingFile = files.find(f => {
+                  const fParts = f.match(/selfie-(\d+)-(\d+)\./);
+                  if (fParts) {
+                    return fParts[1] === timestamp || fParts[2] === randomNum;
+                  }
+                  return false;
+                });
+                
+                if (matchingFile) {
+                  logger.info(`[Record ${id}] [PUBLIC] Found by timestamp/random match: ${matchingFile}`);
+                }
+              }
+            }
+            
+            // If still no match, try partial matches (filename contains stored filename or vice versa)
             if (!matchingFile) {
               const baseFilename = path.basename(storedPath);
               const filenameWithoutExt = path.parse(filename).name;
               const storedFilenameWithoutExt = path.parse(baseFilename).name;
               
+              logger.info(`[Record ${id}] [PUBLIC] Trying partial match: filenameWithoutExt="${filenameWithoutExt}", storedFilenameWithoutExt="${storedFilenameWithoutExt}"`);
+              
               matchingFile = files.find(f => {
                 const fWithoutExt = path.parse(f).name;
-                return f === filename || 
+                const match = f === filename || 
                        f === baseFilename ||
                        fWithoutExt === filenameWithoutExt ||
                        fWithoutExt === storedFilenameWithoutExt ||
-                       f.includes(filenameWithoutExt) ||
-                       filenameWithoutExt.includes(fWithoutExt) ||
-                       f.includes(storedFilenameWithoutExt) ||
-                       storedFilenameWithoutExt.includes(fWithoutExt);
+                       (filenameWithoutExt && f.includes(filenameWithoutExt)) ||
+                       (filenameWithoutExt && filenameWithoutExt.includes(fWithoutExt)) ||
+                       (storedFilenameWithoutExt && f.includes(storedFilenameWithoutExt)) ||
+                       (storedFilenameWithoutExt && storedFilenameWithoutExt.includes(fWithoutExt));
+                if (match) logger.info(`[Record ${id}] [PUBLIC] Partial match found: ${f}`);
+                return match;
               });
+            }
+            
+            // Last resort: if filename starts with "selfie-", try to find any file with similar pattern
+            if (!matchingFile && filename && filename.startsWith('selfie-')) {
+              logger.info(`[Record ${id}] [PUBLIC] Trying to find any selfie file with similar pattern`);
+              // Get the date part from filename (selfie-TIMESTAMP-random.jpg)
+              const dateMatch = filename.match(/selfie-(\d{10,})/);
+              if (dateMatch) {
+                const datePrefix = dateMatch[1].substring(0, 10); // First 10 digits (timestamp)
+                matchingFile = files.find(f => f.startsWith('selfie-') && f.includes(datePrefix));
+                if (matchingFile) {
+                  logger.info(`[Record ${id}] [PUBLIC] Found by date prefix match: ${matchingFile}`);
+                }
+              }
             }
             
             if (matchingFile) {
               absolutePath = path.join(selfiesDir, matchingFile);
-              logger.info(`Found selfie by filename search (public): ${absolutePath}`);
+              logger.info(`[Record ${id}] [PUBLIC] ✅ Found selfie by filename search: ${absolutePath}`);
             } else {
               // Log available files for debugging
-              logger.warn(`No matching file found (public). Available files (first 20): ${files.slice(0, 20).join(', ')}`);
+              const selfieFiles = files.filter(f => f.startsWith('selfie-'));
+              logger.error(`[Record ${id}] [PUBLIC] ❌ No matching file found. Looking for: "${filename}" or "${path.basename(storedPath)}"`);
+              logger.error(`[Record ${id}] [PUBLIC] Available selfie files (${selfieFiles.length} total, showing first 30): ${selfieFiles.slice(0, 30).join(', ')}`);
               // Last resort: use the most likely path
               absolutePath = path.join(selfiesDir, filename);
-              logger.warn(`No existing path found (public), using: ${absolutePath}`);
+              logger.warn(`[Record ${id}] [PUBLIC] Using fallback path: ${absolutePath}`);
             }
           } else {
             logger.error(`Selfies directory does not exist (public): ${selfiesDir}`);
