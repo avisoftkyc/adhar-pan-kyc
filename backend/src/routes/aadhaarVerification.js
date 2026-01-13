@@ -459,6 +459,13 @@ router.post('/records/:id/selfie', protect, selfieUpload.single('selfie'), async
       }
     }
 
+    // Store the path correctly - ensure it's relative to project root
+    // req.file.path is absolute, we need to make it relative
+    // Format: uploads/selfies/filename
+    const relativePath = req.file.path.replace(/^.*uploads/, 'uploads');
+    
+    logger.info(`Storing selfie path (protected): original=${req.file.path}, relative=${relativePath}`);
+
     // Update verification record with selfie using findByIdAndUpdate to avoid validation issues with encrypted fields
     await AadhaarVerification.findByIdAndUpdate(
       id,
@@ -467,7 +474,7 @@ router.post('/records/:id/selfie', protect, selfieUpload.single('selfie'), async
           selfie: {
             filename: req.file.filename,
             originalName: req.file.originalname,
-            path: req.file.path.replace(/^.*uploads/, 'uploads'), // Store relative path
+            path: relativePath, // Store relative path
             mimetype: req.file.mimetype,
             size: req.file.size,
             uploadedAt: new Date()
@@ -569,16 +576,10 @@ router.post('/records/:id/selfie-public', selfieUpload.single('selfie'), async (
 
     // Store the path correctly - ensure it's relative to project root
     // req.file.path is absolute, we need to make it relative
-    let relativePath = req.file.path;
-    const uploadsIndex = relativePath.indexOf('uploads');
-    if (uploadsIndex !== -1) {
-      relativePath = relativePath.substring(uploadsIndex);
-    } else {
-      // Fallback: use filename in selfies directory
-      relativePath = `uploads/selfies/${req.file.filename}`;
-    }
+    // Use the same logic as the protected endpoint for consistency
+    const relativePath = req.file.path.replace(/^.*uploads/, 'uploads');
     
-    logger.info(`Storing selfie path: original=${req.file.path}, relative=${relativePath}`);
+    logger.info(`Storing selfie path (public): original=${req.file.path}, relative=${relativePath}`);
 
     // Update verification record with selfie
     await AadhaarVerification.findByIdAndUpdate(
@@ -806,57 +807,84 @@ router.get('/records/:id/selfie-public', async (req, res) => {
     // Resolve the absolute path - handle both relative and absolute paths
     let absolutePath;
     const storedPath = verificationRecord.selfie.path;
+    const filename = verificationRecord.selfie.filename || path.basename(storedPath);
+    
+    // Get the selfies directory (same as multer storage destination)
+    const selfiesDir = path.join(__dirname, '..', '..', 'uploads', 'selfies');
+    
+    logger.info(`Selfie retrieval (public) - storedPath: ${storedPath}, filename: ${filename}, selfiesDir: ${selfiesDir}`);
     
     if (path.isAbsolute(storedPath)) {
       absolutePath = storedPath;
     } else {
       // Handle relative paths - try multiple possible locations
+      // storedPath format should be: uploads/selfies/filename or uploads/selfies/selfie-xxx.jpg
       const possiblePaths = [
+        // First try: resolve from backend directory (most common case)
         path.resolve(__dirname, '..', '..', storedPath),
-        path.resolve(__dirname, '..', '..', 'uploads', 'selfies', path.basename(storedPath)),
-        path.join(__dirname, '..', '..', storedPath)
+        // Second try: construct from selfies directory + filename (if storedPath is just filename)
+        path.join(selfiesDir, filename),
+        // Third try: if storedPath already includes selfies, extract filename and use it
+        path.join(selfiesDir, path.basename(storedPath)),
+        // Fourth try: resolve from project root
+        path.resolve(process.cwd(), storedPath),
+        // Fifth try: resolve from project root with selfies
+        path.resolve(process.cwd(), 'uploads', 'selfies', filename),
+        // Sixth try: if storedPath is just the filename without directory
+        storedPath.startsWith('uploads/') ? path.resolve(__dirname, '..', '..', storedPath) : path.join(selfiesDir, storedPath)
       ];
+      
+      logger.info(`Trying possible paths (public): ${JSON.stringify(possiblePaths)}`);
       
       // Find the first existing path
       for (const possiblePath of possiblePaths) {
         if (fs.existsSync(possiblePath)) {
           absolutePath = possiblePath;
+          logger.info(`Found selfie at (public): ${absolutePath}`);
           break;
         }
       }
       
-      // If none found, use the first one for error reporting
-      if (!absolutePath) {
-        absolutePath = possiblePaths[0];
+      // If none found, try to search for the file by filename in the selfies directory
+      if (!absolutePath || !fs.existsSync(absolutePath)) {
+        try {
+          const files = fs.readdirSync(selfiesDir);
+          const matchingFile = files.find(f => f === filename || f === path.basename(storedPath));
+          if (matchingFile) {
+            absolutePath = path.join(selfiesDir, matchingFile);
+            logger.info(`Found selfie by filename search (public): ${absolutePath}`);
+          } else {
+            // Last resort: use the most likely path
+            absolutePath = path.join(selfiesDir, filename);
+            logger.warn(`No existing path found (public), using: ${absolutePath}`);
+          }
+        } catch (err) {
+          logger.error(`Error searching selfies directory (public): ${err.message}`);
+          absolutePath = path.join(selfiesDir, filename);
+        }
       }
     }
     
-    logger.info(`Selfie path resolution (public): stored=${storedPath}, resolved=${absolutePath}, exists=${fs.existsSync(absolutePath)}`);
+    logger.info(`Final path resolution (public): stored=${storedPath}, resolved=${absolutePath}, exists=${fs.existsSync(absolutePath)}`);
     
     // Check if file exists
     if (!fs.existsSync(absolutePath)) {
-      logger.warn(`Selfie file not found: ${absolutePath} for record ${id}, stored path: ${storedPath}`);
-      
-      // Try to find the file by filename in the selfies directory
-      const selfiesDir = path.join(__dirname, '..', '..', 'uploads', 'selfies');
+      logger.error(`Selfie file not found (public): ${absolutePath} for record ${id}`);
+      logger.error(`Stored path: ${storedPath}, Filename: ${filename}`);
+      logger.error(`Selfies directory exists: ${fs.existsSync(selfiesDir)}`);
       if (fs.existsSync(selfiesDir)) {
-        const filename = verificationRecord.selfie.filename || path.basename(storedPath);
-        const alternativePath = path.join(selfiesDir, filename);
-        if (fs.existsSync(alternativePath)) {
-          logger.info(`Found selfie at alternative path: ${alternativePath}`);
-          absolutePath = alternativePath;
-        } else {
-          return res.status(404).json({
-            success: false,
-            message: 'Selfie file not found on server'
-          });
+        try {
+          const files = fs.readdirSync(selfiesDir);
+          logger.error(`Files in selfies directory: ${files.slice(0, 10).join(', ')} (showing first 10)`);
+        } catch (err) {
+          logger.error(`Error reading selfies directory: ${err.message}`);
         }
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'Selfie file not found on server'
-        });
       }
+      
+      return res.status(404).json({
+        success: false,
+        message: 'Selfie file not found on server'
+      });
     }
 
     // Set headers for image serving
