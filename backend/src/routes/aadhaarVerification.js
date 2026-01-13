@@ -612,9 +612,12 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
   try {
     const { id } = req.params;
     
+    logger.info(`Fetching selfie for record: ${id}, user: ${req.user.id}`);
+    
     const verificationRecord = await AadhaarVerification.findById(id);
     
     if (!verificationRecord) {
+      logger.warn(`Verification record not found: ${id}`);
       return res.status(404).json({
         success: false,
         message: 'Verification record not found'
@@ -627,6 +630,7 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
     const isAdmin = user && user.role === 'admin';
     
     if (!isAdmin && verificationRecord.userId.toString() !== req.user.id.toString()) {
+      logger.warn(`Unauthorized selfie access attempt: record ${id} by user ${req.user.id}`);
       return res.status(403).json({
         success: false,
         message: 'Not authorized to view this selfie'
@@ -634,22 +638,76 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
     }
 
     if (!verificationRecord.selfie || !verificationRecord.selfie.path) {
+      logger.warn(`No selfie path found for record: ${id}`);
       return res.status(404).json({
         success: false,
         message: 'Selfie not found for this record'
       });
     }
 
-    // Resolve the absolute path
-    const absolutePath = path.resolve(__dirname, '..', '..', verificationRecord.selfie.path);
+    // Resolve the absolute path - handle both relative and absolute paths
+    let absolutePath;
+    const storedPath = verificationRecord.selfie.path;
+    
+    if (path.isAbsolute(storedPath)) {
+      absolutePath = storedPath;
+    } else {
+      // Handle relative paths - try multiple possible locations
+      const possiblePaths = [
+        path.resolve(__dirname, '..', '..', storedPath),
+        path.resolve(__dirname, '..', '..', 'uploads', 'selfies', path.basename(storedPath)),
+        path.join(__dirname, '..', '..', storedPath)
+      ];
+      
+      // Find the first existing path
+      for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(possiblePath)) {
+          absolutePath = possiblePath;
+          break;
+        }
+      }
+      
+      // If none found, use the first one for error reporting
+      if (!absolutePath) {
+        absolutePath = possiblePaths[0];
+      }
+    }
+    
+    logger.info(`Selfie path resolution: stored=${storedPath}, resolved=${absolutePath}, exists=${fs.existsSync(absolutePath)}`);
     
     // Check if file exists
     if (!fs.existsSync(absolutePath)) {
-      logger.warn(`Selfie file not found: ${absolutePath} for record ${id}`);
-      return res.status(404).json({
-        success: false,
-        message: 'Selfie file not found on server'
-      });
+      logger.warn(`Selfie file not found: ${absolutePath} for record ${id}, stored path: ${storedPath}`);
+      
+      // Try to find the file by filename in the selfies directory
+      const selfiesDir = path.join(__dirname, '..', '..', 'uploads', 'selfies');
+      if (fs.existsSync(selfiesDir)) {
+        const filename = verificationRecord.selfie.filename || path.basename(storedPath);
+        const alternativePath = path.join(selfiesDir, filename);
+        if (fs.existsSync(alternativePath)) {
+          logger.info(`Found selfie at alternative path: ${alternativePath}`);
+          absolutePath = alternativePath;
+        } else {
+          return res.status(404).json({
+            success: false,
+            message: 'Selfie file not found on server',
+            debug: {
+              storedPath: storedPath,
+              resolvedPath: absolutePath,
+              filename: filename
+            }
+          });
+        }
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: 'Selfie file not found on server',
+          debug: {
+            storedPath: storedPath,
+            resolvedPath: absolutePath
+          }
+        });
+      }
     }
 
     // Set headers for image serving
@@ -660,15 +718,22 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
       'Access-Control-Allow-Methods': 'GET',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Cross-Origin-Resource-Policy': 'cross-origin',
-      'Cross-Origin-Embedder-Policy': 'unsafe-none'
+      'Cross-Origin-Embedder-Policy': 'unsafe-none',
+      'Cache-Control': 'public, max-age=31536000' // Cache for 1 year
     });
     
     res.sendFile(absolutePath);
   } catch (error) {
-    logger.error('Error serving selfie:', error);
+    logger.error('Error serving selfie:', {
+      error: error.message,
+      stack: error.stack,
+      recordId: req.params.id,
+      userId: req.user?.id
+    });
     res.status(500).json({
       success: false,
-      message: 'Failed to serve selfie'
+      message: 'Failed to serve selfie',
+      error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message
     });
   }
 });
