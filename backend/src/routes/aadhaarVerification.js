@@ -823,7 +823,11 @@ router.post('/verify-otp-qr/:qrCode', async (req, res) => {
           value: value
         }))
       ],
-      status: verificationResult.status === 'VALID' ? 'verified' : 'invalid',
+      // Check status from API response - status can be in data.status or at root level
+      // Also check if there's an error or if the verification was successful
+      status: (verificationResult.data?.status === 'VALID' || 
+               verificationResult.status === 'VALID' || 
+               (verificationResult.data && !verificationResult.data.error)) ? 'verified' : 'rejected',
       verificationDetails: {
         apiResponse: verificationResult,
         verifiedName: verificationResult.data.name || '',
