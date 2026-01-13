@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const CustomField = require('../models/CustomField');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalAuth } = require('../middleware/auth');
 const { logEvent } = require('../services/auditService');
 const logger = require('../utils/logger');
 
 // @route   GET /api/custom-fields
-// @desc    Get all custom fields
-// @access  Private
-router.get('/', protect, async (req, res) => {
+// @desc    Get all custom fields (public for verification fields, private for others)
+// @access  Public for verification fields, Private for others
+router.get('/', optionalAuth, async (req, res) => {
   try {
     const { appliesTo, category, isActive, search } = req.query;
     
