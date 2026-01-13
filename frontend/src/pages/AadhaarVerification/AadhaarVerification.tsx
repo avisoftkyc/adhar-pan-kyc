@@ -593,7 +593,8 @@ const AadhaarVerification: React.FC = () => {
           dynamicFields: dynamicFields.map(field => ({
             label: field.label,
             value: field.value.trim()
-          }))
+          })),
+          customFields: customFields
         })
       });
 
