@@ -12,6 +12,19 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     const { appliesTo, category, isActive, search } = req.query;
     
+    // If requesting verification fields and user is not authenticated, allow public access
+    // Otherwise, require authentication for non-verification fields
+    const isPublicRequest = !req.user;
+    const isVerificationRequest = appliesTo === 'verification';
+    
+    // For public requests, only allow verification fields
+    if (isPublicRequest && !isVerificationRequest) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required to access non-verification custom fields'
+      });
+    }
+    
     let query = {};
     
     // Filter by appliesTo
@@ -25,7 +38,10 @@ router.get('/', optionalAuth, async (req, res) => {
     }
     
     // Filter by active status
-    if (isActive !== undefined) {
+    // For public requests, always require isActive=true
+    if (isPublicRequest) {
+      query.isActive = true;
+    } else if (isActive !== undefined) {
       query.isActive = isActive === 'true';
     }
     
