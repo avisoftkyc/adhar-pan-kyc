@@ -330,7 +330,12 @@ router.post('/verify-otp', protect, async (req, res) => {
       careOf: apiData.care_of || '', // Add care_of field
       photo: apiData.photo || '', // Add photo field
       dynamicFields: dynamicFields, // Store the dynamic fields from the request
-      status: apiData.status === 'VALID' ? 'verified' : 'rejected',
+      // Check status from API response - status can be in data.status or at root level
+      // Also check if there's an error or if the verification was successful
+      status: (apiData.status === 'VALID' || 
+               otpResult.data?.status === 'VALID' || 
+               otpResult.status === 'VALID' ||
+               (otpResult.data && !otpResult.data.error && apiData.name)) ? 'verified' : 'rejected',
       verificationDetails: {
         apiResponse: otpResult,
         verificationDate: new Date(),
