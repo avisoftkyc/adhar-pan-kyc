@@ -670,66 +670,76 @@ router.get('/records/:id/selfie', protect, async (req, res) => {
     // Resolve the absolute path - handle both relative and absolute paths
     let absolutePath;
     const storedPath = verificationRecord.selfie.path;
+    const filename = verificationRecord.selfie.filename || path.basename(storedPath);
+    
+    // Get the selfies directory (same as multer storage destination)
+    const selfiesDir = path.join(__dirname, '..', '..', 'uploads', 'selfies');
+    
+    logger.info(`Selfie retrieval - storedPath: ${storedPath}, filename: ${filename}, selfiesDir: ${selfiesDir}`);
     
     if (path.isAbsolute(storedPath)) {
       absolutePath = storedPath;
     } else {
       // Handle relative paths - try multiple possible locations
       const possiblePaths = [
+        // First try: direct path resolution
         path.resolve(__dirname, '..', '..', storedPath),
-        path.resolve(__dirname, '..', '..', 'uploads', 'selfies', path.basename(storedPath)),
-        path.join(__dirname, '..', '..', storedPath)
+        // Second try: construct from selfies directory + filename
+        path.join(selfiesDir, filename),
+        // Third try: if storedPath already includes selfies, use it directly
+        path.join(selfiesDir, path.basename(storedPath)),
+        // Fourth try: resolve from project root
+        path.resolve(process.cwd(), storedPath),
+        // Fifth try: resolve from project root with selfies
+        path.resolve(process.cwd(), 'uploads', 'selfies', filename)
       ];
+      
+      logger.info(`Trying possible paths: ${JSON.stringify(possiblePaths)}`);
       
       // Find the first existing path
       for (const possiblePath of possiblePaths) {
         if (fs.existsSync(possiblePath)) {
           absolutePath = possiblePath;
+          logger.info(`Found selfie at: ${absolutePath}`);
           break;
         }
       }
       
-      // If none found, use the first one for error reporting
+      // If none found, use the most likely path (selfiesDir + filename)
       if (!absolutePath) {
-        absolutePath = possiblePaths[0];
+        absolutePath = path.join(selfiesDir, filename);
+        logger.warn(`No existing path found, using: ${absolutePath}`);
       }
     }
     
-    logger.info(`Selfie path resolution: stored=${storedPath}, resolved=${absolutePath}, exists=${fs.existsSync(absolutePath)}`);
+    logger.info(`Final path resolution: stored=${storedPath}, resolved=${absolutePath}, exists=${fs.existsSync(absolutePath)}`);
     
     // Check if file exists
     if (!fs.existsSync(absolutePath)) {
-      logger.warn(`Selfie file not found: ${absolutePath} for record ${id}, stored path: ${storedPath}`);
-      
-      // Try to find the file by filename in the selfies directory
-      const selfiesDir = path.join(__dirname, '..', '..', 'uploads', 'selfies');
+      logger.error(`Selfie file not found: ${absolutePath} for record ${id}`);
+      logger.error(`Stored path: ${storedPath}, Filename: ${filename}`);
+      logger.error(`Selfies directory exists: ${fs.existsSync(selfiesDir)}`);
       if (fs.existsSync(selfiesDir)) {
-        const filename = verificationRecord.selfie.filename || path.basename(storedPath);
-        const alternativePath = path.join(selfiesDir, filename);
-        if (fs.existsSync(alternativePath)) {
-          logger.info(`Found selfie at alternative path: ${alternativePath}`);
-          absolutePath = alternativePath;
-        } else {
-          return res.status(404).json({
-            success: false,
-            message: 'Selfie file not found on server',
-            debug: {
-              storedPath: storedPath,
-              resolvedPath: absolutePath,
-              filename: filename
-            }
-          });
+        try {
+          const files = fs.readdirSync(selfiesDir);
+          logger.error(`Files in selfies directory: ${files.slice(0, 10).join(', ')} (showing first 10)`);
+        } catch (err) {
+          logger.error(`Error reading selfies directory: ${err.message}`);
         }
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: 'Selfie file not found on server',
-          debug: {
-            storedPath: storedPath,
-            resolvedPath: absolutePath
-          }
-        });
       }
+      
+      return res.status(404).json({
+        success: false,
+        message: 'Selfie file not found on server',
+        debug: process.env.NODE_ENV === 'development' ? {
+          storedPath: storedPath,
+          resolvedPath: absolutePath,
+          filename: filename,
+          selfiesDir: selfiesDir,
+          __dirname: __dirname,
+          cwd: process.cwd()
+        } : undefined
+      });
     }
 
     // Set headers for image serving
