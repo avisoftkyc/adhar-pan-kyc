@@ -33,20 +33,39 @@ const AuthenticatedImage: React.FC<{
 
   useEffect(() => {
     let currentImageUrl: string | null = null;
+    let isMounted = true;
     
     const loadImage = async () => {
       try {
         setLoading(true);
         setError(false);
+        
+        // Revoke previous URL if it exists
+        if (currentImageUrl) {
+          URL.revokeObjectURL(currentImageUrl);
+          currentImageUrl = null;
+        }
+        
         const response = await api.get(`/aadhaar-verification/records/${recordId}/selfie`, {
           responseType: 'blob'
         });
         
+        // Check if component is still mounted
+        if (!isMounted) {
+          // If unmounted, revoke the URL and return
+          if (response.data instanceof Blob) {
+            URL.revokeObjectURL(URL.createObjectURL(response.data));
+          }
+          return;
+        }
+        
         // Check if response is actually an image blob
         const contentType = response.headers['content-type'] || '';
         if (contentType.startsWith('image/')) {
-          // response.data is already a Blob when responseType is 'blob'
-          const url = URL.createObjectURL(response.data);
+          // Clone the blob to ensure it's not consumed
+          const blob = response.data as Blob;
+          const clonedBlob = blob.slice(0, blob.size, blob.type);
+          const url = URL.createObjectURL(clonedBlob);
           currentImageUrl = url;
           setImageUrl(url);
         } else {
@@ -60,9 +79,14 @@ const AuthenticatedImage: React.FC<{
           } catch {
             console.error('Error loading selfie: Invalid response format');
           }
-          setError(true);
+          if (isMounted) {
+            setError(true);
+          }
         }
       } catch (err: any) {
+        // Only update state if component is still mounted
+        if (!isMounted) return;
+        
         // Handle errors gracefully - 404 is expected if selfie doesn't exist
         const status = err.response?.status;
         if (status === 404) {
@@ -88,16 +112,20 @@ const AuthenticatedImage: React.FC<{
           setError(true);
         }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadImage();
 
-    // Cleanup object URL on unmount
+    // Cleanup function
     return () => {
+      isMounted = false;
       if (currentImageUrl) {
         URL.revokeObjectURL(currentImageUrl);
+        currentImageUrl = null;
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
