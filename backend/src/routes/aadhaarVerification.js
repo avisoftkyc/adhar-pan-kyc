@@ -804,20 +804,31 @@ router.post('/verify-otp-qr/:qrCode', async (req, res) => {
     const verificationResult = await verifyAadhaarOTP(transactionId, otp);
     const processingTime = Date.now() - startTime;
 
+    // Extract data from API response - handle different response structures
+    const apiData = verificationResult.data?.data || verificationResult.data || {};
+    const addressData = apiData.address || {};
+    
+    logger.info('QR OTP Verification - API Response:', {
+      hasData: !!verificationResult.data,
+      hasNestedData: !!verificationResult.data?.data,
+      apiDataKeys: Object.keys(apiData),
+      addressDataKeys: Object.keys(addressData)
+    });
+
     // Create verification record
     const verificationRecord = new AadhaarVerification({
       userId: user._id,
       batchId: `qr-${Date.now()}`,
       aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-      name: verificationResult.data.name || '',
-      dateOfBirth: verificationResult.data.date_of_birth || '',
-      gender: verificationResult.data.gender || '',
-      address: verificationResult.data.full_address || '',
-      pinCode: verificationResult.data.address?.pincode?.toString() || '',
-      state: verificationResult.data.address?.state || '',
-      district: verificationResult.data.address?.district || '',
-      careOf: verificationResult.data.care_of || '',
-      photo: verificationResult.data.photo || '',
+      name: apiData.name || '',
+      dateOfBirth: apiData.date_of_birth || apiData.dateOfBirth || '',
+      gender: apiData.gender || '',
+      address: apiData.full_address || addressData.full_address || '',
+      pinCode: addressData.pincode?.toString() || apiData.pincode?.toString() || apiData.pinCode || '',
+      state: addressData.state || apiData.state || '',
+      district: addressData.district || apiData.district || '',
+      careOf: apiData.care_of || apiData.careOf || '',
+      photo: apiData.photo || '',
       dynamicFields: [
         ...dynamicFields.map(field => ({
           label: field.label,
@@ -830,15 +841,16 @@ router.post('/verify-otp-qr/:qrCode', async (req, res) => {
       ],
       // Check status from API response - status can be in data.status or at root level
       // Also check if there's an error or if the verification was successful
-      status: (verificationResult.data?.status === 'VALID' || 
-               verificationResult.status === 'VALID' || 
-               (verificationResult.data && !verificationResult.data.error)) ? 'verified' : 'rejected',
+      status: (apiData.status === 'VALID' || 
+               verificationResult.data?.status === 'VALID' || 
+               verificationResult.status === 'VALID' ||
+               (apiData && !apiData.error && apiData.name)) ? 'verified' : 'rejected',
       verificationDetails: {
         apiResponse: verificationResult,
-        verifiedName: verificationResult.data.name || '',
-        verifiedDob: verificationResult.data.date_of_birth || '',
-        verifiedGender: verificationResult.data.gender || '',
-        verifiedAddress: verificationResult.data.full_address || '',
+        verifiedName: apiData.name || '',
+        verifiedDob: apiData.date_of_birth || apiData.dateOfBirth || '',
+        verifiedGender: apiData.gender || '',
+        verifiedAddress: apiData.full_address || addressData.full_address || '',
         verificationDate: new Date(),
         confidence: 95,
         dataMatch: true,
@@ -865,11 +877,11 @@ router.post('/verify-otp-qr/:qrCode', async (req, res) => {
       data: {
         recordId: verificationRecord._id,
         aadhaarNumber: aadhaarNumber.replace(/\s/g, ''),
-        name: verificationResult.data.name,
-        dateOfBirth: verificationResult.data.date_of_birth,
-        gender: verificationResult.data.gender,
-        address: verificationResult.data.full_address,
-        status: verificationResult.status,
+        name: apiData.name || '',
+        dateOfBirth: apiData.date_of_birth || apiData.dateOfBirth || '',
+        gender: apiData.gender || '',
+        address: apiData.full_address || addressData.full_address || '',
+        status: verificationRecord.status,
         processingTime: processingTime,
         hasSelfieAccess: user.moduleAccess && user.moduleAccess.includes('selfie-upload')
       }
