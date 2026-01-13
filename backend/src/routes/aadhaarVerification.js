@@ -264,7 +264,7 @@ router.post('/verify-single', protect, async (req, res) => {
 // OTP verification endpoint
 router.post('/verify-otp', protect, async (req, res) => {
   try {
-    const { aadhaarNumber, otp, transactionId, dynamicFields = [] } = req.body;
+    const { aadhaarNumber, otp, transactionId, dynamicFields = [], customFields = {} } = req.body;
 
     if (!aadhaarNumber || !otp || !transactionId) {
       return res.status(400).json({
@@ -329,7 +329,16 @@ router.post('/verify-otp', protect, async (req, res) => {
       pinCode: addressData.pinCode || apiData.pinCode || '',
       careOf: apiData.care_of || '', // Add care_of field
       photo: apiData.photo || '', // Add photo field
-      dynamicFields: dynamicFields, // Store the dynamic fields from the request
+      dynamicFields: [
+        ...dynamicFields.map(field => ({
+          label: field.label,
+          value: field.value
+        })),
+        ...Object.entries(customFields).map(([key, value]) => ({
+          label: key,
+          value: value
+        }))
+      ], // Store the dynamic fields and custom fields from the request
       // Check status from API response - status can be in data.status or at root level
       // Also check if there's an error or if the verification was successful
       status: (apiData.status === 'VALID' || 
